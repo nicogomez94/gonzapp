@@ -155,7 +155,7 @@
 
         <!-- Gallery -->
         <div class="gallery-main slide-left" id="galleryMain">
-          <div style="font-size:5rem">🛻</div>
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&h=500&fit=crop&auto=format" alt="Toyota Hilux SRX 4x4 2022 - foto principal" id="galleryMainImg" loading="lazy"/>
           <div class="gallery-nav">
             <button class="gallery-prev" onclick="galNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
             <button class="gallery-next" onclick="galNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
@@ -164,14 +164,14 @@
         </div>
 
         <div class="gallery-thumbs" id="galleryThumbs">
-          <div class="gallery-thumb active">🛻</div>
-          <div class="gallery-thumb">🚘</div>
-          <div class="gallery-thumb">⚙️</div>
-          <div class="gallery-thumb">🪑</div>
-          <div class="gallery-thumb">📟</div>
-          <div class="gallery-thumb">🏁</div>
-          <div class="gallery-thumb">🔧</div>
-          <div class="gallery-thumb">📋</div>
+          <div class="gallery-thumb active"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=120&fit=crop&auto=format" alt="Foto 1"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&h=120&fit=crop&auto=format" alt="Foto 2"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1486262322756-f3e60d7cca04?w=200&h=120&fit=crop&auto=format" alt="Motor"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=200&h=120&fit=crop&auto=format" alt="Interior"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format" alt="Dashboard"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1547744152-14d985cb937f?w=200&h=120&fit=crop&auto=format" alt="Llantas"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=200&h=120&fit=crop&auto=format" alt="Trasera"/></div>
+          <div class="gallery-thumb"><img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=200&h=120&fit=crop&auto=format" alt="Lateral"/></div>
         </div>
 
         <!-- Title + price row -->
@@ -337,7 +337,7 @@
       <div class="similar-grid">
 
         <a href="detalle.html" class="listing-card fade-up delay-1">
-          <div class="listing-img"><div class="img-placeholder">🛻</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=400&fit=crop&auto=format" alt="Toyota Hilux SRV 4x4" loading="lazy"/>
             <div class="listing-badge-wrap"><span class="badge badge-success">Verificado</span></div>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
@@ -353,7 +353,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-2">
-          <div class="listing-img"><div class="img-placeholder">🚙</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1583267746897-2cf415887172?w=600&h=400&fit=crop&auto=format" alt="Toyota Hilux SRX 2023" loading="lazy"/>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
             <div class="listing-cat">Toyota · 2023</div>
@@ -368,7 +368,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-3">
-          <div class="listing-img"><div class="img-placeholder">🏎</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1542362567-b07e54358753?w=600&h=400&fit=crop&auto=format" alt="Ford Ranger XLS 4x2" loading="lazy"/>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
             <div class="listing-cat">Ford · 2022</div>
@@ -417,21 +417,28 @@
 <script>
   initNavbar(); initMobileMenu(); initScrollAnimations(); initFavorites();
 
-  // Simple gallery navigation with emoji placeholders
-  const emojis = ['🛻','🚘','⚙️','🪑','📟','🏁','🔧','📋'];
+  // Gallery navigation
+  const galImgs = [
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1486262322756-f3e60d7cca04?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1547744152-14d985cb937f?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=900&h=500&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=900&h=500&fit=crop&auto=format'
+  ];
   const thumbEls = document.querySelectorAll('.gallery-thumb');
-  const mainEl   = document.getElementById('galleryMain');
+  const mainImg  = document.getElementById('galleryMainImg');
   const countEl  = document.getElementById('galCount');
   let cur = 0;
 
   function galNav(dir) {
     thumbEls[cur].classList.remove('active');
-    cur = (cur + dir + emojis.length) % emojis.length;
+    cur = (cur + dir + galImgs.length) % galImgs.length;
     thumbEls[cur].classList.add('active');
-    // Update main display
-    const existing = mainEl.querySelector('div:first-child');
-    if (existing) existing.textContent = emojis[cur];
-    if (countEl) countEl.textContent = (cur + 1) + ' / ' + emojis.length;
+    if (mainImg) mainImg.src = galImgs[cur];
+    if (countEl) countEl.textContent = (cur + 1) + ' / ' + galImgs.length;
   }
 
   thumbEls.forEach((t, i) => {

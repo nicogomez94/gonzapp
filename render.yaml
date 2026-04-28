@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: gonzapp
+    runtime: static
+    buildCommand: "true"
+    staticPublishPath: .

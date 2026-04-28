@@ -128,6 +128,19 @@
       .results-grid { grid-template-columns: 1fr; }
       .results-grid.list-view .listing-card { flex-direction: column; }
       .results-grid.list-view .listing-img { width: 100%; height: 178px; }
+      .search-bar { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+      .search-bar input { min-width: 0; width: 100%; flex: 1 1 100%; order: 1; }
+      .search-bar .search-divider { display: none; }
+      .search-bar select { flex: 1 1 auto; width: auto !important; font-size: 0.85rem; order: 2; }
+      .search-bar .btn { order: 3; flex-shrink: 0; }
+      .results-header { flex-direction: column; align-items: flex-start; }
+      .results-controls { width: 100%; justify-content: space-between; }
+    }
+    @media (max-width: 420px) {
+      .search-bar select.form-input { display: none; }
+      .page-top { padding-top: calc(var(--nav-height) + 12px); padding-bottom: 12px; }
+      .cat-pills { gap: 6px; }
+      .tag { padding: 5px 10px; font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -337,7 +350,7 @@
       <div class="results-grid" id="resultsGrid">
 
         <a href="detalle.html" class="listing-card fade-up">
-          <div class="listing-img"><div class="img-placeholder">🛻</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop&auto=format" alt="Toyota Hilux SRX 4x4" loading="lazy"/>
             <div class="listing-badge-wrap"><span class="badge badge-accent">Destacado</span></div>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
@@ -355,7 +368,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-1">
-          <div class="listing-img"><div class="img-placeholder">🚙</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=400&fit=crop&auto=format" alt="Toyota Corolla XEI CVT" loading="lazy"/>
             <div class="listing-badge-wrap"><span class="badge badge-success">0 km</span></div>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
@@ -373,7 +386,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-2">
-          <div class="listing-img"><div class="img-placeholder">🚘</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop&auto=format" alt="Toyota SW4 SRX 7 asientos" loading="lazy"/>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
             <div class="listing-cat">Toyota · 2020</div>
@@ -390,7 +403,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up">
-          <div class="listing-img"><div class="img-placeholder">🏎</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1580414057403-c5f451753e3c?w=600&h=400&fit=crop&auto=format" alt="Toyota GR Yaris Circuit AWD" loading="lazy"/>
             <div class="listing-badge-wrap"><span class="badge badge-warning">Precio rebajado</span></div>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
@@ -408,7 +421,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-1">
-          <div class="listing-img"><div class="img-placeholder">🚗</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&h=400&fit=crop&auto=format" alt="Toyota RAV4 Hybrid AWD" loading="lazy"/>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
             <div class="listing-cat">Toyota · 2021</div>
@@ -425,7 +438,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-2">
-          <div class="listing-img"><div class="img-placeholder">🛻</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop&auto=format" alt="Toyota Hilux DX 4x2" loading="lazy"/>
             <div class="listing-badge-wrap"><span class="badge badge-primary">Financiación</span></div>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
@@ -443,7 +456,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up">
-          <div class="listing-img"><div class="img-placeholder">🚙</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=400&fit=crop&auto=format" alt="Toyota Fortuner SRX 4x4" loading="lazy"/>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
             <div class="listing-cat">Toyota · 2018</div>
@@ -460,7 +473,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-1">
-          <div class="listing-img"><div class="img-placeholder">🚗</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1467533003447-e295ff1b0435?w=600&h=400&fit=crop&auto=format" alt="Toyota Yaris GR-S" loading="lazy"/>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
             <div class="listing-cat">Toyota · 2022</div>
@@ -477,7 +490,7 @@
         </a>
 
         <a href="detalle.html" class="listing-card fade-up delay-2">
-          <div class="listing-img"><div class="img-placeholder">🏎</div>
+          <div class="listing-img"><img src="https://images.unsplash.com/photo-1542362567-b07e54358753?w=600&h=400&fit=crop&auto=format" alt="Toyota Camry XSE V6" loading="lazy"/>
             <div class="listing-badge-wrap"><span class="badge badge-accent">Top vendedor</span></div>
             <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
