@@ -1,519 +1,513 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Publicaciones — GonzApp</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Publicaciones — GonzApp Autos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="styles.css"/>
   <style>
-    body { background: #070711; }
-
-    /* ---- PAGE HEADER ---- */
-    .page-hero {
-      padding: calc(var(--nav-height) + 50px) 0 50px;
-      background: linear-gradient(180deg, #0E0E1A 0%, #070711 100%);
-      border-bottom: 1px solid var(--border);
-      position: relative; overflow: hidden;
+    .page-top {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: calc(var(--nav-height) + 20px) 0 20px;
     }
-    .page-hero::before {
-      content: ''; position: absolute;
-      top: -60%; left: 50%; transform: translateX(-50%);
-      width: 800px; height: 400px;
-      background: radial-gradient(ellipse, rgba(124,58,237,.18) 0%, transparent 70%);
-    }
-    .page-hero .container { position: relative; z-index: 1; }
-    .page-hero h1 { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 12px; }
-    .page-hero p { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; }
+    .page-top-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-faint); }
+    .breadcrumb a { color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--primary); }
 
-    /* ---- SEARCH BAR ---- */
+    /* Search bar */
     .search-bar {
-      display: flex; gap: 10px;
-      background: rgba(22,22,38,.9);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 10px;
-      backdrop-filter: blur(10px);
-      max-width: 700px;
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: var(--shadow-xs); margin-bottom: 20px;
     }
-    .search-bar .form-input {
-      flex: 1; border: none; background: transparent; padding: 8px 12px;
+    .search-bar input {
+      flex: 1; border: none; outline: none; font-size: 0.95rem;
+      color: var(--text); background: transparent; font-family: inherit;
     }
-    .search-bar .form-input:focus { box-shadow: none; background: transparent; border: none; }
-    .search-bar select.form-input { max-width: 160px; background: rgba(255,255,255,.04); border: 1px solid var(--border); }
+    .search-bar input::placeholder { color: var(--text-faint); }
+    .search-bar .search-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
 
-    /* ---- CATEGORIES ---- */
-    .cats-row {
-      display: flex; gap: 10px; flex-wrap: wrap;
-      margin-top: 20px;
+    /* Layout */
+    .listings-layout {
+      display: grid; grid-template-columns: 280px 1fr; gap: 24px;
+      align-items: start; padding: 24px 0 60px;
     }
 
-    /* ---- LAYOUT ---- */
-    .browse-layout {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 28px;
-      padding: 40px 0 80px;
-      align-items: start;
+    /* Sidebar */
+    .filters-sidebar {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px;
+      position: sticky; top: calc(var(--nav-height) + 16px);
     }
+    .filters-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .filters-header h3 { font-size: 0.95rem; font-weight: 700; }
+    .filter-reset { font-size: 0.78rem; color: var(--primary); font-weight: 600; cursor: pointer; }
+    .filter-reset:hover { color: var(--primary-dark); text-decoration: underline; }
 
-    /* ---- SIDEBAR ---- */
-    .sidebar {
-      position: sticky; top: calc(var(--nav-height) + 20px);
-      display: flex; flex-direction: column; gap: 16px;
-    }
-    .filter-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      backdrop-filter: blur(10px);
-    }
-    .filter-box h3 {
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .filter-check {
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .filter-check label {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.9rem; color: var(--text-muted);
-      cursor: pointer; user-select: none;
-    }
-    .filter-check input[type="checkbox"] {
-      width: 16px; height: 16px;
-      border-radius: 4px;
-      accent-color: var(--primary);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .filter-check label:hover { color: var(--text); }
-    .range-row { display: flex; gap: 8px; align-items: center; }
-    .range-row .form-input { text-align: center; }
-    .range-sep { color: var(--text-faint); font-size: 0.85rem; white-space: nowrap; }
-    .filter-range input[type="range"] {
-      width: 100%; margin-top: 10px;
-      accent-color: var(--primary);
-      cursor: pointer;
-    }
+    .filter-section { border-top: 1px solid var(--border); padding: 16px 0; }
+    .filter-section:last-child { border-bottom: none; padding-bottom: 0; }
+    .filter-title { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .filter-title i { font-size: 0.72rem; color: var(--text-faint); transition: var(--transition); }
+    .filter-title.open i { transform: rotate(180deg); }
 
-    /* ---- MAIN CONTENT ---- */
-    .results-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
-    }
-    .results-header h2 { font-size: 1rem; font-weight: 600; color: var(--text-muted); }
-    .results-header strong { color: var(--text); }
-    .sort-row { display: flex; align-items: center; gap: 10px; }
-    .sort-row select.form-input { width: auto; padding: 9px 38px 9px 14px; font-size: 0.85rem; }
+    .filter-checks { display: flex; flex-direction: column; gap: 8px; }
+    .filter-check { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+    .filter-check input[type=checkbox] { width: 15px; height: 15px; border-radius: 4px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
+    .filter-check label { font-size: 0.85rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .filter-check label span { font-size: 0.74rem; color: var(--text-faint); }
+    .filter-check:has(input:checked) label { color: var(--primary); font-weight: 600; }
 
-    .listings-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
+    .price-range { display: flex; gap: 8px; align-items: center; }
+    .price-range input { flex: 1; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.82rem; color: var(--text); outline: none; background: var(--bg); }
+    .price-range input:focus { border-color: var(--primary); }
+    .price-range span { color: var(--text-faint); font-size: 0.8rem; flex-shrink: 0; }
 
-    /* ---- LISTING CARDS COLORS ---- */
-    .img-purple  { background: linear-gradient(135deg,#1a0a2e,#4c1d95); }
-    .img-pink    { background: linear-gradient(135deg,#2d0030,#831843); }
-    .img-green   { background: linear-gradient(135deg,#022c22,#064e3b); }
-    .img-amber   { background: linear-gradient(135deg,#1c1400,#3d2e00); }
-    .img-blue    { background: linear-gradient(135deg,#001a3d,#1e3a5f); }
-    .img-teal    { background: linear-gradient(135deg,#001a1a,#0f3460); }
-    .img-red     { background: linear-gradient(135deg,#2d0000,#7f1d1d); }
-    .img-indigo  { background: linear-gradient(135deg,#0a0020,#312e81); }
+    .range-slider { margin-top: 8px; }
+    .range-slider input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+    .range-labels { display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-faint); margin-top: 3px; }
 
-    /* ---- PAGINATION ---- */
-    .pagination {
-      display: flex; justify-content: center; align-items: center;
-      gap: 8px; margin-top: 40px;
+    /* Results header */
+    .results-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .results-count { font-size: 0.92rem; color: var(--text-muted); }
+    .results-count strong { color: var(--text); font-weight: 700; }
+    .results-controls { display: flex; align-items: center; gap: 10px; }
+    .sort-select {
+      padding: 7px 32px 7px 12px; border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--text);
+      background: #fff; cursor: pointer; outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%2394A3B8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; -webkit-appearance: none; appearance: none;
     }
-    .page-btn {
-      width: 38px; height: 38px;
-      border-radius: var(--radius-sm);
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem; font-weight: 500;
-      cursor: pointer; transition: var(--transition);
-    }
-    .page-btn:hover, .page-btn.active {
-      background: rgba(124,58,237,.15);
-      border-color: var(--primary);
-      color: var(--primary-light);
-    }
-    .page-btn.active { font-weight: 700; }
+    .view-toggle { display: flex; border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .view-btn { padding: 7px 11px; background: #fff; border: none; cursor: pointer; color: var(--text-faint); font-size: 0.82rem; transition: var(--transition); }
+    .view-btn.active { background: var(--primary-bg); color: var(--primary); }
 
-    /* ---- EMPTY STATE ---- */
-    .empty-state {
-      text-align: center; padding: 60px 20px;
-      color: var(--text-muted); display: none;
-    }
-    .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: .3; }
+    /* Active filters */
+    .active-filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+    .active-filter { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; background: var(--primary-bg); border-radius: 100px; font-size: 0.78rem; font-weight: 600; color: var(--primary); }
+    .active-filter button { background: none; border: none; color: var(--primary); cursor: pointer; padding: 0; font-size: 0.72rem; margin-left: 2px; }
+    .active-filter button:hover { color: var(--error); }
 
-    /* ---- MOBILE FILTER TOGGLE ---- */
-    .filter-toggle-btn {
-      display: none;
-      width: 100%; justify-content: center; gap: 8px;
-      margin-bottom: 16px;
-    }
-    .sidebar-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.7);
-      z-index: 900;
-    }
-    .sidebar-overlay.open { display: block; }
+    /* Category pills */
+    .cat-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 1024px) {
-      .listings-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      .browse-layout { grid-template-columns: 1fr; }
+    /* Grid */
+    .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .results-grid.list-view { grid-template-columns: 1fr; }
+    .results-grid.list-view .listing-card { display: flex; flex-direction: row; }
+    .results-grid.list-view .listing-img { width: 200px; flex-shrink: 0; height: auto; min-height: 140px; }
+    .results-grid.list-view .listing-body { flex: 1; }
+
+    /* Pagination */
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 4px; margin-top: 36px; flex-wrap: wrap; }
+    .page-btn { width: 36px; height: 36px; border-radius: var(--radius-sm); background: #fff; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; font-weight: 500; transition: var(--transition); color: var(--text-muted); text-decoration: none; }
+    .page-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+    .page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .page-btn.dots { border: none; background: none; cursor: default; }
+
+    /* No results */
+    .no-results { text-align: center; padding: 60px 20px; }
+    .no-results i { font-size: 3rem; color: var(--text-faint); margin-bottom: 16px; }
+    .no-results h3 { color: var(--text-muted); margin-bottom: 8px; }
+    .no-results p { font-size: 0.88rem; color: var(--text-faint); }
+
+    /* Mobile filter toggle */
+    .filter-toggle-btn { display: none; }
+
+    @media (max-width: 1000px) {
+      .listings-layout { grid-template-columns: 1fr; }
+      .filters-sidebar { position: static; display: none; }
+      .filters-sidebar.mobile-open { display: block; }
       .filter-toggle-btn { display: flex; }
-      .sidebar {
-        position: fixed;
-        top: 0; left: -280px; bottom: 0;
-        width: 280px; z-index: 950;
-        background: var(--bg-2);
-        border-right: 1px solid var(--border);
-        padding: 20px;
-        overflow-y: auto;
-        transition: var(--transition-slow);
-        gap: 14px;
-      }
-      .sidebar.open { left: 0; }
-      .sidebar-close {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 8px;
-      }
-      .sidebar-close span { font-weight: 700; font-size: 1rem; }
+      .results-grid { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 560px) {
-      .listings-grid { grid-template-columns: 1fr; }
-    }
-    @media (min-width: 769px) {
-      .sidebar-close { display: none; }
+    @media (max-width: 600px) {
+      .results-grid { grid-template-columns: 1fr; }
+      .results-grid.list-view .listing-card { flex-direction: column; }
+      .results-grid.list-view .listing-img { width: 100%; height: 178px; }
     }
   </style>
 </head>
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar solid" id="navbar">
+<nav class="navbar">
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo"><span class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</span></a>
+    <a href="index.html" class="nav-logo"><i class="fa-solid fa-car-side"></i> GonzApp<span class="dot">.</span>Autos</a>
     <ul class="nav-links">
       <li><a href="index.html">Inicio</a></li>
       <li><a href="publicaciones.html" class="active">Publicaciones</a></li>
-      <li><a href="index.html#features">Funciones</a></li>
-      <li><a href="index.html#pricing">Planes</a></li>
+      <li><a href="publicaciones.html">Concesionarias</a></li>
+      <li><a href="#">Tasaciones</a></li>
     </ul>
     <div class="nav-actions">
-      <a href="login.html" class="btn btn-ghost btn-sm">Ingresar</a>
-      <a href="login.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Publicar</a>
+      <a href="login.html" class="btn btn-ghost">Ingresar</a>
+      <a href="login.html" class="btn btn-accent btn-sm"><i class="fa-solid fa-plus"></i> Publicar</a>
     </div>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+    <button class="nav-hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
   </div>
 </nav>
-<div class="mobile-menu" id="mobile-menu">
+<div class="mobile-menu">
   <ul>
     <li><a href="index.html">Inicio</a></li>
-    <li><a href="publicaciones.html">Publicaciones</a></li>
-    <li><a href="index.html#features">Funciones</a></li>
-    <li><a href="index.html#pricing">Planes</a></li>
+    <li><a href="publicaciones.html" class="active">Publicaciones</a></li>
+    <li><a href="publicaciones.html">Concesionarias</a></li>
+    <li><a href="#">Tasaciones</a></li>
   </ul>
-  <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-plus"></i> Publicar aviso</a>
+  <div class="mobile-actions">
+    <a href="login.html" class="btn btn-outline-gray btn-block">Ingresar</a>
+    <a href="login.html" class="btn btn-accent btn-block"><i class="fa-solid fa-plus"></i> Publicar</a>
+  </div>
 </div>
 
-<!-- PAGE HERO -->
-<div class="page-hero">
+<!-- PAGE TOP -->
+<div class="page-top">
   <div class="container">
-    <h1>Explorar <span class="gradient-text">Publicaciones</span></h1>
-    <p>Encontrá lo que buscás entre miles de publicaciones verificadas</p>
+    <div class="page-top-inner">
+      <div class="breadcrumb">
+        <a href="index.html"><i class="fa-solid fa-house"></i></a>
+        <i class="fa-solid fa-chevron-right" style="font-size:0.65rem"></i>
+        <span>Publicaciones</span>
+      </div>
+      <button class="btn btn-outline-gray btn-sm filter-toggle-btn" onclick="document.querySelector('.filters-sidebar').classList.toggle('mobile-open')">
+        <i class="fa-solid fa-sliders"></i> Filtros
+      </button>
+    </div>
+
+    <!-- Search bar -->
     <div class="search-bar">
-      <i class="fas fa-search" style="color:var(--text-faint);margin:auto 4px;flex-shrink:0"></i>
-      <input type="text" class="form-input" placeholder="¿Qué estás buscando?" id="search-input">
-      <select class="form-input" id="search-loc">
-        <option value="">Toda la Argentina</option>
+      <i class="fa-solid fa-magnifying-glass" style="color:var(--text-faint)"></i>
+      <input type="text" placeholder="Buscá por marca, modelo, versión…" id="searchInput"/>
+      <div class="search-divider"></div>
+      <select class="form-input" style="border:none;background:transparent;width:150px;padding:0 8px;font-size:0.88rem">
+        <option>Todo el país</option>
         <option>Buenos Aires</option>
+        <option>CABA</option>
         <option>Córdoba</option>
         <option>Rosario</option>
         <option>Mendoza</option>
-        <option>Tucumán</option>
       </select>
-      <button class="btn btn-primary btn-sm" onclick="filterListings()"><i class="fas fa-search"></i> Buscar</button>
+      <button class="btn btn-primary btn-sm" onclick="window.location='publicaciones.html'">Buscar</button>
     </div>
-    <div class="cats-row" id="cats-row">
-      <span class="tag active" data-cat="all"><i class="fas fa-border-all"></i> Todos</span>
-      <span class="tag" data-cat="inmuebles"><i class="fas fa-home"></i> Inmuebles</span>
-      <span class="tag" data-cat="vehiculos"><i class="fas fa-car"></i> Vehículos</span>
-      <span class="tag" data-cat="electronica"><i class="fas fa-laptop"></i> Electrónica</span>
-      <span class="tag" data-cat="servicios"><i class="fas fa-briefcase"></i> Servicios</span>
-      <span class="tag" data-cat="moda"><i class="fas fa-tshirt"></i> Moda</span>
-      <span class="tag" data-cat="hogar"><i class="fas fa-couch"></i> Hogar</span>
+
+    <!-- Category pills -->
+    <div class="cat-pills filter-tags">
+      <div class="tag active">Todos</div>
+      <div class="tag"><i class="fa-solid fa-car"></i> Sedanes</div>
+      <div class="tag"><i class="fa-solid fa-car-side"></i> SUV</div>
+      <div class="tag"><i class="fa-solid fa-truck-pickup"></i> Pickups</div>
+      <div class="tag">Hatchbacks</div>
+      <div class="tag">Familiares</div>
+      <div class="tag"><i class="fa-solid fa-bolt"></i> Eléctricos</div>
+      <div class="tag"><i class="fa-solid fa-star"></i> 0 km</div>
     </div>
   </div>
 </div>
 
-<!-- MAIN -->
+<!-- LAYOUT -->
 <div class="container">
-  <div class="browse-layout">
+  <div class="listings-layout">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-    <button class="btn btn-ghost filter-toggle-btn" id="filter-toggle-btn">
-      <i class="fas fa-sliders"></i> Filtros
-    </button>
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-close">
-        <span>Filtros</span>
-        <button class="btn btn-ghost btn-sm" id="sidebar-close-btn"><i class="fas fa-times"></i></button>
+    <!-- SIDEBAR FILTERS -->
+    <aside class="filters-sidebar">
+      <div class="filters-header">
+        <h3><i class="fa-solid fa-sliders" style="color:var(--primary);margin-right:7px"></i>Filtros</h3>
+        <span class="filter-reset" onclick="resetFilters()">Limpiar todo</span>
       </div>
 
-      <div class="filter-box">
-        <h3><i class="fas fa-tag"></i> Categoría</h3>
-        <div class="filter-check">
-          <label><input type="checkbox" checked> Inmuebles <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">142</span></label>
-          <label><input type="checkbox" checked> Vehículos <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">89</span></label>
-          <label><input type="checkbox" checked> Electrónica <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">215</span></label>
-          <label><input type="checkbox" checked> Servicios <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">67</span></label>
-          <label><input type="checkbox" checked> Moda <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">93</span></label>
-          <label><input type="checkbox"> Hogar <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">48</span></label>
+      <!-- Marca -->
+      <div class="filter-section">
+        <div class="filter-title open">Marca <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="filter-checks">
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="toyota" checked><label>Toyota <span>(1.240)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="ford"><label>Ford <span>(980)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="chevrolet"><label>Chevrolet <span>(860)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="volkswagen"><label>Volkswagen <span>(720)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="renault"><label>Renault <span>(650)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="honda"><label>Honda <span>(540)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="jeep"><label>Jeep <span>(390)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="marca" value="nissan"><label>Nissan <span>(320)</span></label></label>
         </div>
       </div>
 
-      <div class="filter-box">
-        <h3><i class="fas fa-dollar-sign"></i> Precio</h3>
-        <div class="range-row">
-          <input type="number" class="form-input" placeholder="Mínimo" style="padding:9px 10px">
-          <span class="range-sep">–</span>
-          <input type="number" class="form-input" placeholder="Máximo" style="padding:9px 10px">
+      <!-- Precio -->
+      <div class="filter-section">
+        <div class="filter-title open">Precio <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="price-range">
+          <input type="text" placeholder="Mín" value="0"/>
+          <span>—</span>
+          <input type="text" placeholder="Máx" value="60.000.000"/>
         </div>
-        <div class="filter-range">
-          <input type="range" min="0" max="1000000" value="500000" id="price-range">
-        </div>
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:6px">Hasta $<span id="price-val">500.000</span></p>
-      </div>
-
-      <div class="filter-box">
-        <h3><i class="fas fa-map-marker-alt"></i> Ubicación</h3>
-        <select class="form-input">
-          <option value="">Toda la Argentina</option>
-          <option>Buenos Aires</option>
-          <option>CABA</option>
-          <option>Córdoba</option>
-          <option>Santa Fe</option>
-          <option>Mendoza</option>
-          <option>Tucumán</option>
-          <option>Rosario</option>
-        </select>
-      </div>
-
-      <div class="filter-box">
-        <h3><i class="fas fa-star"></i> Estado</h3>
-        <div class="filter-check">
-          <label><input type="radio" name="estado" checked> Todos</label>
-          <label><input type="radio" name="estado"> Nuevo</label>
-          <label><input type="radio" name="estado"> Usado — Buen estado</label>
-          <label><input type="radio" name="estado"> Usado — Aceptable</label>
+        <div class="range-slider" style="margin-top:10px">
+          <input type="range" min="0" max="60000000" value="60000000" id="priceRange"/>
+          <div class="range-labels"><span>$0</span><span id="priceVal">$60.000.000</span></div>
         </div>
       </div>
 
-      <button class="btn btn-primary btn-block" style="margin-top:4px" onclick="filterListings()">
-        <i class="fas fa-filter"></i> Aplicar filtros
-      </button>
-      <button class="btn btn-ghost btn-block" onclick="clearFilters()">Limpiar filtros</button>
+      <!-- Año -->
+      <div class="filter-section">
+        <div class="filter-title open">Año <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="price-range">
+          <input type="text" placeholder="Desde" value="2015"/>
+          <span>—</span>
+          <input type="text" placeholder="Hasta" value="2024"/>
+        </div>
+      </div>
+
+      <!-- Kilometraje -->
+      <div class="filter-section">
+        <div class="filter-title open">Kilómetros <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="filter-checks">
+          <label class="filter-check"><input type="checkbox" data-filter="km" value="0k"><label>0 km <span>(890)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="km" value="30k"><label>Hasta 30.000 km <span>(2.140)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="km" value="60k"><label>Hasta 60.000 km <span>(3.800)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="km" value="100k"><label>Hasta 100.000 km <span>(2.960)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="km" value="100k+"><label>+100.000 km <span>(1.840)</span></label></label>
+        </div>
+      </div>
+
+      <!-- Combustible -->
+      <div class="filter-section">
+        <div class="filter-title open">Combustible <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="filter-checks">
+          <label class="filter-check"><input type="checkbox" data-filter="comb" value="nafta"><label>Naftero <span>(6.420)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="comb" value="diesel"><label>Diesel <span>(3.890)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="comb" value="gnc"><label>GNC <span>(1.240)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="comb" value="hibrido"><label>Híbrido <span>(560)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="comb" value="electrico"><label>Eléctrico <span>(240)</span></label></label>
+        </div>
+      </div>
+
+      <!-- Transmisión -->
+      <div class="filter-section">
+        <div class="filter-title open">Transmisión <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="filter-checks">
+          <label class="filter-check"><input type="checkbox" data-filter="trans" value="auto"><label>Automático <span>(5.840)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="trans" value="manual"><label>Manual <span>(5.260)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="trans" value="cvt"><label>CVT <span>(1.300)</span></label></label>
+        </div>
+      </div>
+
+      <!-- Condición -->
+      <div class="filter-section">
+        <div class="filter-title open">Condición <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="filter-checks">
+          <label class="filter-check"><input type="checkbox" data-filter="cond" value="usado"><label>Usado <span>(11.510)</span></label></label>
+          <label class="filter-check"><input type="checkbox" data-filter="cond" value="nuevo"><label>0 km <span>(890)</span></label></label>
+        </div>
+      </div>
+
+      <div style="padding-top:16px">
+        <button class="btn btn-primary btn-block"><i class="fa-solid fa-magnifying-glass"></i> Aplicar filtros</button>
+      </div>
     </aside>
 
-    <!-- LISTINGS -->
-    <div>
+    <!-- RESULTS -->
+    <main>
       <div class="results-header">
-        <h2><strong id="result-count">654</strong> publicaciones encontradas</h2>
-        <div class="sort-row">
-          <span style="font-size:.85rem;color:var(--text-muted)">Ordenar:</span>
-          <select class="form-input">
+        <div class="results-count">
+          Mostrando <strong>1–9</strong> de <strong>12.400</strong> publicaciones
+        </div>
+        <div class="results-controls">
+          <select class="sort-select">
             <option>Más recientes</option>
-            <option>Precio: menor a mayor</option>
-            <option>Precio: mayor a menor</option>
-            <option>Más visitados</option>
+            <option>Menor precio</option>
+            <option>Mayor precio</option>
+            <option>Menor kilometraje</option>
+            <option>Más consultados</option>
           </select>
+          <div class="view-toggle">
+            <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Vista grilla"><i class="fa-solid fa-grip"></i></button>
+            <button class="view-btn" id="listViewBtn" onclick="setView('list')" title="Vista lista"><i class="fa-solid fa-list"></i></button>
+          </div>
         </div>
       </div>
 
-      <!-- GRID -->
-      <div class="listings-grid" id="listings-grid">
+      <!-- Active filters -->
+      <div class="active-filters">
+        <div class="active-filter">Toyota <button onclick="this.parentElement.remove()"><i class="fa-solid fa-times"></i></button></div>
+        <div class="active-filter">2015–2024 <button onclick="this.parentElement.remove()"><i class="fa-solid fa-times"></i></button></div>
+        <div class="active-filter">Hasta $60.000.000 <button onclick="this.parentElement.remove()"><i class="fa-solid fa-times"></i></button></div>
+      </div>
 
-        <!-- Card 1 -->
-        <a href="detalle.html" class="listing-card fade-up delay-1" data-cat="inmuebles">
-          <div class="listing-img img-blue">
-            <span class="listing-badge-img"><span class="badge badge-warning"><i class="fas fa-crown"></i> Destacado</span></span>
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
-          <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-home"></i> Inmuebles</div>
-            <div class="listing-title">Departamento 2 ambientes en Palermo — luminoso y moderno</div>
-            <div class="listing-price">$95.000 <span class="listing-price-suffix">/ mes</span></div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Buenos Aires</span>
-              <span><i class="fas fa-eye"></i> 1.2k vistas</span>
-            </div>
-          </div>
-        </a>
+      <!-- Results grid -->
+      <div class="results-grid" id="resultsGrid">
 
-        <!-- Card 2 -->
-        <a href="detalle.html" class="listing-card fade-up delay-2" data-cat="vehiculos">
-          <div class="listing-img img-amber">
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up">
+          <div class="listing-img"><div class="img-placeholder">🛻</div>
+            <div class="listing-badge-wrap"><span class="badge badge-accent">Destacado</span></div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
-            <div class="listing-title">Toyota Hilux 2022 — 4x4 Diesel, impecable</div>
+            <div class="listing-cat">Toyota · 2022</div>
+            <div class="listing-title">Hilux SRX 4x4 2.8 TDI AT</div>
             <div class="listing-price">$28.500.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Córdoba</span>
-              <span><i class="fas fa-eye"></i> 3.4k vistas</span>
+            <div class="listing-price-sub">Financiación disponible</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 32.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Diesel</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> Auto</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Buenos Aires</span><span class="badge badge-success">Verificado</span></div>
           </div>
         </a>
 
-        <!-- Card 3 -->
-        <a href="detalle.html" class="listing-card fade-up delay-3" data-cat="electronica">
-          <div class="listing-img img-purple">
-            <span class="listing-badge-img"><span class="badge badge-success">Nuevo</span></span>
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up delay-1">
+          <div class="listing-img"><div class="img-placeholder">🚙</div>
+            <div class="listing-badge-wrap"><span class="badge badge-success">0 km</span></div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-laptop"></i> Electrónica</div>
-            <div class="listing-title">MacBook Pro M3 14" — 16GB RAM, 512GB SSD</div>
-            <div class="listing-price">$3.200.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> CABA</span>
-              <span><i class="fas fa-eye"></i> 890 vistas</span>
+            <div class="listing-cat">Toyota · 2024</div>
+            <div class="listing-title">Corolla XEI 2.0 CVT</div>
+            <div class="listing-price">$36.800.000</div>
+            <div class="listing-price-sub">0 km · Precio de lista</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 0 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Nafta</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> CVT</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> CABA</span><span class="badge badge-primary">Concesionaria</span></div>
           </div>
         </a>
 
-        <!-- Card 4 -->
-        <a href="detalle.html" class="listing-card fade-up delay-1" data-cat="servicios">
-          <div class="listing-img img-green">
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up delay-2">
+          <div class="listing-img"><div class="img-placeholder">🚘</div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-briefcase"></i> Servicios</div>
-            <div class="listing-title">Diseño web y desarrollo — sitios modernos desde $0</div>
-            <div class="listing-price">Desde $80.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Rosario</span>
-              <span><i class="fas fa-eye"></i> 560 vistas</span>
+            <div class="listing-cat">Toyota · 2020</div>
+            <div class="listing-title">SW4 SRX 7 asientos 4x4 AT</div>
+            <div class="listing-price">$38.200.000</div>
+            <div class="listing-price-sub">Acepta permutas</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 78.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Diesel</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> Auto</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Córdoba</span><span class="badge badge-gray">Particular</span></div>
           </div>
         </a>
 
-        <!-- Card 5 -->
-        <a href="detalle.html" class="listing-card fade-up delay-2" data-cat="moda">
-          <div class="listing-img img-pink">
-            <span class="listing-badge-img"><span class="badge badge-primary">Oferta</span></span>
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up">
+          <div class="listing-img"><div class="img-placeholder">🏎</div>
+            <div class="listing-badge-wrap"><span class="badge badge-warning">Precio rebajado</span></div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-tshirt"></i> Moda</div>
-            <div class="listing-title">Zapatillas Nike Air Max 2024 — talla 42, sin uso</div>
-            <div class="listing-price">$85.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Mendoza</span>
-              <span><i class="fas fa-eye"></i> 245 vistas</span>
-            </div>
-          </div>
-        </a>
-
-        <!-- Card 6 -->
-        <a href="detalle.html" class="listing-card fade-up delay-3" data-cat="vehiculos">
-          <div class="listing-img img-red">
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
-          <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
-            <div class="listing-title">Volkswagen Vento 2021 — automático, financio</div>
+            <div class="listing-cat">Toyota · 2019</div>
+            <div class="listing-title">GR Yaris Circuit 1.6 MT AWD</div>
             <div class="listing-price">$18.900.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Santa Fe</span>
-              <span><i class="fas fa-eye"></i> 2.1k vistas</span>
+            <div class="listing-price-sub">Antes $21.000.000</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 62.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Nafta</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> Manual</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Rosario</span><span class="badge badge-success">Verificado</span></div>
           </div>
         </a>
 
-        <!-- Card 7 -->
-        <a href="detalle.html" class="listing-card fade-up delay-1" data-cat="electronica">
-          <div class="listing-img img-indigo">
-            <span class="listing-badge-img"><span class="badge badge-success">Nuevo</span></span>
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up delay-1">
+          <div class="listing-img"><div class="img-placeholder">🚗</div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-laptop"></i> Electrónica</div>
-            <div class="listing-title">iPhone 15 Pro Max 256GB — Titanio Negro, caja abierta</div>
-            <div class="listing-price">$2.450.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> CABA</span>
-              <span><i class="fas fa-eye"></i> 4.7k vistas</span>
+            <div class="listing-cat">Toyota · 2021</div>
+            <div class="listing-title">RAV4 2.5 Hybrid AWD XSE</div>
+            <div class="listing-price">$44.500.000</div>
+            <div class="listing-price-sub">Híbrido · Bajo consumo</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 41.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-bolt"></i> Híbrido</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> CVT</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Mendoza</span><span class="badge badge-success">Verificado</span></div>
           </div>
         </a>
 
-        <!-- Card 8 -->
-        <a href="detalle.html" class="listing-card fade-up delay-2" data-cat="inmuebles">
-          <div class="listing-img img-teal">
-            <span class="listing-badge-img"><span class="badge badge-warning"><i class="fas fa-crown"></i> Destacado</span></span>
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up delay-2">
+          <div class="listing-img"><div class="img-placeholder">🛻</div>
+            <div class="listing-badge-wrap"><span class="badge badge-primary">Financiación</span></div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-home"></i> Inmuebles</div>
-            <div class="listing-title">Casa 3 dormitorios en Córdoba Capital — jardín y garage</div>
-            <div class="listing-price">$180.000.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Córdoba</span>
-              <span><i class="fas fa-eye"></i> 1.9k vistas</span>
+            <div class="listing-cat">Toyota · 2023</div>
+            <div class="listing-title">Hilux DX 4x2 2.8 TDI MT</div>
+            <div class="listing-price">$22.800.000</div>
+            <div class="listing-price-sub">Hasta 48 cuotas</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 12.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Diesel</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> Manual</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Buenos Aires</span><span class="badge badge-primary">Concesionaria</span></div>
           </div>
         </a>
 
-        <!-- Card 9 -->
-        <a href="detalle.html" class="listing-card fade-up delay-3" data-cat="servicios">
-          <div class="listing-img img-green">
-            <div class="listing-fav"><i class="far fa-heart"></i></div>
-          </div>
+        <a href="detalle.html" class="listing-card fade-up">
+          <div class="listing-img"><div class="img-placeholder">🚙</div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
           <div class="listing-body">
-            <div class="listing-cat"><i class="fas fa-briefcase"></i> Servicios</div>
-            <div class="listing-title">Fotógrafo profesional — eventos, bodas y productos</div>
-            <div class="listing-price">Desde $50.000</div>
-            <div class="listing-meta">
-              <span><i class="fas fa-map-marker-alt"></i> Tucumán</span>
-              <span><i class="fas fa-eye"></i> 320 vistas</span>
+            <div class="listing-cat">Toyota · 2018</div>
+            <div class="listing-title">Fortuner SRX 4x4 2.8 TDI AT</div>
+            <div class="listing-price">$29.900.000</div>
+            <div class="listing-price-sub">Precio fijo</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 95.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Diesel</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> Auto</span>
             </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> CABA</span><span class="badge badge-gray">Particular</span></div>
           </div>
         </a>
 
-      </div><!-- /listings-grid -->
+        <a href="detalle.html" class="listing-card fade-up delay-1">
+          <div class="listing-img"><div class="img-placeholder">🚗</div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
+          <div class="listing-body">
+            <div class="listing-cat">Toyota · 2022</div>
+            <div class="listing-title">Yaris GR-S 1.5 CVT 5p</div>
+            <div class="listing-price">$15.600.000</div>
+            <div class="listing-price-sub">Nafta · Muy equipado</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 28.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Nafta</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> CVT</span>
+            </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Rosario</span><span class="badge badge-success">Verificado</span></div>
+          </div>
+        </a>
+
+        <a href="detalle.html" class="listing-card fade-up delay-2">
+          <div class="listing-img"><div class="img-placeholder">🏎</div>
+            <div class="listing-badge-wrap"><span class="badge badge-accent">Top vendedor</span></div>
+            <button class="listing-fav"><i class="fa-regular fa-heart"></i></button></div>
+          <div class="listing-body">
+            <div class="listing-cat">Toyota · 2020</div>
+            <div class="listing-title">Camry XSE V6 3.5 AT Sport</div>
+            <div class="listing-price">$24.100.000</div>
+            <div class="listing-price-sub">Permuta y financiación</div>
+            <div class="listing-specs">
+              <span class="listing-spec"><i class="fa-solid fa-road"></i> 58.000 km</span>
+              <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Nafta</span>
+              <span class="listing-spec"><i class="fa-solid fa-gears"></i> Auto</span>
+            </div>
+            <div class="listing-meta"><span><i class="fa-solid fa-location-dot"></i> Córdoba</span><span class="badge badge-primary">Concesionaria</span></div>
+          </div>
+        </a>
+
+      </div>
 
       <!-- Pagination -->
       <div class="pagination">
-        <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <span style="color:var(--text-faint)">...</span>
-        <button class="page-btn">18</button>
-        <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+        <a href="#" class="page-btn"><i class="fa-solid fa-chevron-left" style="font-size:0.7rem"></i></a>
+        <a href="#" class="page-btn active">1</a>
+        <a href="#" class="page-btn">2</a>
+        <a href="#" class="page-btn">3</a>
+        <a href="#" class="page-btn">4</a>
+        <span class="page-btn dots">…</span>
+        <a href="#" class="page-btn">139</a>
+        <a href="#" class="page-btn"><i class="fa-solid fa-chevron-right" style="font-size:0.7rem"></i></a>
       </div>
-    </div>
+    </main>
   </div>
 </div>
 
@@ -522,111 +516,63 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div style="font-size:1.4rem;font-weight:800" class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</div>
-        <p>La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes y pagos integrados.</p>
+        <div class="footer-logo"><i class="fa-solid fa-car-side"></i> GonzApp<span style="color:var(--accent)">.</span>Autos</div>
+        <p>La plataforma líder para comprar y vender autos en Argentina.</p>
         <div class="footer-social">
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-whatsapp"></i></a>
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>
-      <div class="footer-col">
-        <h4>Plataforma</h4>
-        <ul>
-          <li><a href="index.html">Inicio</a></li>
-          <li><a href="login.html">Publicar aviso</a></li>
-          <li><a href="index.html#pricing">Planes</a></li>
-          <li><a href="dashboard.html">Mi cuenta</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Categorías</h4>
-        <ul>
-          <li><a href="#">Inmuebles</a></li>
-          <li><a href="#">Vehículos</a></li>
-          <li><a href="#">Electrónica</a></li>
-          <li><a href="#">Servicios</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Ayuda</h4>
-        <ul>
-          <li><a href="#">Cómo publicar</a></li>
-          <li><a href="#">Centro de ayuda</a></li>
-          <li><a href="#">Contacto</a></li>
-          <li><a href="#">Términos</a></li>
-        </ul>
-      </div>
+      <div class="footer-col"><h4>Comprar</h4><ul><li><a href="#">Todos los autos</a></li><li><a href="#">SUV</a></li><li><a href="#">Pickups</a></li><li><a href="#">0 km</a></li></ul></div>
+      <div class="footer-col"><h4>Vender</h4><ul><li><a href="login.html">Publicar auto</a></li><li><a href="#">Tasación</a></li><li><a href="#">Planes</a></li></ul></div>
+      <div class="footer-col"><h4>Empresa</h4><ul><li><a href="#">Sobre nosotros</a></li><li><a href="#">Blog</a></li><li><a href="#">Contacto</a></li></ul></div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 GonzApp. Todos los derechos reservados.</span>
-      <span>Hecho con <i class="fas fa-heart" style="color:var(--accent)"></i> en Argentina</span>
+      <span>© 2024 GonzApp Autos. Todos los derechos reservados.</span>
+      <span>Hecho en Argentina 🇦🇷</span>
     </div>
   </div>
 </footer>
 
 <script src="main.js"></script>
 <script>
-  // Category filter pills
-  document.querySelectorAll('#cats-row .tag').forEach(tag => {
-    tag.addEventListener('click', function() {
-      document.querySelectorAll('#cats-row .tag').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      filterListings();
-    });
-  });
+  initNavbar(); initMobileMenu(); initScrollAnimations(); initFavorites(); initFilterTags();
 
   // Price range display
-  const priceRange = document.getElementById('price-range');
-  const priceVal = document.getElementById('price-val');
-  if (priceRange) {
-    priceRange.addEventListener('input', () => {
-      priceVal.textContent = Number(priceRange.value).toLocaleString('es-AR');
+  const range = document.getElementById('priceRange');
+  const val   = document.getElementById('priceVal');
+  if (range && val) {
+    range.addEventListener('input', () => {
+      val.textContent = '$' + parseInt(range.value).toLocaleString('es-AR');
     });
   }
 
-  // Filter listings
-  function filterListings() {
-    const activeCat = document.querySelector('#cats-row .tag.active');
-    const cat = activeCat ? activeCat.dataset.cat : 'all';
-    const searchVal = (document.getElementById('search-input').value || '').toLowerCase();
-    const cards = document.querySelectorAll('#listings-grid .listing-card');
-    let visible = 0;
-    cards.forEach(card => {
-      const cardCat = card.dataset.cat || '';
-      const title = card.querySelector('.listing-title')?.textContent.toLowerCase() || '';
-      const matchCat = cat === 'all' || cardCat === cat;
-      const matchSearch = !searchVal || title.includes(searchVal);
-      const show = matchCat && matchSearch;
-      card.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-    const countEl = document.getElementById('result-count');
-    if (countEl) countEl.textContent = visible;
+  // View toggle
+  function setView(mode) {
+    const grid = document.getElementById('resultsGrid');
+    const gb   = document.getElementById('gridViewBtn');
+    const lb   = document.getElementById('listViewBtn');
+    if (mode === 'list') {
+      grid.classList.add('list-view');
+      lb.classList.add('active'); gb.classList.remove('active');
+    } else {
+      grid.classList.remove('list-view');
+      gb.classList.add('active'); lb.classList.remove('active');
+    }
   }
 
-  function clearFilters() {
-    const firstTag = document.querySelector('#cats-row .tag');
-    document.querySelectorAll('#cats-row .tag').forEach(t => t.classList.remove('active'));
-    if (firstTag) firstTag.classList.add('active');
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) searchInput.value = '';
-    filterListings();
+  function resetFilters() {
+    document.querySelectorAll('.filter-check input').forEach(c => c.checked = false);
+    document.querySelectorAll('.active-filter').forEach(f => f.remove());
+    showToast('Filtros limpiados', 'info');
   }
 
-  // Mobile sidebar
-  const filterBtn = document.getElementById('filter-toggle-btn');
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  const closeBtn = document.getElementById('sidebar-close-btn');
-
-  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
-
-  if (filterBtn) filterBtn.addEventListener('click', openSidebar);
-  if (overlay) overlay.addEventListener('click', closeSidebar);
-  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  // Filter titles toggle
+  document.querySelectorAll('.filter-title').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('open'));
+  });
 </script>
 </body>
 </html>

@@ -1,660 +1,882 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GonzApp — Plataforma de Publicaciones</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GonzApp Autos — Encontrá tu próximo auto</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* ---- HERO ---- */
+    /* ---- Page-specific styles ---- */
+
+    /* Hero */
     .hero {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      background: #070711;
-      padding-top: var(--nav-height);
+      background: linear-gradient(160deg, #0c2d8e 0%, #1563FF 45%, #1a7aff 70%, #0a1f6b 100%);
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      padding: calc(var(--nav-height) + 30px) 0 60px;
     }
-    .hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      animation: float-rot 10s ease-in-out infinite;
-    }
-    .orb-1 { width: 600px; height: 600px; top: -15%; right: -10%; background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%); animation-duration: 9s; }
-    .orb-2 { width: 500px; height: 500px; bottom: -20%; left: -10%; background: radial-gradient(circle, rgba(236,72,153,0.25) 0%, transparent 70%); animation-duration: 13s; animation-delay: -4s; }
-    .orb-3 { width: 350px; height: 350px; top: 40%; left: 35%; background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%); animation-duration: 16s; animation-delay: -7s; }
-    .hero-grid {
-      position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(124,58,237,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.06) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
-      -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
-    }
-    .hero-inner {
-      position: relative; z-index: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 70px;
-      align-items: center;
-      padding: 80px 0 60px;
-    }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 7px 16px;
-      background: rgba(124,58,237,0.14);
-      border: 1px solid rgba(124,58,237,0.35);
-      border-radius: 100px;
-      font-size: 0.82rem; font-weight: 700;
-      color: var(--primary-light);
-      text-transform: uppercase; letter-spacing: 0.8px;
-      margin-bottom: 22px;
-      animation: fade-in-down 0.6s ease both;
-    }
-    .hero-badge .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--success);
-      box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
-      animation: ping 1.5s ease infinite;
-    }
-    .hero-title {
-      font-size: clamp(2.6rem, 5vw, 4.2rem);
-      font-weight: 900;
-      line-height: 1.04;
-      margin-bottom: 22px;
-      animation: fade-in-up 0.6s ease 0.1s both;
-    }
-    .hero-desc {
-      font-size: 1.1rem; color: var(--text-muted); line-height: 1.75;
-      margin-bottom: 36px;
-      max-width: 480px;
-      animation: fade-in-up 0.6s ease 0.2s both;
-    }
-    .hero-actions {
-      display: flex; gap: 14px; flex-wrap: wrap;
-      animation: fade-in-up 0.6s ease 0.3s both;
-    }
-    .hero-trust {
-      display: flex; align-items: center; gap: 14px;
-      margin-top: 36px;
-      animation: fade-in-up 0.6s ease 0.4s both;
-    }
-    .hero-avatars { display: flex; }
-    .hero-avatars span {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: 2px solid #070711;
-      margin-left: -10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 700;
-    }
-    .hero-avatars span:first-child { margin-left: 0; }
-    .hero-trust p { font-size: 0.85rem; color: var(--text-muted); }
-    .hero-trust strong { color: var(--text); }
-
-    /* Hero visual / mockup */
-    .hero-visual { position: relative; animation: fade-in-up 0.8s ease 0.25s both; }
-    .mockup-window {
-      background: rgba(22,22,38,0.9);
-      border: 1px solid rgba(124,58,237,0.3);
-      border-radius: var(--radius-xl);
-      padding: 18px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(124,58,237,0.2);
-      backdrop-filter: blur(10px);
-    }
-    .mockup-bar {
-      display: flex; align-items: center; gap: 8px;
-      padding-bottom: 14px; border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
-    }
-    .m-dot { width: 11px; height: 11px; border-radius: 50%; }
-    .mockup-url {
-      flex: 1; margin-left: 8px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 6px;
-      height: 24px; max-width: 220px;
-    }
-    .mockup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .m-card {
-      border-radius: var(--radius);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      animation: float 6s ease-in-out infinite;
-    }
-    .m-card:nth-child(2) { animation-delay: -2s; }
-    .m-card:nth-child(3) { animation-delay: -4s; }
-    .m-card:nth-child(4) { animation-delay: -1s; }
-    .m-img { height: 72px; position: relative; }
-    .m-img::after {
+    .hero::before {
       content: ''; position: absolute; inset: 0;
-      background: var(--gradient-primary); opacity: 0.25;
+      background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z' /%3E%3C%2Fg%3E%3C%2Fg%3E%3C/svg%3E");
     }
-    .m-body { padding: 8px; background: rgba(7,7,17,0.7); }
-    .m-line { height: 7px; border-radius: 3px; background: rgba(255,255,255,0.08); margin-bottom: 5px; }
-    .m-price { height: 7px; border-radius: 3px; background: rgba(124,58,237,0.5); width: 55%; }
+    .hero-road {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(to top, rgba(0,0,0,0.35), transparent);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    .hero-left {}
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px; padding: 5px 14px; font-size: 0.8rem; font-weight: 600;
+      color: #fff; margin-bottom: 20px;
+    }
+    .hero-eyebrow i { color: #FFD700; }
+    .hero h1 { color: #fff; margin-bottom: 16px; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .hero h1 em { font-style: normal; color: #FFB347; }
+    .hero-sub { color: rgba(255,255,255,0.82); font-size: 1.1rem; margin-bottom: 32px; max-width: 460px; line-height: 1.65; }
 
-    /* Floating badges */
-    .float-badge {
-      position: absolute;
-      background: rgba(22,22,38,0.95);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      display: flex; align-items: center; gap: 10px;
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      font-size: 0.82rem; font-weight: 600;
-      animation: float 5s ease-in-out infinite;
-      white-space: nowrap;
+    /* Search bar in hero */
+    .hero-search {
+      background: #fff; border-radius: var(--radius-lg);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      padding: 20px; margin-bottom: 22px;
     }
-    .float-badge.fb-1 { top: -22px; right: -18px; animation-delay: -1s; }
-    .float-badge.fb-2 { bottom: -22px; left: -18px; animation-delay: -3s; }
-    .float-badge i { font-size: 1.1rem; }
+    .hero-search-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px;
+    }
+    .hero-search label { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px; }
+    .hero-search select, .hero-search input {
+      width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--text);
+      background: var(--bg); font-family: inherit; outline: none; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .hero-search select:focus, .hero-search input:focus { border-color: var(--primary); }
+    .hero-search-footer { display: flex; justify-content: space-between; align-items: center; }
+    .hero-search-footer .search-hint { font-size: 0.78rem; color: var(--text-faint); }
+    .hero-stats-row { display: flex; gap: 24px; flex-wrap: wrap; }
+    .hero-stat { color: rgba(255,255,255,0.9); }
+    .hero-stat strong { display: block; font-size: 1.3rem; font-weight: 800; color: #fff; }
+    .hero-stat span { font-size: 0.78rem; opacity: 0.75; }
 
-    /* ---- STATS BAND ---- */
-    .stats-band {
-      background: rgba(14,14,26,0.9);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 28px 0;
+    /* Car illustration / mockup */
+    .hero-right { position: relative; }
+    .hero-car-mockup {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius-xl);
+      padding: 24px; backdrop-filter: blur(6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: float 4s ease-in-out infinite;
     }
-    .stats-band-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .stats-band-item { text-align: center; }
-    .stats-band-item strong {
-      display: block; font-size: 2rem; font-weight: 800;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    .car-listing-preview {
+      background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);
     }
-    .stats-band-item span { font-size: 0.85rem; color: var(--text-muted); }
-
-    /* ---- FEATURES ---- */
-    .features-bg { background: #070711; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .feat-card {
-      padding: 30px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      transition: var(--transition);
-    }
-    .feat-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-6px);
-      box-shadow: var(--shadow-lg), 0 0 25px rgba(124,58,237,0.15);
-    }
-    .feat-icon {
-      width: 52px; height: 52px;
-      border-radius: var(--radius);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.35rem;
-      margin-bottom: 18px;
-    }
-    .feat-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
-    .feat-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; }
-
-    /* ---- HOW IT WORKS ---- */
-    .how-bg {
-      background: linear-gradient(180deg, var(--bg-2) 0%, #070711 100%);
-      border-top: 1px solid var(--border);
-    }
-    .steps-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; position: relative; }
-    .steps-row::before {
-      content: ''; position: absolute;
-      top: 36px; left: calc(16.67% + 18px); right: calc(16.67% + 18px);
-      height: 2px;
-      background: var(--gradient-primary); opacity: 0.3;
-    }
-    .step-item { text-align: center; padding: 10px 20px; }
-    .step-num {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: var(--gradient-primary);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem; font-weight: 900;
-      margin: 0 auto 20px;
-      box-shadow: 0 0 30px rgba(124,58,237,0.5);
-    }
-    .step-item h3 { margin-bottom: 10px; }
-    .step-item p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; }
-
-    /* ---- PRICING ---- */
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: center; }
-
-    /* ---- CTA SECTION ---- */
-    .cta-sec {
-      background: var(--bg-2);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 100px 0;
-      text-align: center;
+    .car-preview-img {
+      height: 160px; background: linear-gradient(135deg, #e8ecf4, #c8d4f0);
+      display: flex; align-items: center; justify-content: center; font-size: 4rem;
       position: relative; overflow: hidden;
     }
-    .cta-sec::before {
-      content: ''; position: absolute;
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      width: 700px; height: 400px;
-      background: radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 70%);
+    .car-preview-img::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40%;
+      background: linear-gradient(to top, rgba(0,0,0,0.08), transparent);
     }
-    .cta-sec h2 { margin-bottom: 14px; position: relative; z-index: 1; }
-    .cta-sec p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 38px; position: relative; z-index: 1; }
-    .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+    .car-preview-body { padding: 14px; }
+    .car-preview-brand { font-size: 0.72rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .car-preview-name { font-size: 1rem; font-weight: 700; margin: 3px 0 8px; color: var(--text); }
+    .car-preview-price { font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .car-preview-specs { display: flex; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .car-preview-specs span { font-size: 0.76rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .car-preview-specs i { font-size: 0.68rem; color: var(--text-faint); }
+    .hero-float-badges {
+      position: absolute; display: flex; flex-direction: column; gap: 10px;
+      right: -18px; top: 50%; transform: translateY(-50%);
+    }
+    .hero-float-badge {
+      background: #fff; border-radius: var(--radius); padding: 10px 14px;
+      box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 9px;
+      font-size: 0.8rem; font-weight: 600; color: var(--text); white-space: nowrap;
+    }
+    .hero-float-badge i { font-size: 0.95rem; }
 
-    /* ---- TESTIMONIALS ---- */
-    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .testi-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      transition: var(--transition);
+    /* Brands band */
+    .brands-band {
+      background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 22px 0;
     }
-    .testi-card:hover { border-color: var(--border-hover); transform: translateY(-4px); }
-    .testi-stars { color: var(--warning); font-size: 0.85rem; margin-bottom: 14px; }
-    .testi-text { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 18px; font-style: italic; }
-    .testi-author { display: flex; align-items: center; gap: 12px; }
-    .testi-avatar {
-      width: 40px; height: 40px; border-radius: 50%;
+    .brands-inner { display: flex; align-items: center; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .brands-label { font-size: 0.78rem; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-right: 6px; }
+    .brand-pill {
+      padding: 7px 16px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 100px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 6px;
+    }
+    .brand-pill:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+
+    /* Categories */
+    .categories-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .category-card {
+      background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+      padding: 24px 20px; text-align: center; cursor: pointer; transition: var(--transition);
+    }
+    .category-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-3px); }
+    .category-card:hover .cat-icon { background: var(--primary); color: #fff; }
+    .cat-icon { width: 52px; height: 52px; border-radius: var(--radius); background: var(--bg-2); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 12px; transition: var(--transition); color: var(--primary); }
+    .category-card h3 { font-size: 0.92rem; margin-bottom: 3px; }
+    .category-card p { font-size: 0.78rem; color: var(--text-faint); }
+
+    /* Featured listings */
+    .listings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    /* How it works */
+    .how-section { background: var(--bg-white); }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step-card { text-align: center; padding: 32px 24px; }
+    .step-num {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--primary-bg); border: 2.5px solid var(--primary);
+      color: var(--primary); font-size: 1.2rem; font-weight: 800;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; font-weight: 700;
-      flex-shrink: 0;
+      margin: 0 auto 16px; position: relative;
     }
-    .testi-author h4 { font-size: 0.9rem; margin-bottom: 2px; }
-    .testi-author span { font-size: 0.78rem; color: var(--text-muted); }
+    .step-connector {
+      display: none; /* shown via CSS on desktop */
+    }
+    .step-icon { font-size: 1.8rem; margin-bottom: 14px; color: var(--primary); }
+    .step-card h3 { margin-bottom: 8px; font-size: 1rem; }
+    .step-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
 
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 1024px) {
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .pricing-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
-      .testi-grid { grid-template-columns: repeat(2, 1fr); }
+    /* Features */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px; transition: var(--transition); }
+    .feature-card:hover { box-shadow: var(--shadow); border-color: var(--border-hover); transform: translateY(-2px); }
+    .feature-icon { width: 46px; height: 46px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; margin-bottom: 16px; }
+    .feature-card h3 { margin-bottom: 8px; }
+    .feature-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+
+    /* Stats section */
+    .stats-section { background: var(--primary); color: #fff; padding: 56px 0; }
+    .stats-inner { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+    .stats-item strong { font-size: 2.4rem; font-weight: 900; display: block; }
+    .stats-item span { font-size: 0.88rem; opacity: 0.8; }
+    .stats-divider { width: 1px; background: rgba(255,255,255,0.2); }
+
+    /* Pricing */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+
+    /* Testimonials */
+    .testimonials-section { background: var(--bg-2); }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .testimonial-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; transition: var(--transition); }
+    .testimonial-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+    .t-stars { color: #F59E0B; font-size: 0.85rem; margin-bottom: 12px; }
+    .t-text { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 18px; font-style: italic; }
+    .t-author { display: flex; align-items: center; gap: 11px; }
+    .t-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-bg); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+    .t-name { font-weight: 600; font-size: 0.88rem; }
+    .t-role { font-size: 0.78rem; color: var(--text-faint); }
+
+    /* CTA */
+    .cta-section {
+      background: linear-gradient(135deg, #1563FF 0%, #0040D0 100%);
+      color: #fff; text-align: center; padding: 80px 0;
     }
-    @media (max-width: 768px) {
-      .hero-inner { grid-template-columns: 1fr; gap: 40px; padding: 50px 0 40px; }
-      .hero-visual { display: none; }
-      .stats-band-grid { grid-template-columns: repeat(2, 1fr); }
+    .cta-section h2 { color: #fff; margin-bottom: 14px; }
+    .cta-section p { color: rgba(255,255,255,0.82); font-size: 1rem; max-width: 520px; margin: 0 auto 32px; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .hero-search-grid { grid-template-columns: 1fr 1fr; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .listings-grid { grid-template-columns: 1fr 1fr; }
+      .steps-grid { grid-template-columns: 1fr; gap: 16px; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .stats-inner { grid-template-columns: 1fr 1fr; gap: 20px; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .hero { min-height: auto; padding-top: calc(var(--nav-height) + 24px); padding-bottom: 40px; }
+      .hero-search-grid { grid-template-columns: 1fr; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .listings-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: 1fr; }
-      .steps-row { grid-template-columns: 1fr; }
-      .steps-row::before { display: none; }
-      .testi-grid { grid-template-columns: 1fr; }
-      .hero-trust { flex-wrap: wrap; }
+      .stats-inner { grid-template-columns: 1fr 1fr; }
+      .hero-stats-row { gap: 14px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ============================================================ NAVBAR -->
-<nav class="navbar" id="navbar">
+<!-- NAVBAR -->
+<nav class="navbar transparent" data-transparent="true">
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
-      <span class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</span>
+      <i class="fa-solid fa-car-side"></i> GonzApp<span class="dot">.</span>Autos
     </a>
     <ul class="nav-links">
       <li><a href="index.html" class="active">Inicio</a></li>
       <li><a href="publicaciones.html">Publicaciones</a></li>
-      <li><a href="#features">Funciones</a></li>
-      <li><a href="#pricing">Planes</a></li>
+      <li><a href="publicaciones.html">Concesionarias</a></li>
+      <li><a href="#">Tasaciones</a></li>
     </ul>
     <div class="nav-actions">
-      <a href="login.html" class="btn btn-ghost btn-sm">Ingresar</a>
-      <a href="login.html" class="btn btn-primary btn-sm"><i class="fas fa-rocket"></i> Empezar</a>
+      <a href="login.html" class="btn btn-ghost">Ingresar</a>
+      <a href="login.html" class="btn btn-accent btn-sm"><i class="fa-solid fa-plus"></i> Publicar</a>
     </div>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+    <button class="nav-hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
-<div class="mobile-menu" id="mobile-menu">
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu">
   <ul>
-    <li><a href="index.html">Inicio</a></li>
+    <li><a href="index.html" class="active">Inicio</a></li>
     <li><a href="publicaciones.html">Publicaciones</a></li>
-    <li><a href="#features">Funciones</a></li>
-    <li><a href="#pricing">Planes</a></li>
+    <li><a href="publicaciones.html">Concesionarias</a></li>
+    <li><a href="#">Tasaciones</a></li>
   </ul>
-  <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-rocket"></i> Empezar gratis</a>
+  <div class="mobile-actions">
+    <a href="login.html" class="btn btn-outline-gray btn-block">Ingresar</a>
+    <a href="login.html" class="btn btn-accent btn-block"><i class="fa-solid fa-plus"></i> Publicar</a>
+  </div>
 </div>
 
-<!-- ============================================================ HERO -->
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-bg">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="hero-grid"></div>
-  </div>
+  <div class="hero-road"></div>
   <div class="container">
-    <div class="hero-inner">
-      <!-- Text -->
-      <div>
-        <div class="hero-badge">
-          <span class="dot"></span> Plataforma #1 de clasificados
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-eyebrow fade-in">
+          <i class="fa-solid fa-star"></i> La plataforma #1 de autos usados en Argentina
         </div>
-        <h1 class="hero-title">
-          Publicá, gestioná<br>
-          y <span class="gradient-text">vendé más</span><br>
-          desde un solo lugar
-        </h1>
-        <p class="hero-desc">
-          La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes, filtros avanzados y pagos integrados con Mercado Pago.
-        </p>
-        <div class="hero-actions">
-          <a href="login.html" class="btn btn-primary btn-lg"><i class="fas fa-rocket"></i> Empezar gratis</a>
-          <a href="publicaciones.html" class="btn btn-outline btn-lg"><i class="fas fa-eye"></i> Ver publicaciones</a>
-        </div>
-        <div class="hero-trust">
-          <div class="hero-avatars">
-            <span style="background: linear-gradient(135deg,#7C3AED,#EC4899)">JR</span>
-            <span style="background: linear-gradient(135deg,#06B6D4,#7C3AED)">ML</span>
-            <span style="background: linear-gradient(135deg,#10B981,#06B6D4)">CP</span>
-            <span style="background: linear-gradient(135deg,#F59E0B,#EC4899)">+</span>
+        <h1 class="fade-up delay-1">Encontrá tu próximo <em>auto ideal</em> al mejor precio</h1>
+        <p class="hero-sub fade-up delay-2">Miles de vehículos verificados de particulares y concesionarias. Comprá, vendé y financiá sin salir de casa.</p>
+
+        <div class="hero-search fade-up delay-3">
+          <div class="hero-search-grid">
+            <div>
+              <label>Marca</label>
+              <select>
+                <option value="">Todas las marcas</option>
+                <option>Toyota</option>
+                <option>Ford</option>
+                <option>Chevrolet</option>
+                <option>Volkswagen</option>
+                <option>Renault</option>
+                <option>Honda</option>
+                <option>Jeep</option>
+                <option>Fiat</option>
+                <option>Nissan</option>
+              </select>
+            </div>
+            <div>
+              <label>Precio máximo</label>
+              <select>
+                <option value="">Sin límite</option>
+                <option>Hasta $5.000.000</option>
+                <option>Hasta $10.000.000</option>
+                <option>Hasta $15.000.000</option>
+                <option>Hasta $25.000.000</option>
+              </select>
+            </div>
+            <div>
+              <label>Ubicación</label>
+              <select>
+                <option value="">Todo el país</option>
+                <option>Buenos Aires</option>
+                <option>CABA</option>
+                <option>Córdoba</option>
+                <option>Rosario</option>
+                <option>Mendoza</option>
+              </select>
+            </div>
           </div>
-          <p><strong>+1.200 usuarios</strong> ya confían en GonzApp</p>
+          <div class="hero-search-footer">
+            <span class="search-hint"><i class="fa-solid fa-magnifying-glass" style="color:var(--primary);margin-right:4px"></i>+12.400 autos disponibles hoy</span>
+            <a href="publicaciones.html" class="btn btn-primary">Buscar autos <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="hero-stats-row fade-up delay-4">
+          <div class="hero-stat">
+            <strong data-count="12400" data-suffix="+">0</strong>
+            <span>Publicaciones activas</span>
+          </div>
+          <div class="hero-stat" style="border-left:1px solid rgba(255,255,255,0.2);padding-left:20px">
+            <strong data-count="850" data-suffix="+">0</strong>
+            <span>Concesionarias</span>
+          </div>
+          <div class="hero-stat" style="border-left:1px solid rgba(255,255,255,0.2);padding-left:20px">
+            <strong data-count="48000" data-suffix="+">0</strong>
+            <span>Ventas realizadas</span>
+          </div>
         </div>
       </div>
-      <!-- Visual -->
-      <div class="hero-visual">
-        <div class="mockup-window">
-          <div class="mockup-bar">
-            <div class="m-dot" style="background:#FF5F57"></div>
-            <div class="m-dot" style="background:#FEBC2E"></div>
-            <div class="m-dot" style="background:#28C840"></div>
-            <div class="mockup-url skeleton"></div>
-          </div>
-          <div class="mockup-grid">
-            <div class="m-card">
-              <div class="m-img" style="background: linear-gradient(135deg,#1a0a2e,#4c1d95)"></div>
-              <div class="m-body"><div class="m-line" style="width:85%"></div><div class="m-line" style="width:60%"></div><div class="m-price"></div></div>
-            </div>
-            <div class="m-card">
-              <div class="m-img" style="background: linear-gradient(135deg,#1a0030,#831843)"></div>
-              <div class="m-body"><div class="m-line" style="width:75%"></div><div class="m-line" style="width:50%"></div><div class="m-price" style="background:rgba(236,72,153,.5)"></div></div>
-            </div>
-            <div class="m-card">
-              <div class="m-img" style="background: linear-gradient(135deg,#022c22,#064e3b)"></div>
-              <div class="m-body"><div class="m-line" style="width:90%"></div><div class="m-line" style="width:65%"></div><div class="m-price" style="background:rgba(16,185,129,.5)"></div></div>
-            </div>
-            <div class="m-card">
-              <div class="m-img" style="background: linear-gradient(135deg,#1c1400,#3d2e00)"></div>
-              <div class="m-body"><div class="m-line" style="width:80%"></div><div class="m-line" style="width:55%"></div><div class="m-price" style="background:rgba(245,158,11,.5)"></div></div>
+
+      <div class="hero-right fade-in delay-3">
+        <div class="hero-car-mockup">
+          <div class="car-listing-preview">
+            <div class="car-preview-img">🚙</div>
+            <div class="car-preview-body">
+              <div class="car-preview-brand">Toyota • 2022</div>
+              <div class="car-preview-name">Hilux SRX 4x4 A/T</div>
+              <div class="car-preview-price">$28.500.000</div>
+              <div class="car-preview-specs">
+                <span><i class="fa-solid fa-road"></i> 32.000 km</span>
+                <span><i class="fa-solid fa-gas-pump"></i> Diesel</span>
+                <span><i class="fa-solid fa-location-dot"></i> Bs. As.</span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="float-badge fb-1">
-          <i class="fas fa-check-circle" style="color:var(--success)"></i>
-          Pago acreditado
-        </div>
-        <div class="float-badge fb-2">
-          <i class="fab fa-whatsapp" style="color:#25D366;font-size:1.2rem"></i>
-          Nuevo mensaje recibido
+        <div class="hero-float-badges">
+          <div class="hero-float-badge"><i class="fa-solid fa-shield-check" style="color:var(--success)"></i> Vehículo verificado</div>
+          <div class="hero-float-badge"><i class="fa-brands fa-whatsapp" style="color:#25D366"></i> Contacto directo</div>
+          <div class="hero-float-badge"><i class="fa-solid fa-credit-card" style="color:var(--primary)"></i> Financiación</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ STATS BAND -->
-<div class="stats-band">
+<!-- BRANDS BAND -->
+<div class="brands-band">
   <div class="container">
-    <div class="stats-band-grid fade-up">
-      <div class="stats-band-item">
-        <strong><span data-target="5230">0</span>+</strong>
+    <div class="brands-inner">
+      <span class="brands-label">Marcas populares</span>
+      <div class="brand-pill">🏎 Toyota</div>
+      <div class="brand-pill">🚗 Ford</div>
+      <div class="brand-pill">🚘 Chevrolet</div>
+      <div class="brand-pill">🚙 VW</div>
+      <div class="brand-pill">🛻 Renault</div>
+      <div class="brand-pill">🚐 Honda</div>
+      <div class="brand-pill">🏁 Jeep</div>
+      <div class="brand-pill">+ Ver todas</div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section" style="background:#fff">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="section-tag">Explorá</div>
+      <h2 class="section-title fade-up">Buscá por tipo de vehículo</h2>
+      <p class="section-subtitle fade-up delay-1">Desde sedanes hasta camionetas 4x4, encontrá exactamente lo que buscás.</p>
+    </div>
+    <div class="categories-grid">
+      <a href="publicaciones.html" class="category-card fade-up delay-1">
+        <div class="cat-icon">🚗</div>
+        <h3>Sedanes</h3>
+        <p>2.340 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-2">
+        <div class="cat-icon">🚙</div>
+        <h3>SUV / Crossover</h3>
+        <p>3.180 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-3">
+        <div class="cat-icon">🛻</div>
+        <h3>Pickups</h3>
+        <p>1.920 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-4">
+        <div class="cat-icon">🏎</div>
+        <h3>Hatchbacks</h3>
+        <p>1.560 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-2">
+        <div class="cat-icon">🚐</div>
+        <h3>Familiares</h3>
+        <p>480 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-3">
+        <div class="cat-icon">⚡</div>
+        <h3>Eléctricos</h3>
+        <p>240 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-4">
+        <div class="cat-icon">🔵</div>
+        <h3>0 km</h3>
+        <p>890 publicaciones</p>
+      </a>
+      <a href="publicaciones.html" class="category-card fade-up delay-5">
+        <div class="cat-icon"><i class="fa-solid fa-ellipsis" style="color:var(--text-muted);font-size:1rem"></i></div>
+        <h3>Ver todos</h3>
+        <p>12.400+ vehículos</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED LISTINGS -->
+<section class="section">
+  <div class="container">
+    <div class="section-header" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-tag orange">Destacados</div>
+        <h2 class="section-title fade-up">Publicaciones recientes</h2>
+      </div>
+      <a href="publicaciones.html" class="btn btn-outline fade-up">Ver todas <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div class="listings-grid">
+      <!-- Card 1 -->
+      <a href="detalle.html" class="listing-card fade-up delay-1">
+        <div class="listing-img">
+          <div class="img-placeholder">🛻</div>
+          <div class="listing-badge-wrap">
+            <span class="badge badge-accent">Destacado</span>
+          </div>
+          <button class="listing-fav"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat">Toyota • 2022</div>
+          <div class="listing-title">Hilux SRX 4x4 2.8 TDI Automática</div>
+          <div class="listing-price">$28.500.000</div>
+          <div class="listing-price-sub">Precio en pesos · Financiación disponible</div>
+          <div class="listing-specs">
+            <span class="listing-spec"><i class="fa-solid fa-road"></i> 32.000 km</span>
+            <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Diesel</span>
+            <span class="listing-spec"><i class="fa-solid fa-gears"></i> Automático</span>
+            <span class="listing-spec"><i class="fa-solid fa-location-dot"></i> Bs. As.</span>
+          </div>
+          <div class="listing-meta">
+            <span><i class="fa-regular fa-clock" style="margin-right:3px"></i> hace 2 horas</span>
+            <span class="badge badge-success">Verificado</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="detalle.html" class="listing-card fade-up delay-2">
+        <div class="listing-img">
+          <div class="img-placeholder">🚙</div>
+          <div class="listing-badge-wrap">
+            <span class="badge badge-primary">Nuevo ingreso</span>
+          </div>
+          <button class="listing-fav"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat">Ford • 2021</div>
+          <div class="listing-title">Explorer Titanium 4WD 2.3 EcoBoost</div>
+          <div class="listing-price">$31.200.000</div>
+          <div class="listing-price-sub">Precio en pesos · Acepta permutas</div>
+          <div class="listing-specs">
+            <span class="listing-spec"><i class="fa-solid fa-road"></i> 48.000 km</span>
+            <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Naftero</span>
+            <span class="listing-spec"><i class="fa-solid fa-gears"></i> Automático</span>
+            <span class="listing-spec"><i class="fa-solid fa-location-dot"></i> Córdoba</span>
+          </div>
+          <div class="listing-meta">
+            <span><i class="fa-regular fa-clock" style="margin-right:3px"></i> hace 5 horas</span>
+            <span class="badge badge-primary">Con fotos</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="detalle.html" class="listing-card fade-up delay-3">
+        <div class="listing-img">
+          <div class="img-placeholder">🏎</div>
+          <div class="listing-badge-wrap">
+            <span class="badge badge-warning">Urgente</span>
+          </div>
+          <button class="listing-fav"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat">Volkswagen • 2023</div>
+          <div class="listing-title">Tiguan Allspace Highline 2.0 TSI 7 plazas</div>
+          <div class="listing-price">$42.800.000</div>
+          <div class="listing-price-sub">Precio en pesos</div>
+          <div class="listing-specs">
+            <span class="listing-spec"><i class="fa-solid fa-road"></i> 18.500 km</span>
+            <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Naftero</span>
+            <span class="listing-spec"><i class="fa-solid fa-gears"></i> Automático</span>
+            <span class="listing-spec"><i class="fa-solid fa-location-dot"></i> Rosario</span>
+          </div>
+          <div class="listing-meta">
+            <span><i class="fa-regular fa-clock" style="margin-right:3px"></i> hace 1 día</span>
+            <span class="badge badge-success">Verificado</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 4 -->
+      <a href="detalle.html" class="listing-card fade-up delay-1">
+        <div class="listing-img">
+          <div class="img-placeholder">🚗</div>
+          <button class="listing-fav"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat">Honda • 2022</div>
+          <div class="listing-title">HR-V EXL 1.5 VTEC Turbo CVT</div>
+          <div class="listing-price">$22.400.000</div>
+          <div class="listing-price-sub">Precio en pesos</div>
+          <div class="listing-specs">
+            <span class="listing-spec"><i class="fa-solid fa-road"></i> 41.000 km</span>
+            <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Naftero</span>
+            <span class="listing-spec"><i class="fa-solid fa-gears"></i> CVT</span>
+            <span class="listing-spec"><i class="fa-solid fa-location-dot"></i> Mendoza</span>
+          </div>
+          <div class="listing-meta">
+            <span><i class="fa-regular fa-clock" style="margin-right:3px"></i> hace 2 días</span>
+            <span class="badge badge-gray">Particular</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="detalle.html" class="listing-card fade-up delay-2">
+        <div class="listing-img">
+          <div class="img-placeholder">🚘</div>
+          <div class="listing-badge-wrap">
+            <span class="badge badge-accent">Financiación</span>
+          </div>
+          <button class="listing-fav"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat">Chevrolet • 2021</div>
+          <div class="listing-title">Tracker Premier+ 1.2 Turbo AT Trackfield</div>
+          <div class="listing-price">$19.900.000</div>
+          <div class="listing-price-sub">Hasta 60 cuotas disponibles</div>
+          <div class="listing-specs">
+            <span class="listing-spec"><i class="fa-solid fa-road"></i> 55.000 km</span>
+            <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Naftero</span>
+            <span class="listing-spec"><i class="fa-solid fa-gears"></i> Automático</span>
+            <span class="listing-spec"><i class="fa-solid fa-location-dot"></i> Bs. As.</span>
+          </div>
+          <div class="listing-meta">
+            <span><i class="fa-regular fa-clock" style="margin-right:3px"></i> hace 3 días</span>
+            <span class="badge badge-primary">Concesionaria</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 6 -->
+      <a href="detalle.html" class="listing-card fade-up delay-3">
+        <div class="listing-img">
+          <div class="img-placeholder">🛻</div>
+          <div class="listing-badge-wrap">
+            <span class="badge badge-success">0 km</span>
+          </div>
+          <button class="listing-fav"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat">Jeep • 2024</div>
+          <div class="listing-title">Compass Limited 1.3 T270 DCT AWD</div>
+          <div class="listing-price">$58.000.000</div>
+          <div class="listing-price-sub">0 km · Precio de lista</div>
+          <div class="listing-specs">
+            <span class="listing-spec"><i class="fa-solid fa-road"></i> 0 km</span>
+            <span class="listing-spec"><i class="fa-solid fa-gas-pump"></i> Naftero</span>
+            <span class="listing-spec"><i class="fa-solid fa-gears"></i> DCT 6v</span>
+            <span class="listing-spec"><i class="fa-solid fa-location-dot"></i> CABA</span>
+          </div>
+          <div class="listing-meta">
+            <span><i class="fa-regular fa-clock" style="margin-right:3px"></i> hace 4 días</span>
+            <span class="badge badge-success">0 km</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div style="text-align:center;margin-top:36px">
+      <a href="publicaciones.html" class="btn btn-outline btn-lg fade-up">Ver las 12.400 publicaciones <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-inner">
+      <div class="stats-item fade-up">
+        <strong data-count="12400" data-suffix="+">0</strong>
         <span>Publicaciones activas</span>
       </div>
-      <div class="stats-band-item">
-        <strong><span data-target="1280">0</span>+</strong>
-        <span>Usuarios registrados</span>
+      <div class="stats-item fade-up delay-2">
+        <strong data-count="850" data-suffix="+">0</strong>
+        <span>Concesionarias registradas</span>
       </div>
-      <div class="stats-band-item">
-        <strong><span data-target="98">0</span>%</strong>
-        <span>Tasa de satisfacción</span>
+      <div class="stats-item fade-up delay-3">
+        <strong data-count="48000" data-suffix="+">0</strong>
+        <span>Autos vendidos</span>
       </div>
-      <div class="stats-band-item">
-        <strong>24/7</strong>
-        <span>Disponibilidad online</span>
+      <div class="stats-item fade-up delay-4">
+        <strong data-count="98">0</strong><strong style="font-size:1.5rem">%</strong>
+        <span>Usuarios satisfechos</span>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ============================================================ FEATURES -->
-<section class="section features-bg" id="features">
+<!-- HOW IT WORKS -->
+<section class="section how-section">
   <div class="container">
-    <div class="section-header fade-up">
-      <div class="section-tag">Funcionalidades</div>
-      <h2 class="section-title">Todo lo que necesitás<br><span class="gradient-text">en un solo lugar</span></h2>
-      <p class="section-subtitle">Desde la creación del aviso hasta el cobro, gestioná todo desde una plataforma moderna e intuitiva.</p>
+    <div class="section-header centered">
+      <div class="section-tag">Simple y rápido</div>
+      <h2 class="section-title fade-up">¿Cómo funciona?</h2>
+      <p class="section-subtitle fade-up delay-1">En 3 pasos tenés tu auto o vendés el tuyo</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card fade-up delay-1">
+        <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="step-num">1</div>
+        <h3>Buscá tu auto</h3>
+        <p>Filtrá por marca, modelo, precio, kilómetros y ubicación. Miles de opciones al instante.</p>
+      </div>
+      <div class="step-card fade-up delay-2">
+        <div class="step-icon"><i class="fa-brands fa-whatsapp" style="color:#25D366"></i></div>
+        <div class="step-num">2</div>
+        <h3>Contactá al vendedor</h3>
+        <p>Escribile directo por WhatsApp o Mensaje. Sin intermediarios. Sin comisiones.</p>
+      </div>
+      <div class="step-card fade-up delay-3">
+        <div class="step-icon"><i class="fa-solid fa-handshake"></i></div>
+        <div class="step-num">3</div>
+        <h3>Cerrá el trato</h3>
+        <p>Coordiná la revisión, pagá con MercadoPago y listo. Transferencia segura garantizada.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="background:var(--bg-2)">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="section-tag">¿Por qué elegirnos?</div>
+      <h2 class="section-title fade-up">Todo lo que necesitás para comprar o vender</h2>
     </div>
     <div class="features-grid">
-      <div class="feat-card fade-up delay-1">
-        <div class="feat-icon" style="background:rgba(124,58,237,.14)"><i class="fas fa-layer-group" style="color:var(--primary-light)"></i></div>
-        <h3>Gestión de publicaciones</h3>
-        <p>Creá, editá y eliminá publicaciones con fotos, descripción y precio. Control total sobre tu inventario de avisos en tiempo real.</p>
+      <div class="feature-card fade-up delay-1">
+        <div class="feature-icon" style="background:#EEF3FF;color:var(--primary)"><i class="fa-solid fa-shield-check"></i></div>
+        <h3>Vehículos verificados</h3>
+        <p>Cada publicación pasa por nuestro proceso de verificación. Informe de título, multas y deudas incluido.</p>
       </div>
-      <div class="feat-card fade-up delay-2">
-        <div class="feat-icon" style="background:rgba(236,72,153,.14)"><i class="fas fa-users" style="color:var(--accent-light)"></i></div>
-        <h3>Gestión de usuarios</h3>
-        <p>Administrá tu base de usuarios, asigná planes individualmente y controlá permisos desde un panel centralizado y simple.</p>
+      <div class="feature-card fade-up delay-2">
+        <div class="feature-icon" style="background:#FFF3EB;color:var(--accent)"><i class="fa-solid fa-camera"></i></div>
+        <h3>Fotos 360°</h3>
+        <p>Publicaciones con galerías completas y recorridos virtuales del vehículo desde tu celular.</p>
       </div>
-      <div class="feat-card fade-up delay-3">
-        <div class="feat-icon" style="background:rgba(6,182,212,.14)"><i class="fas fa-sliders" style="color:var(--cyan)"></i></div>
-        <h3>Filtros avanzados</h3>
-        <p>Tus visitantes pueden filtrar por categoría, rango de precios y ubicación para encontrar exactamente lo que buscan.</p>
+      <div class="feature-card fade-up delay-3">
+        <div class="feature-icon" style="background:#DCFCE7;color:var(--success)"><i class="fa-solid fa-credit-card"></i></div>
+        <h3>Financiación fácil</h3>
+        <p>Simulá tu crédito en segundos. Trabajamos con los mejores bancos y financieras del país.</p>
       </div>
-      <div class="feat-card fade-up delay-1">
-        <div class="feat-icon" style="background:rgba(16,185,129,.14)"><i class="fas fa-credit-card" style="color:var(--success)"></i></div>
-        <h3>Mercado Pago integrado</h3>
-        <p>Aceptá pagos de suscripciones de forma automática. Activación y desactivación de planes según el estado del pago.</p>
+      <div class="feature-card fade-up delay-1">
+        <div class="feature-icon" style="background:#FEF3C7;color:var(--warning)"><i class="fa-solid fa-bell"></i></div>
+        <h3>Alertas inteligentes</h3>
+        <p>Configurá tu búsqueda y te avisamos cuando llegue el auto que buscás al precio que querés.</p>
       </div>
-      <div class="feat-card fade-up delay-2">
-        <div class="feat-icon" style="background:rgba(245,158,11,.14)"><i class="fas fa-chart-pie" style="color:var(--warning)"></i></div>
-        <h3>Planes y límites</h3>
-        <p>Configurá planes con límites de publicaciones activas. El sistema controla automáticamente cuánto puede publicar cada usuario.</p>
+      <div class="feature-card fade-up delay-2">
+        <div class="feature-icon" style="background:#EEF3FF;color:var(--primary)"><i class="fa-brands fa-whatsapp"></i></div>
+        <h3>WhatsApp directo</h3>
+        <p>Contacto inmediato con el vendedor sin registros ni formularios. Rápido y sin fricción.</p>
       </div>
-      <div class="feat-card fade-up delay-3">
-        <div class="feat-icon" style="background:rgba(37,211,102,.12)"><i class="fab fa-whatsapp" style="color:#25D366;font-size:1.5rem"></i></div>
-        <h3>Contacto por WhatsApp</h3>
-        <p>Los interesados contactan directamente al vendedor con un toque. Sin intermediarios, experiencia fluida para el comprador.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ HOW IT WORKS -->
-<section class="section how-bg">
-  <div class="container">
-    <div class="section-header fade-up">
-      <div class="section-tag">Proceso</div>
-      <h2 class="section-title">¿Cómo <span class="gradient-text">funciona</span>?</h2>
-      <p class="section-subtitle">En tres simples pasos ya estás publicando y llegando a miles de potenciales clientes.</p>
-    </div>
-    <div class="steps-row">
-      <div class="step-item fade-up delay-1">
-        <div class="step-num">1</div>
-        <h3>Registrate</h3>
-        <p>Creá tu cuenta gratis en segundos. Elegí el plan que mejor se adapte a tus necesidades actuales.</p>
-      </div>
-      <div class="step-item fade-up delay-2">
-        <div class="step-num">2</div>
-        <h3>Publicá</h3>
-        <p>Subí tus productos o servicios con fotos y descripción detallada. Tu publicación aparece al instante.</p>
-      </div>
-      <div class="step-item fade-up delay-3">
-        <div class="step-num">3</div>
-        <h3>Vendé</h3>
-        <p>Recibí consultas por WhatsApp o cobros directamente por Mercado Pago. Rápido, simple y seguro.</p>
+      <div class="feature-card fade-up delay-3">
+        <div class="feature-icon" style="background:#FFF3EB;color:var(--accent)"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Tasación gratis</h3>
+        <p>Conocé el valor de mercado de tu auto en segundos con nuestra herramienta de tasación.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ PRICING -->
-<section class="section" id="pricing">
+<!-- PRICING -->
+<section class="section" style="background:#fff">
   <div class="container">
-    <div class="section-header fade-up">
+    <div class="section-header centered">
       <div class="section-tag">Planes</div>
-      <h2 class="section-title">Precios <span class="gradient-text">simples y claros</span></h2>
-      <p class="section-subtitle">Empezá gratis y escalá cuando lo necesites. Sin sorpresas ni letras chicas.</p>
+      <h2 class="section-title fade-up">Publicá tu vehículo</h2>
+      <p class="section-subtitle fade-up delay-1">Elegí el plan que mejor se adapte a tus necesidades</p>
     </div>
     <div class="pricing-grid">
-
       <!-- Básico -->
       <div class="pricing-card fade-up delay-1">
-        <div class="pricing-icon" style="background:rgba(255,255,255,.05)">
-          <i class="fas fa-seedling" style="color:var(--text-muted)"></i>
-        </div>
-        <div class="section-tag">Básico</div>
-        <div class="pricing-price">Gratis <span>/ siempre</span></div>
-        <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:4px">Ideal para empezar</p>
+        <div class="pricing-icon" style="background:var(--bg-2);color:var(--text-muted)"><i class="fa-solid fa-car"></i></div>
+        <div class="pricing-name">Básico</div>
+        <div class="pricing-price">Gratis <span>/ 30 días</span></div>
+        <div class="pricing-desc">Para vender tu auto sin costo</div>
         <ul class="pricing-features">
-          <li><i class="fas fa-check"></i> 3 publicaciones activas</li>
-          <li><i class="fas fa-check"></i> 3 fotos por publicación</li>
-          <li><i class="fas fa-check"></i> Contacto por WhatsApp</li>
-          <li class="no"><i class="fas fa-times"></i> Publicaciones destacadas</li>
-          <li class="no"><i class="fas fa-times"></i> Estadísticas</li>
-          <li class="no"><i class="fas fa-times"></i> Soporte prioritario</li>
+          <li><i class="fa-solid fa-check"></i> 1 publicación activa</li>
+          <li><i class="fa-solid fa-check"></i> Hasta 8 fotos</li>
+          <li><i class="fa-solid fa-check"></i> Contacto por WhatsApp</li>
+          <li class="no"><i class="fa-solid fa-times"></i> Posición destacada</li>
+          <li class="no"><i class="fa-solid fa-times"></i> Estadísticas de visitas</li>
+          <li class="no"><i class="fa-solid fa-times"></i> Renovación automática</li>
         </ul>
-        <a href="login.html" class="btn btn-outline btn-block">Comenzar gratis</a>
+        <a href="login.html" class="btn btn-outline-gray btn-block">Publicar gratis</a>
       </div>
 
-      <!-- Profesional (featured) -->
+      <!-- Profesional -->
       <div class="pricing-card featured fade-up delay-2">
         <div class="pricing-badge">Más popular</div>
-        <div class="pricing-icon" style="background:rgba(124,58,237,.18)">
-          <i class="fas fa-bolt" style="color:var(--primary-light)"></i>
-        </div>
-        <div class="section-tag">Profesional</div>
+        <div class="pricing-icon" style="background:var(--primary-bg);color:var(--primary)"><i class="fa-solid fa-star"></i></div>
+        <div class="pricing-name">Profesional</div>
         <div class="pricing-price">$4.900 <span>/ mes</span></div>
-        <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:4px">Para profesionales</p>
+        <div class="pricing-desc">Para concesionarias y vendedores frecuentes</div>
         <ul class="pricing-features">
-          <li><i class="fas fa-check"></i> 20 publicaciones activas</li>
-          <li><i class="fas fa-check"></i> 10 fotos por publicación</li>
-          <li><i class="fas fa-check"></i> Contacto por WhatsApp</li>
-          <li><i class="fas fa-check"></i> 3 publicaciones destacadas</li>
-          <li><i class="fas fa-check"></i> Estadísticas básicas</li>
-          <li class="no"><i class="fas fa-times"></i> Soporte prioritario</li>
+          <li><i class="fa-solid fa-check"></i> Hasta 20 publicaciones</li>
+          <li><i class="fa-solid fa-check"></i> Hasta 25 fotos por auto</li>
+          <li><i class="fa-solid fa-check"></i> Posición destacada</li>
+          <li><i class="fa-solid fa-check"></i> Estadísticas detalladas</li>
+          <li><i class="fa-solid fa-check"></i> Renovación automática</li>
+          <li class="no"><i class="fa-solid fa-times"></i> Botón MercadoPago</li>
         </ul>
-        <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-rocket"></i> Elegir plan</a>
+        <a href="login.html" class="btn btn-primary btn-block">Empezar prueba gratis</a>
       </div>
 
       <!-- Premium -->
       <div class="pricing-card fade-up delay-3">
-        <div class="pricing-icon" style="background:rgba(245,158,11,.14)">
-          <i class="fas fa-crown" style="color:var(--warning)"></i>
-        </div>
-        <div class="section-tag" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#FCD34D">Premium</div>
-        <div class="pricing-price">$9.900 <span>/ mes</span></div>
-        <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:4px">Para empresas</p>
+        <div class="pricing-icon" style="background:var(--accent-bg);color:var(--accent)"><i class="fa-solid fa-crown"></i></div>
+        <div class="pricing-name">Premium</div>
+        <div class="pricing-price">$8.900 <span>/ mes</span></div>
+        <div class="pricing-desc">La experiencia completa de ventas</div>
         <ul class="pricing-features">
-          <li><i class="fas fa-check"></i> Publicaciones ilimitadas</li>
-          <li><i class="fas fa-check"></i> Fotos ilimitadas</li>
-          <li><i class="fas fa-check"></i> Contacto por WhatsApp</li>
-          <li><i class="fas fa-check"></i> Destacadas ilimitadas</li>
-          <li><i class="fas fa-check"></i> Estadísticas completas</li>
-          <li><i class="fas fa-check"></i> Soporte prioritario 24/7</li>
+          <li><i class="fa-solid fa-check"></i> Publicaciones ilimitadas</li>
+          <li><i class="fa-solid fa-check"></i> Fotos ilimitadas + 360°</li>
+          <li><i class="fa-solid fa-check"></i> Posición top en resultados</li>
+          <li><i class="fa-solid fa-check"></i> Cobro con MercadoPago</li>
+          <li><i class="fa-solid fa-check"></i> Financiación integrada</li>
+          <li><i class="fa-solid fa-check"></i> Soporte prioritario 24/7</li>
         </ul>
-        <a href="login.html" class="btn btn-block" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#FCD34D">
-          <i class="fas fa-crown"></i> Elegir Premium
-        </a>
+        <a href="login.html" class="btn btn-accent btn-block">Contratar Premium</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ TESTIMONIALS -->
-<section class="section" style="background:var(--bg-2);border-top:1px solid var(--border)">
+<!-- TESTIMONIALS -->
+<section class="section testimonials-section">
   <div class="container">
-    <div class="section-header fade-up">
+    <div class="section-header centered">
       <div class="section-tag">Testimonios</div>
-      <h2 class="section-title">Lo que dicen nuestros <span class="gradient-text">usuarios</span></h2>
+      <h2 class="section-title fade-up">Lo que dicen nuestros usuarios</h2>
     </div>
-    <div class="testi-grid">
-      <div class="testi-card fade-up delay-1">
-        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-        <p class="testi-text">"Desde que uso GonzApp mis ventas aumentaron un 40%. La plataforma es muy fácil de usar y mis clientes me contactan directo por WhatsApp."</p>
-        <div class="testi-author">
-          <div class="testi-avatar" style="background:linear-gradient(135deg,#7C3AED,#EC4899)">JR</div>
-          <div><h4>Juan Rodríguez</h4><span>Vendedor de electrónica · Córdoba</span></div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card fade-up delay-1">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"Vendí mi Hilux en 4 días. Nunca pensé que sería tan rápido. La plataforma es muy fácil de usar y los compradores llegan solos."</p>
+        <div class="t-author">
+          <div class="t-avatar">MG</div>
+          <div><div class="t-name">Marcelo González</div><div class="t-role">Particular · Buenos Aires</div></div>
         </div>
       </div>
-      <div class="testi-card fade-up delay-2">
-        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-        <p class="testi-text">"El sistema de planes es perfecto. Puedo controlar exactamente cuántos avisos tiene activos cada vendedor de mi plataforma."</p>
-        <div class="testi-author">
-          <div class="testi-avatar" style="background:linear-gradient(135deg,#06B6D4,#7C3AED)">ML</div>
-          <div><h4>María López</h4><span>Dueña de inmobiliaria · Buenos Aires</span></div>
+      <div class="testimonial-card fade-up delay-2">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"Tenemos 3 sucursales y usamos el plan Premium. Es increíble la visibilidad que nos da. Las consultas se triplicaron desde que migramos acá."</p>
+        <div class="t-author">
+          <div class="t-avatar" style="background:var(--accent-bg);color:var(--accent)">RC</div>
+          <div><div class="t-name">Rodrigo Castillo</div><div class="t-role">Concesionaria El Sur · Rosario</div></div>
         </div>
       </div>
-      <div class="testi-card fade-up delay-3">
-        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-        <p class="testi-text">"La integración con Mercado Pago es increíble. Los cobros son automáticos y mis clientes renuevan sin que yo tenga que hacer nada."</p>
-        <div class="testi-author">
-          <div class="testi-avatar" style="background:linear-gradient(135deg,#10B981,#06B6D4)">CP</div>
-          <div><h4>Carlos Ponce</h4><span>Agencia de autos · Rosario</span></div>
+      <div class="testimonial-card fade-up delay-3">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-text">"Compré mi primer auto acá y fue una experiencia muy segura. El vehículo estaba verificado y el proceso de pago con MercadoPago fue clarísimo."</p>
+        <div class="t-author">
+          <div class="t-avatar" style="background:var(--success-bg);color:var(--success)">LP</div>
+          <div><div class="t-name">Luciana Pérez</div><div class="t-role">Compradora · Córdoba</div></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ CTA -->
-<section class="cta-sec">
+<!-- CTA -->
+<section class="cta-section">
   <div class="container">
-    <div class="fade-up">
-      <h2>¿Listo para <span class="gradient-text">comenzar</span>?</h2>
-      <p>Unite a más de 1.200 vendedores que ya confían en GonzApp para gestionar sus publicaciones.</p>
-      <div class="cta-buttons">
-        <a href="login.html" class="btn btn-primary btn-lg"><i class="fas fa-rocket"></i> Crear cuenta gratis</a>
-        <a href="publicaciones.html" class="btn btn-outline btn-lg"><i class="fas fa-search"></i> Explorar publicaciones</a>
-      </div>
+    <div class="section-tag" style="background:rgba(255,255,255,0.15);color:#fff;margin-bottom:12px" class="fade-up">¿Listo para empezar?</div>
+    <h2 class="fade-up">Publicá tu auto hoy y llegá a miles de compradores</h2>
+    <p class="fade-up delay-1">Gratis. Sin comisiones. Resultados en 24 horas.</p>
+    <div class="cta-actions fade-up delay-2">
+      <a href="login.html" class="btn btn-accent btn-lg"><i class="fa-solid fa-plus"></i> Publicar mi auto gratis</a>
+      <a href="publicaciones.html" class="btn btn-white btn-lg"><i class="fa-solid fa-magnifying-glass"></i> Buscar autos</a>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ FOOTER -->
+<!-- FOOTER -->
 <footer>
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div style="font-size:1.4rem;font-weight:800" class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</div>
-        <p>La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes y pagos integrados.</p>
+        <div class="footer-logo"><i class="fa-solid fa-car-side"></i> GonzApp<span style="color:var(--accent)">.</span>Autos</div>
+        <p>La plataforma líder para comprar y vender autos en Argentina. Conectamos compradores y vendedores de forma simple, rápida y segura.</p>
         <div class="footer-social">
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-whatsapp"></i></a>
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>
       <div class="footer-col">
-        <h4>Plataforma</h4>
+        <h4>Comprar</h4>
         <ul>
-          <li><a href="publicaciones.html">Ver publicaciones</a></li>
-          <li><a href="login.html">Registrarse</a></li>
-          <li><a href="#pricing">Planes</a></li>
-          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="publicaciones.html">Todos los autos</a></li>
+          <li><a href="publicaciones.html">SUV y Crossover</a></li>
+          <li><a href="publicaciones.html">Pickup y 4x4</a></li>
+          <li><a href="publicaciones.html">Sedanes</a></li>
+          <li><a href="publicaciones.html">0 kilómetros</a></li>
+          <li><a href="#">Financiación</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Soporte</h4>
+        <h4>Vender</h4>
         <ul>
-          <li><a href="#">Centro de ayuda</a></li>
-          <li><a href="#">Contacto</a></li>
+          <li><a href="login.html">Publicar auto</a></li>
+          <li><a href="#">Tasación gratis</a></li>
+          <li><a href="#">Planes y precios</a></li>
+          <li><a href="#">Para concesionarias</a></li>
+          <li><a href="#">Consejos de venta</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Sobre nosotros</a></li>
+          <li><a href="#">Blog automotor</a></li>
+          <li><a href="#">Trabaja con nosotros</a></li>
           <li><a href="#">Términos y condiciones</a></li>
           <li><a href="#">Privacidad</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Pagos aceptados</h4>
-        <ul>
-          <li><a href="#"><i class="fab fa-cc-visa"></i> Visa</a></li>
-          <li><a href="#"><i class="fab fa-cc-mastercard"></i> Mastercard</a></li>
-          <li><a href="#">Mercado Pago</a></li>
-          <li><a href="#">Transferencia bancaria</a></li>
+          <li><a href="#">Contacto</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 GonzApp. Todos los derechos reservados.</span>
-      <span>Hecho con <i class="fas fa-heart" style="color:var(--accent)"></i> en Argentina</span>
+      <span>© 2024 GonzApp Autos. Todos los derechos reservados.</span>
+      <span style="display:flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-lock" style="color:var(--primary)"></i> Pagos seguros con MercadoPago
+        <span style="margin-left:8px">Hecho en Argentina 🇦🇷</span>
+      </span>
     </div>
   </div>
 </footer>
 
+<style>
+@keyframes fade-in-up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+</style>
 <script src="main.js"></script>
+<script>
+  initScrollAnimations();
+  initNavbar();
+  initMobileMenu();
+  initCounters();
+  initFavorites();
+</script>
 </body>
 </html>
