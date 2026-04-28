@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toyota Hilux 2022 — GonzApp</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { background: #070711; }
+
+    /* ---- BREADCRUMB ---- */
+    .breadcrumb {
+      padding: calc(var(--nav-height) + 24px) 0 0;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; color: var(--text-faint);
+      flex-wrap: wrap;
+    }
+    .breadcrumb a { color: var(--text-muted); }
+    .breadcrumb a:hover { color: var(--text); }
+    .breadcrumb i { font-size: 0.7rem; }
+
+    /* ---- DETAIL LAYOUT ---- */
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 30px;
+      padding: 24px 0 80px;
+      align-items: start;
+    }
+
+    /* ---- GALLERY ---- */
+    .gallery { margin-bottom: 24px; }
+    .gallery-main {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      height: 380px;
+      position: relative;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .gallery-main .img-bg {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #1c1400, #3d2e00, #5a4300);
+      position: relative;
+    }
+    .gallery-main .img-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom right, rgba(245,158,11,.2), rgba(124,58,237,.15));
+    }
+    .gallery-main .img-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+    }
+    .gallery-main .img-overlay i {
+      font-size: 4rem; opacity: .2;
+    }
+    .gallery-main .img-overlay span {
+      font-size: 0.85rem; color: var(--text-faint);
+    }
+    .gallery-controls {
+      position: absolute; bottom: 16px; right: 16px;
+      display: flex; gap: 8px;
+    }
+    .gallery-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(7,7,17,.8); backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      color: var(--text); font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: var(--transition);
+    }
+    .gallery-btn:hover { background: rgba(124,58,237,.3); border-color: var(--primary); }
+    .gallery-count {
+      position: absolute; bottom: 16px; left: 16px;
+      background: rgba(7,7,17,.8); backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px; font-size: 0.8rem; color: var(--text-muted);
+    }
+
+    .gallery-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .gallery-thumb {
+      width: 72px; height: 56px; border-radius: var(--radius-sm);
+      flex-shrink: 0; border: 2px solid transparent;
+      overflow: hidden; cursor: pointer; transition: var(--transition);
+    }
+    .gallery-thumb.active { border-color: var(--primary); }
+    .gallery-thumb:hover { border-color: var(--border-hover); }
+    .gallery-thumb .t-img {
+      width: 100%; height: 100%;
+    }
+
+    /* ---- DETAIL CONTENT ---- */
+    .detail-content {}
+    .detail-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .detail-cat {
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--primary-light); text-transform: uppercase; letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .detail-title { font-size: clamp(1.4rem,3vw,2rem); font-weight: 800; line-height: 1.2; margin-bottom: 14px; }
+    .detail-price {
+      font-size: 2.2rem; font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .detail-price-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
+
+    .detail-meta {
+      display: flex; flex-wrap: wrap; gap: 18px;
+      padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      margin: 16px 0 20px;
+    }
+    .detail-meta-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; color: var(--text-muted);
+    }
+    .detail-meta-item i { color: var(--primary-light); font-size: 0.9rem; }
+    .detail-meta-item strong { color: var(--text); }
+
+    /* ---- SPEC CARDS ---- */
+    .specs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+    .spec-item {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+    }
+    .spec-item i { font-size: 1.2rem; margin-bottom: 8px; display: block; }
+    .spec-item span { font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+    .spec-item strong { font-size: 0.92rem; }
+
+    /* ---- DESCRIPTION ---- */
+    .detail-section { margin-bottom: 28px; }
+    .detail-section h3 {
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .detail-text { color: var(--text-muted); font-size: 0.93rem; line-height: 1.75; }
+
+    .features-list {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; list-style: none;
+    }
+    .features-list li {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.88rem; color: var(--text-muted);
+    }
+    .features-list li i { color: var(--success); font-size: 0.8rem; flex-shrink: 0; }
+
+    /* ---- SIDEBAR / STICKY CARD ---- */
+    .detail-sidebar { position: sticky; top: calc(var(--nav-height) + 20px); }
+
+    .contact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 16px;
+    }
+    .seller-row {
+      display: flex; align-items: center; gap: 14px;
+      padding-bottom: 18px; border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .seller-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700; flex-shrink: 0;
+    }
+    .seller-info h4 { font-size: 1rem; margin-bottom: 4px; }
+    .seller-info span { font-size: 0.8rem; color: var(--text-muted); }
+    .seller-rating { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .seller-rating i { color: var(--warning); font-size: 0.75rem; }
+    .seller-rating span { font-size: 0.78rem; color: var(--text-muted); }
+
+    .price-display { margin-bottom: 20px; }
+    .price-display .big-price {
+      font-size: 2rem; font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1;
+    }
+    .price-display .price-note { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+    .contact-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .btn-whatsapp {
+      background: #25D366; color: white;
+      box-shadow: 0 4px 20px rgba(37,211,102,.3);
+    }
+    .btn-whatsapp:hover { background: #1ebe57; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,211,102,.4); }
+    .btn-mercadopago {
+      background: #009EE3; color: white;
+      box-shadow: 0 4px 20px rgba(0,158,227,.25);
+    }
+    .btn-mercadopago:hover { background: #0085c7; transform: translateY(-2px); }
+
+    .contact-info-row {
+      display: flex; gap: 10px; margin-top: 14px;
+      padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    .contact-info-row span {
+      flex: 1; text-align: center;
+      font-size: 0.75rem; color: var(--text-faint);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+
+    /* Safety card */
+    .safety-card {
+      background: rgba(16,185,129,.06);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+    }
+    .safety-card h4 { font-size: 0.88rem; color: #34D399; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .safety-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .safety-card li { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 7px; }
+    .safety-card li i { color: #34D399; font-size: 0.75rem; flex-shrink: 0; margin-top: 2px; }
+
+    /* ---- SIMILAR ---- */
+    .similar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 1024px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .detail-sidebar { position: static; }
+      .similar-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-list { grid-template-columns: 1fr; }
+      .similar-grid { grid-template-columns: 1fr; }
+      .gallery-main { height: 240px; }
+    }
+    @media (max-width: 480px) {
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar solid" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="publicaciones.html" class="active">Publicaciones</a></li>
+      <li><a href="index.html#features">Funciones</a></li>
+      <li><a href="index.html#pricing">Planes</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Ingresar</a>
+      <a href="login.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Publicar</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="publicaciones.html">Publicaciones</a></li>
+    <li><a href="index.html#features">Funciones</a></li>
+    <li><a href="index.html#pricing">Planes</a></li>
+  </ul>
+  <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-plus"></i> Publicar aviso</a>
+</div>
+
+<div class="container">
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="index.html">Inicio</a>
+    <i class="fas fa-chevron-right"></i>
+    <a href="publicaciones.html">Publicaciones</a>
+    <i class="fas fa-chevron-right"></i>
+    <a href="publicaciones.html">Vehículos</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Toyota Hilux 2022</span>
+  </nav>
+
+  <!-- DETAIL LAYOUT -->
+  <div class="detail-layout">
+
+    <!-- LEFT: CONTENT -->
+    <div>
+      <!-- Gallery -->
+      <div class="gallery fade-up">
+        <div class="gallery-main">
+          <div class="img-bg" id="main-img" style="background: linear-gradient(135deg, #1c1400, #3d2e00, #5a4300)">
+            <div class="img-overlay">
+              <i class="fas fa-car"></i>
+              <span>Foto principal</span>
+            </div>
+          </div>
+          <div class="gallery-count"><i class="fas fa-images"></i> 1 / 8</div>
+          <div class="gallery-controls">
+            <button class="gallery-btn" onclick="prevImg()"><i class="fas fa-chevron-left"></i></button>
+            <button class="gallery-btn" onclick="nextImg()"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="gallery-thumbs">
+          <div class="gallery-thumb active" onclick="setImg(0, this)"><div class="t-img" style="background:linear-gradient(135deg,#1c1400,#3d2e00)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(1, this)"><div class="t-img" style="background:linear-gradient(135deg,#0a1a00,#1a3300)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(2, this)"><div class="t-img" style="background:linear-gradient(135deg,#1a0a00,#3d1500)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(3, this)"><div class="t-img" style="background:linear-gradient(135deg,#00101a,#002030)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(4, this)"><div class="t-img" style="background:linear-gradient(135deg,#100015,#2d0030)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(5, this)"><div class="t-img" style="background:linear-gradient(135deg,#001010,#003030)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(6, this)"><div class="t-img" style="background:linear-gradient(135deg,#15000a,#400020)"></div></div>
+          <div class="gallery-thumb" onclick="setImg(7, this)"><div class="t-img" style="background:linear-gradient(135deg,#100010,#300030)"></div></div>
+        </div>
+      </div>
+
+      <!-- Detail content -->
+      <div class="fade-up delay-1">
+        <div class="detail-cat"><i class="fas fa-car"></i> Vehículos — Pick-ups y 4x4</div>
+        <div class="detail-top">
+          <h1 class="detail-title">Toyota Hilux 2022 — SRV 4x4<br>Diesel Automática, impecable</h1>
+          <div>
+            <div class="detail-price">$28.500.000</div>
+            <div class="detail-price-label">Precio fijo · Acepta permuta parcial</div>
+          </div>
+        </div>
+
+        <div class="detail-meta">
+          <div class="detail-meta-item"><i class="fas fa-map-marker-alt"></i> <strong>Córdoba Capital</strong></div>
+          <div class="detail-meta-item"><i class="fas fa-clock"></i> Publicado hace <strong>2 días</strong></div>
+          <div class="detail-meta-item"><i class="fas fa-eye"></i> <strong>3.412</strong> visitas</div>
+          <div class="detail-meta-item"><i class="fas fa-heart"></i> <strong>48</strong> guardados</div>
+          <div class="detail-meta-item"><i class="fas fa-check-circle" style="color:var(--success)"></i> <strong>Vendedor verificado</strong></div>
+        </div>
+
+        <!-- Specs -->
+        <div class="specs-grid">
+          <div class="spec-item">
+            <i class="fas fa-calendar" style="color:var(--primary-light)"></i>
+            <span>Año</span>
+            <strong>2022</strong>
+          </div>
+          <div class="spec-item">
+            <i class="fas fa-tachometer-alt" style="color:var(--cyan)"></i>
+            <span>Kilometraje</span>
+            <strong>38.000 km</strong>
+          </div>
+          <div class="spec-item">
+            <i class="fas fa-gas-pump" style="color:var(--warning)"></i>
+            <span>Combustible</span>
+            <strong>Diesel</strong>
+          </div>
+          <div class="spec-item">
+            <i class="fas fa-cog" style="color:var(--accent-light)"></i>
+            <span>Transmisión</span>
+            <strong>Automática</strong>
+          </div>
+          <div class="spec-item">
+            <i class="fas fa-users" style="color:var(--success)"></i>
+            <span>Plazas</span>
+            <strong>5 personas</strong>
+          </div>
+          <div class="spec-item">
+            <i class="fas fa-palette" style="color:#F472B6"></i>
+            <span>Color</span>
+            <strong>Blanco</strong>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-section">
+          <h3>Descripción</h3>
+          <p class="detail-text">
+            Toyota Hilux SRV 4x4 diesel automática modelo 2022 en perfecto estado. Vehículo de segundo dueño, con todos los service realizados en concesionario oficial Toyota. Llantas originales, sin choques ni reparaciones, motor 2.8 GD-6 turbodiesel de 204 CV.
+          </p>
+          <p class="detail-text" style="margin-top:12px">
+            El vehículo cuenta con caja automática de 6 velocidades, tracción 4x4 con reducida, sistema multimedia Toyota con pantalla touch 8", Apple CarPlay y Android Auto. Airbags delanteros y laterales, control de estabilidad y ABS.
+          </p>
+          <p class="detail-text" style="margin-top:12px">
+            Acepta permuta parcial con vehículo de menor valor. Posibilidad de financiación bancaria. Papeles al día, sin multas ni deudas.
+          </p>
+        </div>
+
+        <!-- Features -->
+        <div class="detail-section">
+          <h3>Equipamiento incluido</h3>
+          <ul class="features-list">
+            <li><i class="fas fa-check"></i> Apple CarPlay / Android Auto</li>
+            <li><i class="fas fa-check"></i> Cámara de retroceso 360°</li>
+            <li><i class="fas fa-check"></i> Airbags x6</li>
+            <li><i class="fas fa-check"></i> Control de crucero adaptativo</li>
+            <li><i class="fas fa-check"></i> Sensores de estacionamiento</li>
+            <li><i class="fas fa-check"></i> Climatizador bizona</li>
+            <li><i class="fas fa-check"></i> Asientos de cuero eléctricos</li>
+            <li><i class="fas fa-check"></i> Tracción 4x4 con reducida</li>
+            <li><i class="fas fa-check"></i> Faros LED full</li>
+            <li><i class="fas fa-check"></i> Llantas de aleación 18"</li>
+          </ul>
+        </div>
+
+        <!-- Location -->
+        <div class="detail-section">
+          <h3>Ubicación</h3>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;height:200px;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px">
+            <i class="fas fa-map-marked-alt" style="font-size:2rem;opacity:.2"></i>
+            <span style="font-size:.85rem;color:var(--text-faint)">Córdoba Capital, Argentina</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div class="detail-sidebar">
+
+      <!-- Contact card -->
+      <div class="contact-card slide-right">
+        <div class="seller-row">
+          <div class="seller-avatar">CP</div>
+          <div class="seller-info">
+            <h4>Carlos Ponce</h4>
+            <span>Vendedor verificado</span>
+            <div class="seller-rating">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+              <span>4.8 (23 reseñas)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="price-display">
+          <div class="big-price">$28.500.000</div>
+          <div class="price-note">IVA incluido · Precio en pesos argentinos</div>
+        </div>
+
+        <div class="contact-buttons">
+          <button class="btn btn-whatsapp btn-block btn-lg" onclick="showToast('Abriendo WhatsApp...','success')">
+            <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+          </button>
+          <button class="btn btn-mercadopago btn-block" onclick="showToast('Redirigiendo a Mercado Pago...','success')">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='18' height='18'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z'/%3E%3C/svg%3E" alt="MP" style="width:18px;height:18px">
+            Pagar con Mercado Pago
+          </button>
+          <button class="btn btn-ghost btn-block" onclick="showToast('Publicación guardada','success')">
+            <i class="far fa-heart"></i> Guardar publicación
+          </button>
+        </div>
+
+        <div class="contact-info-row">
+          <span><i class="fas fa-shield-alt" style="color:var(--success)"></i> Compra protegida</span>
+          <span><i class="fas fa-undo" style="color:var(--cyan)"></i> 7 días garantía</span>
+        </div>
+      </div>
+
+      <!-- Safety tips -->
+      <div class="safety-card slide-right delay-2">
+        <h4><i class="fas fa-shield-alt"></i> Consejos de seguridad</h4>
+        <ul>
+          <li><i class="fas fa-check"></i> Siempre verificá la identidad del vendedor</li>
+          <li><i class="fas fa-check"></i> Realizá la operación en un lugar seguro</li>
+          <li><i class="fas fa-check"></i> No enviés dinero sin ver el producto</li>
+          <li><i class="fas fa-check"></i> Usá Mercado Pago para mayor seguridad</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIMILAR LISTINGS -->
+  <div style="padding-bottom: 80px">
+    <div class="section-header fade-up" style="text-align:left;margin-bottom:24px">
+      <h2>Publicaciones <span class="gradient-text">similares</span></h2>
+    </div>
+    <div class="similar-grid">
+      <a href="detalle.html" class="listing-card fade-up delay-1">
+        <div class="listing-img" style="background:linear-gradient(135deg,#001a3d,#1e3a5f)">
+          <div class="listing-fav"><i class="far fa-heart"></i></div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
+          <div class="listing-title">Ford Ranger 2021 XLT 4x4 diesel — 52.000 km</div>
+          <div class="listing-price">$24.200.000</div>
+          <div class="listing-meta"><span><i class="fas fa-map-marker-alt"></i> Santa Fe</span><span><i class="fas fa-eye"></i> 1.8k</span></div>
+        </div>
+      </a>
+      <a href="detalle.html" class="listing-card fade-up delay-2">
+        <div class="listing-img" style="background:linear-gradient(135deg,#1a0800,#402000)">
+          <div class="listing-fav"><i class="far fa-heart"></i></div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
+          <div class="listing-title">Volkswagen Amarok V6 2022 — Highline impecable</div>
+          <div class="listing-price">$32.000.000</div>
+          <div class="listing-meta"><span><i class="fas fa-map-marker-alt"></i> Córdoba</span><span><i class="fas fa-eye"></i> 2.3k</span></div>
+        </div>
+      </a>
+      <a href="detalle.html" class="listing-card fade-up delay-3">
+        <div class="listing-img" style="background:linear-gradient(135deg,#001015,#002030)">
+          <div class="listing-fav"><i class="far fa-heart"></i></div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
+          <div class="listing-title">Nissan Frontier 2023 LE 4x4 diesel — única mano</div>
+          <div class="listing-price">$26.800.000</div>
+          <div class="listing-meta"><span><i class="fas fa-map-marker-alt"></i> Mendoza</span><span><i class="fas fa-eye"></i> 990</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="font-size:1.4rem;font-weight:800" class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</div>
+        <p>La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes y pagos integrados.</p>
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Plataforma</h4><ul><li><a href="index.html">Inicio</a></li><li><a href="publicaciones.html">Publicaciones</a></li><li><a href="index.html#pricing">Planes</a></li></ul></div>
+      <div class="footer-col"><h4>Categorías</h4><ul><li><a href="publicaciones.html">Inmuebles</a></li><li><a href="publicaciones.html">Vehículos</a></li><li><a href="publicaciones.html">Electrónica</a></li></ul></div>
+      <div class="footer-col"><h4>Ayuda</h4><ul><li><a href="#">Cómo publicar</a></li><li><a href="#">Centro de ayuda</a></li><li><a href="#">Contacto</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 GonzApp. Todos los derechos reservados.</span>
+      <span>Hecho con <i class="fas fa-heart" style="color:var(--accent)"></i> en Argentina</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+  const imgBgs = [
+    'linear-gradient(135deg,#1c1400,#3d2e00,#5a4300)',
+    'linear-gradient(135deg,#0a1a00,#1a3300,#2d5200)',
+    'linear-gradient(135deg,#1a0a00,#3d1500,#6b2400)',
+    'linear-gradient(135deg,#00101a,#002030,#003d5c)',
+    'linear-gradient(135deg,#100015,#2d0030,#4a0050)',
+    'linear-gradient(135deg,#001010,#003030,#005050)',
+    'linear-gradient(135deg,#15000a,#400020,#6b0035)',
+    'linear-gradient(135deg,#100010,#300030,#500050)',
+  ];
+  let currentImg = 0;
+  function setImg(idx, thumbEl) {
+    currentImg = idx;
+    document.getElementById('main-img').style.background = imgBgs[idx] || imgBgs[0];
+    document.querySelector('.gallery-count').innerHTML = `<i class="fas fa-images"></i> ${idx+1} / ${imgBgs.length}`;
+    document.querySelectorAll('.gallery-thumb').forEach((t,i) => t.classList.toggle('active', i === idx));
+  }
+  function nextImg() { setImg((currentImg + 1) % imgBgs.length, null); }
+  function prevImg() { setImg((currentImg - 1 + imgBgs.length) % imgBgs.length, null); }
+</script>
+</body>
+</html>

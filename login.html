@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingresar — GonzApp</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { background: #070711; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ---- AUTH SHELL ---- */
+    .auth-shell {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+
+    /* ---- LEFT PANEL ---- */
+    .auth-visual {
+      background: linear-gradient(135deg, #0E0E1A 0%, #1a0a2e 60%, #0d001f 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-visual::before {
+      content: '';
+      position: absolute; top: -20%; right: -15%;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(124,58,237,.4) 0%, transparent 70%);
+      animation: blob 8s ease-in-out infinite;
+    }
+    .auth-visual::after {
+      content: '';
+      position: absolute; bottom: -20%; left: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(236,72,153,.25) 0%, transparent 70%);
+      animation: blob 11s ease-in-out infinite reverse;
+    }
+    .auth-visual-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(124,58,237,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+    }
+    .auth-logo {
+      font-size: 1.5rem; font-weight: 800;
+      position: relative; z-index: 1;
+    }
+    .auth-visual-content {
+      position: relative; z-index: 1;
+    }
+    .auth-visual-content h2 {
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+    .auth-visual-content p {
+      color: var(--text-muted); font-size: 1rem; line-height: 1.7;
+      margin-bottom: 32px; max-width: 400px;
+    }
+    .auth-features { display: flex; flex-direction: column; gap: 14px; }
+    .auth-feature {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      backdrop-filter: blur(8px);
+      transition: var(--transition);
+    }
+    .auth-feature:hover { background: rgba(124,58,237,.08); border-color: var(--border-hover); transform: translateX(4px); }
+    .auth-feature-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .auth-feature-text h4 { font-size: 0.9rem; margin-bottom: 2px; }
+    .auth-feature-text p { font-size: 0.8rem; color: var(--text-muted); margin: 0; }
+    .auth-visual-footer {
+      position: relative; z-index: 1;
+      font-size: 0.8rem; color: var(--text-faint);
+    }
+
+    /* Floating stats on visual */
+    .auth-stat-card {
+      position: absolute;
+      background: rgba(22,22,38,.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      backdrop-filter: blur(10px);
+      z-index: 2;
+      animation: float 5s ease-in-out infinite;
+    }
+    .auth-stat-card.asc-1 { top: 28%; right: -16px; animation-delay: -1s; }
+    .auth-stat-card.asc-2 { bottom: 28%; left: -16px; animation-delay: -3s; font-size:.88rem; }
+    .auth-stat-card strong { display: block; font-size: 1.2rem; font-weight: 800; }
+    .auth-stat-card span { font-size: 0.72rem; color: var(--text-muted); }
+
+    /* ---- RIGHT PANEL ---- */
+    .auth-form-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 40px;
+      background: #070711;
+    }
+    .auth-form-box { width: 100%; max-width: 420px; }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: calc(var(--radius-lg) - 4px);
+      font-size: 0.9rem; font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+      border: none; background: none;
+      font-family: inherit;
+    }
+    .auth-tab.active {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 2px 12px rgba(124,58,237,.4);
+    }
+
+    /* Panel content */
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; animation: fade-in-up .4s ease both; }
+
+    .auth-form-box h2 { font-size: 1.6rem; margin-bottom: 6px; }
+    .auth-form-box .sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-stack { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap .form-input { padding-left: 42px; }
+    .input-icon-wrap .input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-faint); font-size: 0.9rem; pointer-events: none;
+    }
+    .input-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-faint); font-size: 0.9rem;
+      cursor: pointer; background: none; border: none; padding: 0;
+    }
+    .input-toggle:hover { color: var(--text); }
+
+    .forgot { text-align: right; margin-top: -8px; }
+    .forgot a { font-size: 0.82rem; color: var(--primary-light); }
+    .forgot a:hover { color: var(--text); }
+
+    .form-check {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 0.85rem; color: var(--text-muted);
+    }
+    .form-check input[type="checkbox"] {
+      width: 16px; height: 16px; border-radius: 4px;
+      accent-color: var(--primary); cursor: pointer; flex-shrink: 0; margin-top: 2px;
+    }
+    .form-check a { color: var(--primary-light); }
+
+    .auth-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0; color: var(--text-faint); font-size: 0.82rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .social-btns { display: flex; flex-direction: column; gap: 10px; }
+    .social-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text-muted); font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: var(--transition); font-family: inherit;
+      width: 100%;
+    }
+    .social-btn:hover { background: rgba(255,255,255,.08); border-color: var(--border-hover); color: var(--text); }
+    .social-btn i { font-size: 1rem; }
+
+    .auth-footer-note {
+      text-align: center; margin-top: 20px;
+      font-size: 0.85rem; color: var(--text-muted);
+    }
+    .auth-footer-note a { color: var(--primary-light); font-weight: 600; }
+    .auth-footer-note a:hover { color: var(--text); }
+
+    /* Password strength */
+    .pwd-strength { margin-top: 8px; }
+    .pwd-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+    .pwd-bar { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.08); transition: var(--transition); }
+    .pwd-bar.active-weak { background: var(--error); }
+    .pwd-bar.active-med  { background: var(--warning); }
+    .pwd-bar.active-ok   { background: var(--success); }
+    .pwd-text { font-size: 0.74rem; color: var(--text-faint); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 900px) {
+      .auth-shell { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .auth-form-side { padding: 80px 24px 40px; }
+    }
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .auth-form-side { padding: 80px 16px 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- MINI NAVBAR -->
+<nav class="navbar solid" id="navbar" style="position:fixed">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</span></a>
+    <div class="nav-actions">
+      <a href="index.html" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i> Volver al inicio</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="publicaciones.html">Publicaciones</a></li>
+    <li><a href="index.html#pricing">Planes</a></li>
+  </ul>
+</div>
+
+<!-- AUTH SHELL -->
+<div class="auth-shell">
+
+  <!-- LEFT VISUAL -->
+  <div class="auth-visual">
+    <div class="auth-visual-grid"></div>
+
+    <a href="index.html" class="auth-logo gradient-text"><i class="fas fa-bolt"></i> GonzApp</a>
+
+    <div class="auth-visual-content">
+      <h2>Publicá, gestioná y<br><span class="gradient-text">vendé más rápido</span></h2>
+      <p>Accedé a la plataforma más completa para gestionar tus publicaciones con planes inteligentes y pagos integrados.</p>
+
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(124,58,237,.2)"><i class="fas fa-layer-group" style="color:var(--primary-light)"></i></div>
+          <div class="auth-feature-text">
+            <h4>Gestión completa de avisos</h4>
+            <p>Creá, editá y eliminá publicaciones en segundos</p>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(16,185,129,.2)"><i class="fas fa-credit-card" style="color:var(--success)"></i></div>
+          <div class="auth-feature-text">
+            <h4>Mercado Pago integrado</h4>
+            <p>Cobrá suscripciones de forma automática</p>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon" style="background:rgba(37,211,102,.15)"><i class="fab fa-whatsapp" style="color:#25D366"></i></div>
+          <div class="auth-feature-text">
+            <h4>Contacto directo</h4>
+            <p>Tus clientes te escriben con un toque</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating cards -->
+    <div class="auth-stat-card asc-1">
+      <strong class="gradient-text">+1.200</strong>
+      <span>Usuarios activos</span>
+    </div>
+    <div class="auth-stat-card asc-2">
+      <div style="display:flex;align-items:center;gap:8px">
+        <i class="fas fa-check-circle" style="color:var(--success)"></i>
+        <span style="font-size:.8rem;font-weight:600">Cuenta verificada</span>
+      </div>
+    </div>
+
+    <div class="auth-visual-footer">
+      © 2025 GonzApp · Todos los derechos reservados
+    </div>
+  </div>
+
+  <!-- RIGHT FORM -->
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+
+      <!-- TABS -->
+      <div class="auth-tabs tabs-container" id="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">Ingresar</button>
+        <button class="auth-tab" data-tab="register" onclick="switchTab('register')">Registrarse</button>
+      </div>
+
+      <!-- ===== LOGIN ===== -->
+      <div class="auth-panel active" id="panel-login">
+        <h2>Bienvenido de vuelta</h2>
+        <p class="sub">Ingresá tu email y contraseña para acceder</p>
+
+        <div class="form-stack">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" class="form-input" placeholder="tu@email.com" id="login-email">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" class="form-input" placeholder="••••••••" id="login-pwd">
+              <button class="input-toggle" onclick="togglePwd('login-pwd', this)" type="button">
+                <i class="far fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="forgot"><a href="#">¿Olvidaste tu contraseña?</a></div>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" style="margin-bottom:12px" onclick="doLogin()">
+          <i class="fas fa-sign-in-alt"></i> Ingresar
+        </button>
+        <button class="btn btn-ghost btn-block" onclick="doDemoLogin()">
+          <i class="fas fa-play-circle"></i> Probar demo
+        </button>
+
+        <div class="auth-divider">o ingresá con</div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="showToast('Autenticación Google iniciada','success')">
+            <i class="fab fa-google" style="color:#EA4335"></i> Continuar con Google
+          </button>
+          <button class="social-btn" onclick="showToast('Autenticación Facebook iniciada','success')">
+            <i class="fab fa-facebook-f" style="color:#1877F2"></i> Continuar con Facebook
+          </button>
+        </div>
+
+        <div class="auth-footer-note">
+          ¿No tenés cuenta? <a href="#" onclick="switchTab('register')">Registrate gratis</a>
+        </div>
+      </div>
+
+      <!-- ===== REGISTER ===== -->
+      <div class="auth-panel" id="panel-register">
+        <h2>Creá tu cuenta</h2>
+        <p class="sub">Gratis para siempre. Sin tarjeta de crédito.</p>
+
+        <div class="form-stack">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" class="form-input" placeholder="Juan">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apellido</label>
+              <input type="text" class="form-input" placeholder="Rodríguez">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" class="form-input" placeholder="tu@email.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono (WhatsApp)</label>
+            <div class="input-icon-wrap">
+              <i class="fab fa-whatsapp input-icon" style="color:#25D366"></i>
+              <input type="tel" class="form-input" placeholder="+54 9 11 0000-0000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" class="form-input" placeholder="Mínimo 8 caracteres" id="reg-pwd" oninput="checkPwd(this.value)">
+              <button class="input-toggle" onclick="togglePwd('reg-pwd', this)" type="button"><i class="far fa-eye"></i></button>
+            </div>
+            <div class="pwd-strength">
+              <div class="pwd-bars">
+                <div class="pwd-bar" id="pb1"></div>
+                <div class="pwd-bar" id="pb2"></div>
+                <div class="pwd-bar" id="pb3"></div>
+                <div class="pwd-bar" id="pb4"></div>
+              </div>
+              <span class="pwd-text" id="pwd-label">Ingresá una contraseña</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" class="form-input" placeholder="Repetí tu contraseña">
+            </div>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="terms">
+            <label for="terms">Acepto los <a href="#">Términos y condiciones</a> y la <a href="#">Política de privacidad</a> de GonzApp</label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" style="margin-bottom:12px" onclick="doRegister()">
+          <i class="fas fa-rocket"></i> Crear cuenta gratis
+        </button>
+
+        <div class="auth-divider">o registrate con</div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="showToast('Autenticación Google iniciada','success')">
+            <i class="fab fa-google" style="color:#EA4335"></i> Continuar con Google
+          </button>
+        </div>
+
+        <div class="auth-footer-note">
+          ¿Ya tenés cuenta? <a href="#" onclick="switchTab('login')">Ingresá acá</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /auth-shell -->
+
+<script src="main.js"></script>
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.auth-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === name);
+    });
+    document.querySelectorAll('.auth-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'panel-' + name);
+    });
+  }
+
+  function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'far fa-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'far fa-eye';
+    }
+  }
+
+  function checkPwd(val) {
+    const bars = [document.getElementById('pb1'), document.getElementById('pb2'), document.getElementById('pb3'), document.getElementById('pb4')];
+    const label = document.getElementById('pwd-label');
+    bars.forEach(b => { b.className = 'pwd-bar'; });
+
+    let strength = 0;
+    if (val.length >= 8) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+    const levels = ['', 'active-weak', 'active-med', 'active-ok', 'active-ok'];
+    const labels = ['Ingresá una contraseña', 'Muy débil', 'Débil', 'Buena', 'Muy segura'];
+    const colors = ['var(--text-faint)', 'var(--error)', 'var(--warning)', 'var(--success)', 'var(--success)'];
+
+    for (let i = 0; i < strength; i++) bars[i].classList.add(levels[strength]);
+    label.textContent = labels[strength];
+    label.style.color = colors[strength];
+  }
+
+  function doLogin() {
+    const email = document.getElementById('login-email').value;
+    const pwd = document.getElementById('login-pwd').value;
+    if (!email || !pwd) {
+      showToast('Completá todos los campos', 'error');
+      return;
+    }
+    showToast('Iniciando sesión...', 'success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  }
+
+  function doDemoLogin() {
+    showToast('Cargando demo...', 'success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+  }
+
+  function doRegister() {
+    const terms = document.getElementById('terms').checked;
+    if (!terms) {
+      showToast('Debés aceptar los términos y condiciones', 'error');
+      return;
+    }
+    showToast('¡Cuenta creada exitosamente!', 'success');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+  }
+</script>
+</body>
+</html>

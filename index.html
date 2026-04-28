@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GonzApp — Plataforma de Publicaciones</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ---- HERO ---- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background: #070711;
+      padding-top: var(--nav-height);
+    }
+    .hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float-rot 10s ease-in-out infinite;
+    }
+    .orb-1 { width: 600px; height: 600px; top: -15%; right: -10%; background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%); animation-duration: 9s; }
+    .orb-2 { width: 500px; height: 500px; bottom: -20%; left: -10%; background: radial-gradient(circle, rgba(236,72,153,0.25) 0%, transparent 70%); animation-duration: 13s; animation-delay: -4s; }
+    .orb-3 { width: 350px; height: 350px; top: 40%; left: 35%; background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%); animation-duration: 16s; animation-delay: -7s; }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(124,58,237,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+      -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 70px;
+      align-items: center;
+      padding: 80px 0 60px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 16px;
+      background: rgba(124,58,237,0.14);
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 100px;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--primary-light);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin-bottom: 22px;
+      animation: fade-in-down 0.6s ease both;
+    }
+    .hero-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+      box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
+      animation: ping 1.5s ease infinite;
+    }
+    .hero-title {
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.04;
+      margin-bottom: 22px;
+      animation: fade-in-up 0.6s ease 0.1s both;
+    }
+    .hero-desc {
+      font-size: 1.1rem; color: var(--text-muted); line-height: 1.75;
+      margin-bottom: 36px;
+      max-width: 480px;
+      animation: fade-in-up 0.6s ease 0.2s both;
+    }
+    .hero-actions {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      animation: fade-in-up 0.6s ease 0.3s both;
+    }
+    .hero-trust {
+      display: flex; align-items: center; gap: 14px;
+      margin-top: 36px;
+      animation: fade-in-up 0.6s ease 0.4s both;
+    }
+    .hero-avatars { display: flex; }
+    .hero-avatars span {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 2px solid #070711;
+      margin-left: -10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .hero-avatars span:first-child { margin-left: 0; }
+    .hero-trust p { font-size: 0.85rem; color: var(--text-muted); }
+    .hero-trust strong { color: var(--text); }
+
+    /* Hero visual / mockup */
+    .hero-visual { position: relative; animation: fade-in-up 0.8s ease 0.25s both; }
+    .mockup-window {
+      background: rgba(22,22,38,0.9);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(124,58,237,0.2);
+      backdrop-filter: blur(10px);
+    }
+    .mockup-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .m-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .mockup-url {
+      flex: 1; margin-left: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      height: 24px; max-width: 220px;
+    }
+    .mockup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .m-card {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      animation: float 6s ease-in-out infinite;
+    }
+    .m-card:nth-child(2) { animation-delay: -2s; }
+    .m-card:nth-child(3) { animation-delay: -4s; }
+    .m-card:nth-child(4) { animation-delay: -1s; }
+    .m-img { height: 72px; position: relative; }
+    .m-img::after {
+      content: ''; position: absolute; inset: 0;
+      background: var(--gradient-primary); opacity: 0.25;
+    }
+    .m-body { padding: 8px; background: rgba(7,7,17,0.7); }
+    .m-line { height: 7px; border-radius: 3px; background: rgba(255,255,255,0.08); margin-bottom: 5px; }
+    .m-price { height: 7px; border-radius: 3px; background: rgba(124,58,237,0.5); width: 55%; }
+
+    /* Floating badges */
+    .float-badge {
+      position: absolute;
+      background: rgba(22,22,38,0.95);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      font-size: 0.82rem; font-weight: 600;
+      animation: float 5s ease-in-out infinite;
+      white-space: nowrap;
+    }
+    .float-badge.fb-1 { top: -22px; right: -18px; animation-delay: -1s; }
+    .float-badge.fb-2 { bottom: -22px; left: -18px; animation-delay: -3s; }
+    .float-badge i { font-size: 1.1rem; }
+
+    /* ---- STATS BAND ---- */
+    .stats-band {
+      background: rgba(14,14,26,0.9);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 0;
+    }
+    .stats-band-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stats-band-item { text-align: center; }
+    .stats-band-item strong {
+      display: block; font-size: 2rem; font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stats-band-item span { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ---- FEATURES ---- */
+    .features-bg { background: #070711; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feat-card {
+      padding: 30px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+    }
+    .feat-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg), 0 0 25px rgba(124,58,237,0.15);
+    }
+    .feat-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 18px;
+    }
+    .feat-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
+    .feat-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; }
+
+    /* ---- HOW IT WORKS ---- */
+    .how-bg {
+      background: linear-gradient(180deg, var(--bg-2) 0%, #070711 100%);
+      border-top: 1px solid var(--border);
+    }
+    .steps-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; position: relative; }
+    .steps-row::before {
+      content: ''; position: absolute;
+      top: 36px; left: calc(16.67% + 18px); right: calc(16.67% + 18px);
+      height: 2px;
+      background: var(--gradient-primary); opacity: 0.3;
+    }
+    .step-item { text-align: center; padding: 10px 20px; }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; font-weight: 900;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 30px rgba(124,58,237,0.5);
+    }
+    .step-item h3 { margin-bottom: 10px; }
+    .step-item p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; }
+
+    /* ---- PRICING ---- */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: center; }
+
+    /* ---- CTA SECTION ---- */
+    .cta-sec {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 100px 0;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-sec::before {
+      content: ''; position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 700px; height: 400px;
+      background: radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 70%);
+    }
+    .cta-sec h2 { margin-bottom: 14px; position: relative; z-index: 1; }
+    .cta-sec p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 38px; position: relative; z-index: 1; }
+    .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+
+    /* ---- TESTIMONIALS ---- */
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .testi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: var(--transition);
+    }
+    .testi-card:hover { border-color: var(--border-hover); transform: translateY(-4px); }
+    .testi-stars { color: var(--warning); font-size: 0.85rem; margin-bottom: 14px; }
+    .testi-text { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 18px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .testi-author h4 { font-size: 0.9rem; margin-bottom: 2px; }
+    .testi-author span { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+      .testi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; padding: 50px 0 40px; }
+      .hero-visual { display: none; }
+      .stats-band-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-row { grid-template-columns: 1fr; }
+      .steps-row::before { display: none; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .hero-trust { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================ NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Inicio</a></li>
+      <li><a href="publicaciones.html">Publicaciones</a></li>
+      <li><a href="#features">Funciones</a></li>
+      <li><a href="#pricing">Planes</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Ingresar</a>
+      <a href="login.html" class="btn btn-primary btn-sm"><i class="fas fa-rocket"></i> Empezar</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="publicaciones.html">Publicaciones</a></li>
+    <li><a href="#features">Funciones</a></li>
+    <li><a href="#pricing">Planes</a></li>
+  </ul>
+  <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-rocket"></i> Empezar gratis</a>
+</div>
+
+<!-- ============================================================ HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-grid"></div>
+  </div>
+  <div class="container">
+    <div class="hero-inner">
+      <!-- Text -->
+      <div>
+        <div class="hero-badge">
+          <span class="dot"></span> Plataforma #1 de clasificados
+        </div>
+        <h1 class="hero-title">
+          Publicá, gestioná<br>
+          y <span class="gradient-text">vendé más</span><br>
+          desde un solo lugar
+        </h1>
+        <p class="hero-desc">
+          La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes, filtros avanzados y pagos integrados con Mercado Pago.
+        </p>
+        <div class="hero-actions">
+          <a href="login.html" class="btn btn-primary btn-lg"><i class="fas fa-rocket"></i> Empezar gratis</a>
+          <a href="publicaciones.html" class="btn btn-outline btn-lg"><i class="fas fa-eye"></i> Ver publicaciones</a>
+        </div>
+        <div class="hero-trust">
+          <div class="hero-avatars">
+            <span style="background: linear-gradient(135deg,#7C3AED,#EC4899)">JR</span>
+            <span style="background: linear-gradient(135deg,#06B6D4,#7C3AED)">ML</span>
+            <span style="background: linear-gradient(135deg,#10B981,#06B6D4)">CP</span>
+            <span style="background: linear-gradient(135deg,#F59E0B,#EC4899)">+</span>
+          </div>
+          <p><strong>+1.200 usuarios</strong> ya confían en GonzApp</p>
+        </div>
+      </div>
+      <!-- Visual -->
+      <div class="hero-visual">
+        <div class="mockup-window">
+          <div class="mockup-bar">
+            <div class="m-dot" style="background:#FF5F57"></div>
+            <div class="m-dot" style="background:#FEBC2E"></div>
+            <div class="m-dot" style="background:#28C840"></div>
+            <div class="mockup-url skeleton"></div>
+          </div>
+          <div class="mockup-grid">
+            <div class="m-card">
+              <div class="m-img" style="background: linear-gradient(135deg,#1a0a2e,#4c1d95)"></div>
+              <div class="m-body"><div class="m-line" style="width:85%"></div><div class="m-line" style="width:60%"></div><div class="m-price"></div></div>
+            </div>
+            <div class="m-card">
+              <div class="m-img" style="background: linear-gradient(135deg,#1a0030,#831843)"></div>
+              <div class="m-body"><div class="m-line" style="width:75%"></div><div class="m-line" style="width:50%"></div><div class="m-price" style="background:rgba(236,72,153,.5)"></div></div>
+            </div>
+            <div class="m-card">
+              <div class="m-img" style="background: linear-gradient(135deg,#022c22,#064e3b)"></div>
+              <div class="m-body"><div class="m-line" style="width:90%"></div><div class="m-line" style="width:65%"></div><div class="m-price" style="background:rgba(16,185,129,.5)"></div></div>
+            </div>
+            <div class="m-card">
+              <div class="m-img" style="background: linear-gradient(135deg,#1c1400,#3d2e00)"></div>
+              <div class="m-body"><div class="m-line" style="width:80%"></div><div class="m-line" style="width:55%"></div><div class="m-price" style="background:rgba(245,158,11,.5)"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="float-badge fb-1">
+          <i class="fas fa-check-circle" style="color:var(--success)"></i>
+          Pago acreditado
+        </div>
+        <div class="float-badge fb-2">
+          <i class="fab fa-whatsapp" style="color:#25D366;font-size:1.2rem"></i>
+          Nuevo mensaje recibido
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ STATS BAND -->
+<div class="stats-band">
+  <div class="container">
+    <div class="stats-band-grid fade-up">
+      <div class="stats-band-item">
+        <strong><span data-target="5230">0</span>+</strong>
+        <span>Publicaciones activas</span>
+      </div>
+      <div class="stats-band-item">
+        <strong><span data-target="1280">0</span>+</strong>
+        <span>Usuarios registrados</span>
+      </div>
+      <div class="stats-band-item">
+        <strong><span data-target="98">0</span>%</strong>
+        <span>Tasa de satisfacción</span>
+      </div>
+      <div class="stats-band-item">
+        <strong>24/7</strong>
+        <span>Disponibilidad online</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ FEATURES -->
+<section class="section features-bg" id="features">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-tag">Funcionalidades</div>
+      <h2 class="section-title">Todo lo que necesitás<br><span class="gradient-text">en un solo lugar</span></h2>
+      <p class="section-subtitle">Desde la creación del aviso hasta el cobro, gestioná todo desde una plataforma moderna e intuitiva.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card fade-up delay-1">
+        <div class="feat-icon" style="background:rgba(124,58,237,.14)"><i class="fas fa-layer-group" style="color:var(--primary-light)"></i></div>
+        <h3>Gestión de publicaciones</h3>
+        <p>Creá, editá y eliminá publicaciones con fotos, descripción y precio. Control total sobre tu inventario de avisos en tiempo real.</p>
+      </div>
+      <div class="feat-card fade-up delay-2">
+        <div class="feat-icon" style="background:rgba(236,72,153,.14)"><i class="fas fa-users" style="color:var(--accent-light)"></i></div>
+        <h3>Gestión de usuarios</h3>
+        <p>Administrá tu base de usuarios, asigná planes individualmente y controlá permisos desde un panel centralizado y simple.</p>
+      </div>
+      <div class="feat-card fade-up delay-3">
+        <div class="feat-icon" style="background:rgba(6,182,212,.14)"><i class="fas fa-sliders" style="color:var(--cyan)"></i></div>
+        <h3>Filtros avanzados</h3>
+        <p>Tus visitantes pueden filtrar por categoría, rango de precios y ubicación para encontrar exactamente lo que buscan.</p>
+      </div>
+      <div class="feat-card fade-up delay-1">
+        <div class="feat-icon" style="background:rgba(16,185,129,.14)"><i class="fas fa-credit-card" style="color:var(--success)"></i></div>
+        <h3>Mercado Pago integrado</h3>
+        <p>Aceptá pagos de suscripciones de forma automática. Activación y desactivación de planes según el estado del pago.</p>
+      </div>
+      <div class="feat-card fade-up delay-2">
+        <div class="feat-icon" style="background:rgba(245,158,11,.14)"><i class="fas fa-chart-pie" style="color:var(--warning)"></i></div>
+        <h3>Planes y límites</h3>
+        <p>Configurá planes con límites de publicaciones activas. El sistema controla automáticamente cuánto puede publicar cada usuario.</p>
+      </div>
+      <div class="feat-card fade-up delay-3">
+        <div class="feat-icon" style="background:rgba(37,211,102,.12)"><i class="fab fa-whatsapp" style="color:#25D366;font-size:1.5rem"></i></div>
+        <h3>Contacto por WhatsApp</h3>
+        <p>Los interesados contactan directamente al vendedor con un toque. Sin intermediarios, experiencia fluida para el comprador.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ HOW IT WORKS -->
+<section class="section how-bg">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-tag">Proceso</div>
+      <h2 class="section-title">¿Cómo <span class="gradient-text">funciona</span>?</h2>
+      <p class="section-subtitle">En tres simples pasos ya estás publicando y llegando a miles de potenciales clientes.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step-item fade-up delay-1">
+        <div class="step-num">1</div>
+        <h3>Registrate</h3>
+        <p>Creá tu cuenta gratis en segundos. Elegí el plan que mejor se adapte a tus necesidades actuales.</p>
+      </div>
+      <div class="step-item fade-up delay-2">
+        <div class="step-num">2</div>
+        <h3>Publicá</h3>
+        <p>Subí tus productos o servicios con fotos y descripción detallada. Tu publicación aparece al instante.</p>
+      </div>
+      <div class="step-item fade-up delay-3">
+        <div class="step-num">3</div>
+        <h3>Vendé</h3>
+        <p>Recibí consultas por WhatsApp o cobros directamente por Mercado Pago. Rápido, simple y seguro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ PRICING -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-tag">Planes</div>
+      <h2 class="section-title">Precios <span class="gradient-text">simples y claros</span></h2>
+      <p class="section-subtitle">Empezá gratis y escalá cuando lo necesites. Sin sorpresas ni letras chicas.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Básico -->
+      <div class="pricing-card fade-up delay-1">
+        <div class="pricing-icon" style="background:rgba(255,255,255,.05)">
+          <i class="fas fa-seedling" style="color:var(--text-muted)"></i>
+        </div>
+        <div class="section-tag">Básico</div>
+        <div class="pricing-price">Gratis <span>/ siempre</span></div>
+        <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:4px">Ideal para empezar</p>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> 3 publicaciones activas</li>
+          <li><i class="fas fa-check"></i> 3 fotos por publicación</li>
+          <li><i class="fas fa-check"></i> Contacto por WhatsApp</li>
+          <li class="no"><i class="fas fa-times"></i> Publicaciones destacadas</li>
+          <li class="no"><i class="fas fa-times"></i> Estadísticas</li>
+          <li class="no"><i class="fas fa-times"></i> Soporte prioritario</li>
+        </ul>
+        <a href="login.html" class="btn btn-outline btn-block">Comenzar gratis</a>
+      </div>
+
+      <!-- Profesional (featured) -->
+      <div class="pricing-card featured fade-up delay-2">
+        <div class="pricing-badge">Más popular</div>
+        <div class="pricing-icon" style="background:rgba(124,58,237,.18)">
+          <i class="fas fa-bolt" style="color:var(--primary-light)"></i>
+        </div>
+        <div class="section-tag">Profesional</div>
+        <div class="pricing-price">$4.900 <span>/ mes</span></div>
+        <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:4px">Para profesionales</p>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> 20 publicaciones activas</li>
+          <li><i class="fas fa-check"></i> 10 fotos por publicación</li>
+          <li><i class="fas fa-check"></i> Contacto por WhatsApp</li>
+          <li><i class="fas fa-check"></i> 3 publicaciones destacadas</li>
+          <li><i class="fas fa-check"></i> Estadísticas básicas</li>
+          <li class="no"><i class="fas fa-times"></i> Soporte prioritario</li>
+        </ul>
+        <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-rocket"></i> Elegir plan</a>
+      </div>
+
+      <!-- Premium -->
+      <div class="pricing-card fade-up delay-3">
+        <div class="pricing-icon" style="background:rgba(245,158,11,.14)">
+          <i class="fas fa-crown" style="color:var(--warning)"></i>
+        </div>
+        <div class="section-tag" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#FCD34D">Premium</div>
+        <div class="pricing-price">$9.900 <span>/ mes</span></div>
+        <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:4px">Para empresas</p>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check"></i> Publicaciones ilimitadas</li>
+          <li><i class="fas fa-check"></i> Fotos ilimitadas</li>
+          <li><i class="fas fa-check"></i> Contacto por WhatsApp</li>
+          <li><i class="fas fa-check"></i> Destacadas ilimitadas</li>
+          <li><i class="fas fa-check"></i> Estadísticas completas</li>
+          <li><i class="fas fa-check"></i> Soporte prioritario 24/7</li>
+        </ul>
+        <a href="login.html" class="btn btn-block" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#FCD34D">
+          <i class="fas fa-crown"></i> Elegir Premium
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ TESTIMONIALS -->
+<section class="section" style="background:var(--bg-2);border-top:1px solid var(--border)">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-tag">Testimonios</div>
+      <h2 class="section-title">Lo que dicen nuestros <span class="gradient-text">usuarios</span></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card fade-up delay-1">
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="testi-text">"Desde que uso GonzApp mis ventas aumentaron un 40%. La plataforma es muy fácil de usar y mis clientes me contactan directo por WhatsApp."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#7C3AED,#EC4899)">JR</div>
+          <div><h4>Juan Rodríguez</h4><span>Vendedor de electrónica · Córdoba</span></div>
+        </div>
+      </div>
+      <div class="testi-card fade-up delay-2">
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p class="testi-text">"El sistema de planes es perfecto. Puedo controlar exactamente cuántos avisos tiene activos cada vendedor de mi plataforma."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#06B6D4,#7C3AED)">ML</div>
+          <div><h4>María López</h4><span>Dueña de inmobiliaria · Buenos Aires</span></div>
+        </div>
+      </div>
+      <div class="testi-card fade-up delay-3">
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+        <p class="testi-text">"La integración con Mercado Pago es increíble. Los cobros son automáticos y mis clientes renuevan sin que yo tenga que hacer nada."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#10B981,#06B6D4)">CP</div>
+          <div><h4>Carlos Ponce</h4><span>Agencia de autos · Rosario</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ CTA -->
+<section class="cta-sec">
+  <div class="container">
+    <div class="fade-up">
+      <h2>¿Listo para <span class="gradient-text">comenzar</span>?</h2>
+      <p>Unite a más de 1.200 vendedores que ya confían en GonzApp para gestionar sus publicaciones.</p>
+      <div class="cta-buttons">
+        <a href="login.html" class="btn btn-primary btn-lg"><i class="fas fa-rocket"></i> Crear cuenta gratis</a>
+        <a href="publicaciones.html" class="btn btn-outline btn-lg"><i class="fas fa-search"></i> Explorar publicaciones</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="font-size:1.4rem;font-weight:800" class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</div>
+        <p>La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes y pagos integrados.</p>
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="publicaciones.html">Ver publicaciones</a></li>
+          <li><a href="login.html">Registrarse</a></li>
+          <li><a href="#pricing">Planes</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Soporte</h4>
+        <ul>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Términos y condiciones</a></li>
+          <li><a href="#">Privacidad</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Pagos aceptados</h4>
+        <ul>
+          <li><a href="#"><i class="fab fa-cc-visa"></i> Visa</a></li>
+          <li><a href="#"><i class="fab fa-cc-mastercard"></i> Mastercard</a></li>
+          <li><a href="#">Mercado Pago</a></li>
+          <li><a href="#">Transferencia bancaria</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 GonzApp. Todos los derechos reservados.</span>
+      <span>Hecho con <i class="fas fa-heart" style="color:var(--accent)"></i> en Argentina</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

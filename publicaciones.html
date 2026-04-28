@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publicaciones — GonzApp</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { background: #070711; }
+
+    /* ---- PAGE HEADER ---- */
+    .page-hero {
+      padding: calc(var(--nav-height) + 50px) 0 50px;
+      background: linear-gradient(180deg, #0E0E1A 0%, #070711 100%);
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute;
+      top: -60%; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(124,58,237,.18) 0%, transparent 70%);
+    }
+    .page-hero .container { position: relative; z-index: 1; }
+    .page-hero h1 { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 12px; }
+    .page-hero p { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; }
+
+    /* ---- SEARCH BAR ---- */
+    .search-bar {
+      display: flex; gap: 10px;
+      background: rgba(22,22,38,.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 10px;
+      backdrop-filter: blur(10px);
+      max-width: 700px;
+    }
+    .search-bar .form-input {
+      flex: 1; border: none; background: transparent; padding: 8px 12px;
+    }
+    .search-bar .form-input:focus { box-shadow: none; background: transparent; border: none; }
+    .search-bar select.form-input { max-width: 160px; background: rgba(255,255,255,.04); border: 1px solid var(--border); }
+
+    /* ---- CATEGORIES ---- */
+    .cats-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    /* ---- LAYOUT ---- */
+    .browse-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 28px;
+      padding: 40px 0 80px;
+      align-items: start;
+    }
+
+    /* ---- SIDEBAR ---- */
+    .sidebar {
+      position: sticky; top: calc(var(--nav-height) + 20px);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .filter-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+    .filter-box h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .filter-check {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .filter-check label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.9rem; color: var(--text-muted);
+      cursor: pointer; user-select: none;
+    }
+    .filter-check input[type="checkbox"] {
+      width: 16px; height: 16px;
+      border-radius: 4px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .filter-check label:hover { color: var(--text); }
+    .range-row { display: flex; gap: 8px; align-items: center; }
+    .range-row .form-input { text-align: center; }
+    .range-sep { color: var(--text-faint); font-size: 0.85rem; white-space: nowrap; }
+    .filter-range input[type="range"] {
+      width: 100%; margin-top: 10px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* ---- MAIN CONTENT ---- */
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    }
+    .results-header h2 { font-size: 1rem; font-weight: 600; color: var(--text-muted); }
+    .results-header strong { color: var(--text); }
+    .sort-row { display: flex; align-items: center; gap: 10px; }
+    .sort-row select.form-input { width: auto; padding: 9px 38px 9px 14px; font-size: 0.85rem; }
+
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    /* ---- LISTING CARDS COLORS ---- */
+    .img-purple  { background: linear-gradient(135deg,#1a0a2e,#4c1d95); }
+    .img-pink    { background: linear-gradient(135deg,#2d0030,#831843); }
+    .img-green   { background: linear-gradient(135deg,#022c22,#064e3b); }
+    .img-amber   { background: linear-gradient(135deg,#1c1400,#3d2e00); }
+    .img-blue    { background: linear-gradient(135deg,#001a3d,#1e3a5f); }
+    .img-teal    { background: linear-gradient(135deg,#001a1a,#0f3460); }
+    .img-red     { background: linear-gradient(135deg,#2d0000,#7f1d1d); }
+    .img-indigo  { background: linear-gradient(135deg,#0a0020,#312e81); }
+
+    /* ---- PAGINATION ---- */
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 8px; margin-top: 40px;
+    }
+    .page-btn {
+      width: 38px; height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: var(--transition);
+    }
+    .page-btn:hover, .page-btn.active {
+      background: rgba(124,58,237,.15);
+      border-color: var(--primary);
+      color: var(--primary-light);
+    }
+    .page-btn.active { font-weight: 700; }
+
+    /* ---- EMPTY STATE ---- */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-muted); display: none;
+    }
+    .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: .3; }
+
+    /* ---- MOBILE FILTER TOGGLE ---- */
+    .filter-toggle-btn {
+      display: none;
+      width: 100%; justify-content: center; gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 900;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 1024px) {
+      .listings-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .browse-layout { grid-template-columns: 1fr; }
+      .filter-toggle-btn { display: flex; }
+      .sidebar {
+        position: fixed;
+        top: 0; left: -280px; bottom: 0;
+        width: 280px; z-index: 950;
+        background: var(--bg-2);
+        border-right: 1px solid var(--border);
+        padding: 20px;
+        overflow-y: auto;
+        transition: var(--transition-slow);
+        gap: 14px;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-close {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .sidebar-close span { font-weight: 700; font-size: 1rem; }
+    }
+    @media (max-width: 560px) {
+      .listings-grid { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-close { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar solid" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="publicaciones.html" class="active">Publicaciones</a></li>
+      <li><a href="index.html#features">Funciones</a></li>
+      <li><a href="index.html#pricing">Planes</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Ingresar</a>
+      <a href="login.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Publicar</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="publicaciones.html">Publicaciones</a></li>
+    <li><a href="index.html#features">Funciones</a></li>
+    <li><a href="index.html#pricing">Planes</a></li>
+  </ul>
+  <a href="login.html" class="btn btn-primary btn-block"><i class="fas fa-plus"></i> Publicar aviso</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Explorar <span class="gradient-text">Publicaciones</span></h1>
+    <p>Encontrá lo que buscás entre miles de publicaciones verificadas</p>
+    <div class="search-bar">
+      <i class="fas fa-search" style="color:var(--text-faint);margin:auto 4px;flex-shrink:0"></i>
+      <input type="text" class="form-input" placeholder="¿Qué estás buscando?" id="search-input">
+      <select class="form-input" id="search-loc">
+        <option value="">Toda la Argentina</option>
+        <option>Buenos Aires</option>
+        <option>Córdoba</option>
+        <option>Rosario</option>
+        <option>Mendoza</option>
+        <option>Tucumán</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="filterListings()"><i class="fas fa-search"></i> Buscar</button>
+    </div>
+    <div class="cats-row" id="cats-row">
+      <span class="tag active" data-cat="all"><i class="fas fa-border-all"></i> Todos</span>
+      <span class="tag" data-cat="inmuebles"><i class="fas fa-home"></i> Inmuebles</span>
+      <span class="tag" data-cat="vehiculos"><i class="fas fa-car"></i> Vehículos</span>
+      <span class="tag" data-cat="electronica"><i class="fas fa-laptop"></i> Electrónica</span>
+      <span class="tag" data-cat="servicios"><i class="fas fa-briefcase"></i> Servicios</span>
+      <span class="tag" data-cat="moda"><i class="fas fa-tshirt"></i> Moda</span>
+      <span class="tag" data-cat="hogar"><i class="fas fa-couch"></i> Hogar</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+  <div class="browse-layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <button class="btn btn-ghost filter-toggle-btn" id="filter-toggle-btn">
+      <i class="fas fa-sliders"></i> Filtros
+    </button>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-close">
+        <span>Filtros</span>
+        <button class="btn btn-ghost btn-sm" id="sidebar-close-btn"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="filter-box">
+        <h3><i class="fas fa-tag"></i> Categoría</h3>
+        <div class="filter-check">
+          <label><input type="checkbox" checked> Inmuebles <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">142</span></label>
+          <label><input type="checkbox" checked> Vehículos <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">89</span></label>
+          <label><input type="checkbox" checked> Electrónica <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">215</span></label>
+          <label><input type="checkbox" checked> Servicios <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">67</span></label>
+          <label><input type="checkbox" checked> Moda <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">93</span></label>
+          <label><input type="checkbox"> Hogar <span style="margin-left:auto;color:var(--text-faint);font-size:.8rem">48</span></label>
+        </div>
+      </div>
+
+      <div class="filter-box">
+        <h3><i class="fas fa-dollar-sign"></i> Precio</h3>
+        <div class="range-row">
+          <input type="number" class="form-input" placeholder="Mínimo" style="padding:9px 10px">
+          <span class="range-sep">–</span>
+          <input type="number" class="form-input" placeholder="Máximo" style="padding:9px 10px">
+        </div>
+        <div class="filter-range">
+          <input type="range" min="0" max="1000000" value="500000" id="price-range">
+        </div>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:6px">Hasta $<span id="price-val">500.000</span></p>
+      </div>
+
+      <div class="filter-box">
+        <h3><i class="fas fa-map-marker-alt"></i> Ubicación</h3>
+        <select class="form-input">
+          <option value="">Toda la Argentina</option>
+          <option>Buenos Aires</option>
+          <option>CABA</option>
+          <option>Córdoba</option>
+          <option>Santa Fe</option>
+          <option>Mendoza</option>
+          <option>Tucumán</option>
+          <option>Rosario</option>
+        </select>
+      </div>
+
+      <div class="filter-box">
+        <h3><i class="fas fa-star"></i> Estado</h3>
+        <div class="filter-check">
+          <label><input type="radio" name="estado" checked> Todos</label>
+          <label><input type="radio" name="estado"> Nuevo</label>
+          <label><input type="radio" name="estado"> Usado — Buen estado</label>
+          <label><input type="radio" name="estado"> Usado — Aceptable</label>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" style="margin-top:4px" onclick="filterListings()">
+        <i class="fas fa-filter"></i> Aplicar filtros
+      </button>
+      <button class="btn btn-ghost btn-block" onclick="clearFilters()">Limpiar filtros</button>
+    </aside>
+
+    <!-- LISTINGS -->
+    <div>
+      <div class="results-header">
+        <h2><strong id="result-count">654</strong> publicaciones encontradas</h2>
+        <div class="sort-row">
+          <span style="font-size:.85rem;color:var(--text-muted)">Ordenar:</span>
+          <select class="form-input">
+            <option>Más recientes</option>
+            <option>Precio: menor a mayor</option>
+            <option>Precio: mayor a menor</option>
+            <option>Más visitados</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- GRID -->
+      <div class="listings-grid" id="listings-grid">
+
+        <!-- Card 1 -->
+        <a href="detalle.html" class="listing-card fade-up delay-1" data-cat="inmuebles">
+          <div class="listing-img img-blue">
+            <span class="listing-badge-img"><span class="badge badge-warning"><i class="fas fa-crown"></i> Destacado</span></span>
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-home"></i> Inmuebles</div>
+            <div class="listing-title">Departamento 2 ambientes en Palermo — luminoso y moderno</div>
+            <div class="listing-price">$95.000 <span class="listing-price-suffix">/ mes</span></div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Buenos Aires</span>
+              <span><i class="fas fa-eye"></i> 1.2k vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 2 -->
+        <a href="detalle.html" class="listing-card fade-up delay-2" data-cat="vehiculos">
+          <div class="listing-img img-amber">
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
+            <div class="listing-title">Toyota Hilux 2022 — 4x4 Diesel, impecable</div>
+            <div class="listing-price">$28.500.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Córdoba</span>
+              <span><i class="fas fa-eye"></i> 3.4k vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 3 -->
+        <a href="detalle.html" class="listing-card fade-up delay-3" data-cat="electronica">
+          <div class="listing-img img-purple">
+            <span class="listing-badge-img"><span class="badge badge-success">Nuevo</span></span>
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-laptop"></i> Electrónica</div>
+            <div class="listing-title">MacBook Pro M3 14" — 16GB RAM, 512GB SSD</div>
+            <div class="listing-price">$3.200.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> CABA</span>
+              <span><i class="fas fa-eye"></i> 890 vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 4 -->
+        <a href="detalle.html" class="listing-card fade-up delay-1" data-cat="servicios">
+          <div class="listing-img img-green">
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-briefcase"></i> Servicios</div>
+            <div class="listing-title">Diseño web y desarrollo — sitios modernos desde $0</div>
+            <div class="listing-price">Desde $80.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Rosario</span>
+              <span><i class="fas fa-eye"></i> 560 vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 5 -->
+        <a href="detalle.html" class="listing-card fade-up delay-2" data-cat="moda">
+          <div class="listing-img img-pink">
+            <span class="listing-badge-img"><span class="badge badge-primary">Oferta</span></span>
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-tshirt"></i> Moda</div>
+            <div class="listing-title">Zapatillas Nike Air Max 2024 — talla 42, sin uso</div>
+            <div class="listing-price">$85.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Mendoza</span>
+              <span><i class="fas fa-eye"></i> 245 vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 6 -->
+        <a href="detalle.html" class="listing-card fade-up delay-3" data-cat="vehiculos">
+          <div class="listing-img img-red">
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-car"></i> Vehículos</div>
+            <div class="listing-title">Volkswagen Vento 2021 — automático, financio</div>
+            <div class="listing-price">$18.900.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Santa Fe</span>
+              <span><i class="fas fa-eye"></i> 2.1k vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 7 -->
+        <a href="detalle.html" class="listing-card fade-up delay-1" data-cat="electronica">
+          <div class="listing-img img-indigo">
+            <span class="listing-badge-img"><span class="badge badge-success">Nuevo</span></span>
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-laptop"></i> Electrónica</div>
+            <div class="listing-title">iPhone 15 Pro Max 256GB — Titanio Negro, caja abierta</div>
+            <div class="listing-price">$2.450.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> CABA</span>
+              <span><i class="fas fa-eye"></i> 4.7k vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 8 -->
+        <a href="detalle.html" class="listing-card fade-up delay-2" data-cat="inmuebles">
+          <div class="listing-img img-teal">
+            <span class="listing-badge-img"><span class="badge badge-warning"><i class="fas fa-crown"></i> Destacado</span></span>
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-home"></i> Inmuebles</div>
+            <div class="listing-title">Casa 3 dormitorios en Córdoba Capital — jardín y garage</div>
+            <div class="listing-price">$180.000.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Córdoba</span>
+              <span><i class="fas fa-eye"></i> 1.9k vistas</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 9 -->
+        <a href="detalle.html" class="listing-card fade-up delay-3" data-cat="servicios">
+          <div class="listing-img img-green">
+            <div class="listing-fav"><i class="far fa-heart"></i></div>
+          </div>
+          <div class="listing-body">
+            <div class="listing-cat"><i class="fas fa-briefcase"></i> Servicios</div>
+            <div class="listing-title">Fotógrafo profesional — eventos, bodas y productos</div>
+            <div class="listing-price">Desde $50.000</div>
+            <div class="listing-meta">
+              <span><i class="fas fa-map-marker-alt"></i> Tucumán</span>
+              <span><i class="fas fa-eye"></i> 320 vistas</span>
+            </div>
+          </div>
+        </a>
+
+      </div><!-- /listings-grid -->
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span style="color:var(--text-faint)">...</span>
+        <button class="page-btn">18</button>
+        <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="font-size:1.4rem;font-weight:800" class="gradient-text"><i class="fas fa-bolt"></i> GonzApp</div>
+        <p>La plataforma todo-en-uno para gestionar publicaciones con planes inteligentes y pagos integrados.</p>
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="login.html">Publicar aviso</a></li>
+          <li><a href="index.html#pricing">Planes</a></li>
+          <li><a href="dashboard.html">Mi cuenta</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Categorías</h4>
+        <ul>
+          <li><a href="#">Inmuebles</a></li>
+          <li><a href="#">Vehículos</a></li>
+          <li><a href="#">Electrónica</a></li>
+          <li><a href="#">Servicios</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Ayuda</h4>
+        <ul>
+          <li><a href="#">Cómo publicar</a></li>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Términos</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 GonzApp. Todos los derechos reservados.</span>
+      <span>Hecho con <i class="fas fa-heart" style="color:var(--accent)"></i> en Argentina</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+  // Category filter pills
+  document.querySelectorAll('#cats-row .tag').forEach(tag => {
+    tag.addEventListener('click', function() {
+      document.querySelectorAll('#cats-row .tag').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      filterListings();
+    });
+  });
+
+  // Price range display
+  const priceRange = document.getElementById('price-range');
+  const priceVal = document.getElementById('price-val');
+  if (priceRange) {
+    priceRange.addEventListener('input', () => {
+      priceVal.textContent = Number(priceRange.value).toLocaleString('es-AR');
+    });
+  }
+
+  // Filter listings
+  function filterListings() {
+    const activeCat = document.querySelector('#cats-row .tag.active');
+    const cat = activeCat ? activeCat.dataset.cat : 'all';
+    const searchVal = (document.getElementById('search-input').value || '').toLowerCase();
+    const cards = document.querySelectorAll('#listings-grid .listing-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const cardCat = card.dataset.cat || '';
+      const title = card.querySelector('.listing-title')?.textContent.toLowerCase() || '';
+      const matchCat = cat === 'all' || cardCat === cat;
+      const matchSearch = !searchVal || title.includes(searchVal);
+      const show = matchCat && matchSearch;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    const countEl = document.getElementById('result-count');
+    if (countEl) countEl.textContent = visible;
+  }
+
+  function clearFilters() {
+    const firstTag = document.querySelector('#cats-row .tag');
+    document.querySelectorAll('#cats-row .tag').forEach(t => t.classList.remove('active'));
+    if (firstTag) firstTag.classList.add('active');
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+    filterListings();
+  }
+
+  // Mobile sidebar
+  const filterBtn = document.getElementById('filter-toggle-btn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const closeBtn = document.getElementById('sidebar-close-btn');
+
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+  if (filterBtn) filterBtn.addEventListener('click', openSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>
