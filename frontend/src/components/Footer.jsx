@@ -8,7 +8,7 @@ export default function Footer() {
           <div className="footer-brand">
             <div className="footer-logo">
               <i className="fa-solid fa-car-side" />
-              GonzApp<span style={{ color: 'var(--accent)' }}>.</span>Autos
+              AutoZona
             </div>
             <p>El marketplace de autos más completo de Argentina. Encontrá tu próximo vehículo o publicá el tuyo de manera fácil y segura.</p>
             <div className="footer-social">
@@ -45,7 +45,7 @@ export default function Footer() {
             <h4>Contacto</h4>
             <ul>
               <li><a href="tel:2665016253"><i className="fa-solid fa-phone" style={{ marginRight: 6 }} />2665-016253</a></li>
-              <li><a href="mailto:info@gonzapp.com.ar"><i className="fa-solid fa-envelope" style={{ marginRight: 6 }} />info@gonzapp.com.ar</a></li>
+              <li><a href="mailto:info@autozona.com.ar"><i className="fa-solid fa-envelope" style={{ marginRight: 6 }} />info@autozona.com.ar</a></li>
               <li><span><i className="fa-solid fa-location-dot" style={{ marginRight: 6 }} />Buenos Aires, Argentina</span></li>
               <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer"><i className="fa-brands fa-whatsapp" style={{ marginRight: 6 }} />WhatsApp</a></li>
             </ul>
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} GonzApp.Autos — Todos los derechos reservados</span>
+          <span>© {new Date().getFullYear()} AutoZona — Todos los derechos reservados</span>
           <span>
             Hecho por{' '}
             <a href="https://zigodev.com.ar" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', fontWeight: 600 }}>

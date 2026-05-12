@@ -71,7 +71,7 @@ export default function LoginPage() {
       <div className="login-visual">
         <div className="visual-logo">
           <i className="fa-solid fa-car-side" />
-          GonzApp<span className="dot">.</span>Autos
+          AutoZona
         </div>
         <div className="visual-tagline">
           La plataforma #1 para comprar y vender autos en Argentina

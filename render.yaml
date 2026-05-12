@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: gonzapp
+    name: autozona
     env: static
     buildCommand: ""
     staticPublishPath: .

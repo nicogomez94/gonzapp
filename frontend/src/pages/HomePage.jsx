@@ -331,7 +331,7 @@ export default function HomePage() {
             {[
               { init: 'MG', name: 'Martín González', role: 'Vendedor particular', text: 'Vendí mi Corolla en 4 días. La plataforma es súper fácil de usar y recibí muchas consultas de compradores serios. 100% recomendable.' },
               { init: 'LP', name: 'Laura Paz', role: 'Compradora', text: 'Encontré exactamente el auto que buscaba. El proceso fue transparente, pude verificar todo y el vendedor fue muy profesional. Excelente experiencia.' },
-              { init: 'CR', name: 'Carlos Rodríguez', role: 'Concesionaria AutoPrime', text: 'Tenemos más de 40 publicaciones activas y el panel de administración es muy completo. Nuestras ventas aumentaron un 35% desde que usamos GonzApp.' },
+              { init: 'CR', name: 'Carlos Rodríguez', role: 'Concesionaria AutoPrime', text: 'Tenemos más de 40 publicaciones activas y el panel de administración es muy completo. Nuestras ventas aumentaron un 35% desde que usamos AutoZona.' },
             ].map((t, i) => (
               <div key={t.name} className={`testimonial-card fade-up delay-${i + 1}`}>
                 <div className="t-stars">★★★★★</div>

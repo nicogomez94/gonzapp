@@ -25,7 +25,7 @@ export default function Navbar() {
       <nav className={navClass}>
         <div className="nav-inner">
           <Link to="/" className="nav-logo">
-            <i className="fa-solid fa-car-side" /> GonzApp<span className="dot">.</span>Autos
+            <i className="fa-solid fa-car-side" /> AutoZona
           </Link>
 
           <ul className="nav-links">
