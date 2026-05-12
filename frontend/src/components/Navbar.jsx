@@ -8,8 +8,6 @@ export default function Navbar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isHome = location.pathname === '/';
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
@@ -20,7 +18,7 @@ export default function Navbar() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
-  const navClass = isHome && !scrolled ? 'navbar transparent' : scrolled ? 'navbar scrolled' : 'navbar';
+  const navClass = scrolled ? 'navbar scrolled' : 'navbar';
 
   return (
     <>
