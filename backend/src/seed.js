@@ -73,6 +73,14 @@ async function main() {
     }
   });
 
+  const existingListings = await prisma.listing.count();
+  if (existingListings > 0) {
+    console.log('✅ Seed completado:');
+    console.log('   Planes y usuarios base verificados');
+    console.log(`   Publicaciones existentes: ${existingListings} (no se duplicaron)`);
+    return;
+  }
+
   // Sample listings
   const listings = [
     {
