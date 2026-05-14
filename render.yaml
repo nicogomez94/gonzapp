@@ -28,14 +28,11 @@ services:
     rootDir: backend
     plan: free
     buildCommand: npm ci --include=dev && npx prisma generate
-    # PRIMER DEPLOY CON DATOS:
-    # Este comando crea el schema, corre migraciones, ejecuta el seed UNA VEZ y arranca el backend.
-    # Despues del primer deploy exitoso, reemplazar este startCommand sacando la linea:
-    # npm run db:seed &&
+    # Deploy normal despues del primer seed:
+    # crea/verifica el schema, corre migraciones y arranca el backend.
     startCommand: >
-      node -e 'const { Client } = require("pg"); const db = process.env.DATABASE_URL; if (!db) throw new Error("DATABASE_URL is required"); const url = new URL(db); const schema = url.searchParams.get("schema"); if (!schema) throw new Error("DATABASE_URL must include ?schema=gonzapp_webservice"); if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(schema)) throw new Error(`Invalid schema: ${schema}`); url.searchParams.delete("schema"); const client = new Client({ connectionString: url.toString() }); client.connect().then(() => client.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`)).then(() => client.end()).catch((error) => { console.error(error); process.exit(1); });' &&
+      node -e 'const { Client } = require("pg"); const db = process.env.DATABASE_URL; if (!db) throw new Error("DATABASE_URL is required"); const url = new URL(db); const schema = url.searchParams.get("schema"); if (!schema) throw new Error("DATABASE_URL must include ?schema=gonzapp_webservice"); if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(schema)) throw new Error("Invalid schema: " + schema); url.searchParams.delete("schema"); const client = new Client({ connectionString: url.toString() }); client.connect().then(() => client.query("CREATE SCHEMA IF NOT EXISTS \"" + schema + "\"")).then(() => client.end()).catch((error) => { console.error(error); process.exit(1); });' &&
       npx prisma migrate deploy &&
-      npm run db:seed &&
       npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
