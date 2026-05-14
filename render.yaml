@@ -1,6 +1,23 @@
 services:
   - type: web
-    name: autozona
-    env: static
-    buildCommand: ""
-    staticPublishPath: .
+    name: autozona-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci --include=dev && npx prisma generate
+    startCommand: >
+      node -e 'const { Client } = require("pg"); const db = process.env.DATABASE_URL; if (!db) throw new Error("DATABASE_URL is required"); const url = new URL(db); const schema = url.searchParams.get("schema"); if (!schema) throw new Error("DATABASE_URL must include ?schema=gonzapp_webservice"); if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(schema)) throw new Error(`Invalid schema: ${schema}`); url.searchParams.delete("schema"); const client = new Client({ connectionString: url.toString() }); client.connect().then(() => client.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`)).then(() => client.end()).catch((error) => { console.error(error); process.exit(1); });' &&
+      npx prisma migrate deploy &&
+      npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Cargar en Render la URL de PostgreSQL con un schema separado:
+      # postgresql://.../seguros2_db?schema=gonzapp_webservice
+      # Esto evita aplicar migraciones sobre el schema public existente.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
