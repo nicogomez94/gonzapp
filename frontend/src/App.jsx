@@ -11,6 +11,7 @@ import DetallePage from './pages/DetallePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import MiCuentaPage from './pages/MiCuentaPage';
+import PlanesPage from './pages/PlanesPage';
 import './styles/global.css';
 
 function ProtectedAdmin({ children }) {
@@ -45,6 +46,7 @@ export default function App() {
           <ToastProvider>
             <Routes>
               <Route path="/" element={<Layout><HomePage /></Layout>} />
+              <Route path="/planes" element={<Layout><PlanesPage /></Layout>} />
               <Route path="/publicaciones" element={<Layout><PublicacionesPage /></Layout>} />
               <Route path="/publicaciones/:id" element={<Layout><DetallePage /></Layout>} />
               <Route path="/login" element={<LoginPage />} />

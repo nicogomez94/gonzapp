@@ -10,7 +10,7 @@ export default function Footer() {
               <i className="fa-solid fa-car-side" />
               AutoZona
             </div>
-            <p>El marketplace de autos más completo de Argentina. Encontrá tu próximo vehículo o publicá el tuyo de manera fácil y segura.</p>
+            <p>Marketplace de autos con planes claros para publicar una unidad y contacto directo por WhatsApp.</p>
             <div className="footer-social">
               <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f" /></a>
               <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram" /></a>
@@ -24,9 +24,8 @@ export default function Footer() {
             <ul>
               <li><Link to="/">Inicio</Link></li>
               <li><Link to="/publicaciones">Publicaciones</Link></li>
-              <li><a href="#">Concesionarias</a></li>
-              <li><a href="#">Tasaciones</a></li>
-              <li><a href="#">Planes y Precios</a></li>
+              <li><Link to="/planes">Planes y precios</Link></li>
+              <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer">Consultar por WhatsApp</a></li>
             </ul>
           </div>
 
@@ -65,4 +64,3 @@ export default function Footer() {
     </footer>
   );
 }
-

@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -13,8 +12,6 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -31,8 +28,8 @@ export default function Navbar() {
           <ul className="nav-links">
             <li><NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>Inicio</NavLink></li>
             <li><NavLink to="/publicaciones" className={({ isActive }) => isActive ? 'active' : ''}>Publicaciones</NavLink></li>
-            <li><a href="#">Concesionarias</a></li>
-            <li><a href="#">Tasaciones</a></li>
+            <li><NavLink to="/planes" className={({ isActive }) => isActive ? 'active' : ''}>Planes</NavLink></li>
+            <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer">Consultar</a></li>
             {isAdmin && <li><NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink></li>}
             {user && !isAdmin && <li><NavLink to="/mi-cuenta" className={({ isActive }) => isActive ? 'active' : ''}>Mi cuenta</NavLink></li>}
           </ul>
@@ -62,8 +59,8 @@ export default function Navbar() {
         <ul>
           <li><NavLink to="/" end onClick={() => setMenuOpen(false)}>Inicio</NavLink></li>
           <li><NavLink to="/publicaciones" onClick={() => setMenuOpen(false)}>Publicaciones</NavLink></li>
-          <li><a href="#" onClick={() => setMenuOpen(false)}>Concesionarias</a></li>
-          <li><a href="#" onClick={() => setMenuOpen(false)}>Tasaciones</a></li>
+          <li><NavLink to="/planes" onClick={() => setMenuOpen(false)}>Planes</NavLink></li>
+          <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)}>Consultar</a></li>
           {isAdmin && <li><NavLink to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</NavLink></li>}
           {user && <li><NavLink to="/mi-cuenta" onClick={() => setMenuOpen(false)}>Mi cuenta</NavLink></li>}
         </ul>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { listingsApi, usersApi, plansApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -28,7 +28,7 @@ const ACTIVITY = [
   { bg: 'var(--primary-bg)', color: 'var(--primary)', icon: 'fa-solid fa-eye', text: 'La Corolla recibió 28 visitas hoy', time: 'hace 1 hora' },
   { bg: 'var(--accent-bg)', color: 'var(--accent)', icon: 'fa-solid fa-heart', text: 'Valentina R. guardó tu Fortuner', time: 'hace 2 horas' },
   { bg: 'var(--warning-bg)', color: 'var(--warning)', icon: 'fa-solid fa-bell', text: 'Publicación Hilux por vencer en 3 días', time: 'hace 4 horas' },
-  { bg: 'var(--success-bg)', color: 'var(--success)', icon: 'fa-solid fa-check', text: 'Plan Pro renovado exitosamente', time: 'hace 1 día' },
+  { bg: 'var(--success-bg)', color: 'var(--success)', icon: 'fa-solid fa-check', text: 'Plan Intermedio asignado a una unidad', time: 'hace 1 día' },
 ];
 
 function StatusDot({ status }) {
@@ -60,11 +60,6 @@ export default function DashboardPage() {
   const [userForm, setUserForm] = useState(emptyUser);
   const [planForm, setPlanForm] = useState(emptyPlan);
 
-  useEffect(() => {
-    if (!isAdmin) { navigate('/'); return; }
-    loadListings(); loadUsers(); loadPlans();
-  }, [isAdmin]);
-
   const loadListings = useCallback(() => {
     setLoadingL(true);
     listingsApi.getAll({ limit: 100 })
@@ -81,6 +76,13 @@ export default function DashboardPage() {
     setLoadingP(true);
     plansApi.getAll().then(r => setPlans(r.data || [])).catch(() => {}).finally(() => setLoadingP(false));
   }, []);
+
+  useEffect(() => {
+    if (!isAdmin) { navigate('/'); return; }
+    queueMicrotask(() => {
+      loadListings(); loadUsers(); loadPlans();
+    });
+  }, [isAdmin, navigate, loadListings, loadUsers, loadPlans]);
 
   const openCreateListing = () => { setListingForm(emptyListing); setListingModal({ mode: 'create' }); };
   const openEditListing = (l) => { setListingForm({ ...l, images: l.images?.join('\n') || '', equipment: l.equipment?.join(', ') || '' }); setListingModal({ mode: 'edit', id: l.id }); };
@@ -140,7 +142,7 @@ export default function DashboardPage() {
             <span className="sidebar-badge orange">4</span>
           </button>
           <button className={`sidebar-item${section === 'estadisticas' ? ' active' : ''}`} onClick={() => nav('estadisticas')}>
-            <i className="fa-solid fa-chart-line" /> Estadísticas
+            <i className="fa-solid fa-clipboard-check" /> Control manual
           </button>
         </div>
 
@@ -280,7 +282,7 @@ export default function DashboardPage() {
         {/* ====== PUBLICACIONES ====== */}
         <div className={`dash-section${section === 'publicaciones' ? ' active' : ''}`}>
           <div className="dash-page-header">
-            <div><h2>Publicaciones</h2><p>Gestioná todas tus publicaciones</p></div>
+            <div><h2>Publicaciones</h2><p>Gestioná las publicaciones cargadas manualmente</p></div>
             <button className="btn btn-accent btn-sm" onClick={openCreateListing}>
               <i className="fa-solid fa-plus" /> Nueva publicación
             </button>
@@ -358,12 +360,12 @@ export default function DashboardPage() {
           </div>
           {loadingP ? <div style={{ padding: 40, textAlign: 'center' }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.5rem', color: 'var(--primary)' }} /></div> : (
             <div className="stats-grid-4">
-              {plans.map((p, i) => (
+              {plans.map((p) => (
                 <div key={p.id} className="chart-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 4 }}>{p.name}</div>
-                      <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>${p.price?.toLocaleString('es-AR')}<span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)' }}>/mes</span></div>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>${p.price?.toLocaleString('es-AR')}<span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)' }}>/publicación</span></div>
                     </div>
                     <div style={{ display: 'flex', gap: 4 }}>
                       <button className="btn btn-outline btn-sm" onClick={() => openEditPlan(p)}><i className="fa-solid fa-pen" /></button>
@@ -371,7 +373,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.83rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {(p.features || []).map(f => <li key={f}><i className="fa-solid fa-check" style={{ color: 'var(--success)', marginRight: 6 }} />{f}</li>)}
+                    {['1 unidad', ...(p.features || [])].filter((f, index, arr) => arr.indexOf(f) === index).map(f => <li key={f}><i className="fa-solid fa-check" style={{ color: 'var(--success)', marginRight: 6 }} />{f}</li>)}
                   </ul>
                 </div>
               ))}
@@ -390,10 +392,10 @@ export default function DashboardPage() {
 
         {/* ====== ESTADÍSTICAS (placeholder) ====== */}
         <div className={`dash-section${section === 'estadisticas' ? ' active' : ''}`}>
-          <div className="dash-page-header"><div><h2>Estadísticas</h2><p>Análisis de rendimiento</p></div></div>
+          <div className="dash-page-header"><div><h2>Control manual</h2><p>Revisión administrativa de usuarios, planes y unidad publicada</p></div></div>
           <div className="chart-card" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-            <i className="fa-solid fa-chart-line" style={{ fontSize: '3rem', marginBottom: 16, display: 'block', color: 'var(--text-faint)' }} />
-            <p>Estadísticas detalladas próximamente.</p>
+            <i className="fa-solid fa-clipboard-check" style={{ fontSize: '3rem', marginBottom: 16, display: 'block', color: 'var(--text-faint)' }} />
+            <p>Acá se mostrará el control de plan asignado y uso de la unidad por usuario.</p>
           </div>
         </div>
 
@@ -480,5 +482,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-

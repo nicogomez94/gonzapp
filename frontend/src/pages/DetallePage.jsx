@@ -11,13 +11,11 @@ export default function DetallePage() {
   const [related, setRelated] = useState([]);
   const [activeImg, setActiveImg] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [financingMonths, setFinancingMonths] = useState(24);
-  const [fav, setFav] = useState(() => isFavorite(id));
+  const [favoriteState, setFavoriteState] = useState(() => ({ id, value: isFavorite(id) }));
 
   useEffect(() => {
-    setFav(isFavorite(id));
     window.scrollTo(0, 0);
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     listingsApi.getById(id)
       .then(r => {
         setListing(r.data);
@@ -26,7 +24,7 @@ export default function DetallePage() {
       .then(r => setRelated((r.data.listings || r.data || []).filter(l => String(l.id) !== String(id))))
       .catch(() => navigate('/publicaciones'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) return (
     <div className="page-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
@@ -40,11 +38,9 @@ export default function DetallePage() {
     ? `USD ${listing.priceUsd.toLocaleString('es-AR')}`
     : `$\u00a0${listing.priceArs?.toLocaleString('es-AR')}`;
 
-  const monthlyPayment = listing.priceArs
-    ? Math.round(listing.priceArs / financingMonths * 1.035)
-    : null;
-
   const imgs = listing.images?.length ? listing.images : [];
+  const fav = favoriteState.id === id ? favoriteState.value : isFavorite(id);
+  const sellerSince = listing.user?.createdAt ? new Date(listing.user.createdAt).getFullYear() : 'fecha no disponible';
 
   const SPECS = [
     { icon: 'fa-solid fa-calendar', label: 'Año', value: listing.year },
@@ -89,7 +85,7 @@ export default function DetallePage() {
               <button
                 className={`gallery-fav${fav ? ' active' : ''}`}
                 title="Guardar"
-                onClick={() => setFav(toggleFavorite(listing.id))}
+                onClick={() => setFavoriteState({ id, value: toggleFavorite(listing.id) })}
                 style={{ position: 'absolute', top: 16, right: 16, background: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}>
                 <i className={fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} />
               </button>
@@ -200,37 +196,14 @@ export default function DetallePage() {
                 </div>
                 <div>
                   <div className="seller-name">{listing.user?.name || 'Vendedor'}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Miembro desde {new Date(listing.user?.createdAt || Date.now()).getFullYear()}</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Miembro desde {sellerSince}</div>
                 </div>
               </div>
               <div className="seller-stats">
-                <div><strong>12</strong><span>Publicaciones</span></div>
-                <div><strong>98%</strong><span>Confiabilidad</span></div>
+                <div><strong>1</strong><span>Unidad publicada</span></div>
+                <div><strong>WhatsApp</strong><span>Contacto directo</span></div>
               </div>
             </div>
-
-            {/* FINANCING */}
-            {listing.priceArs && (
-              <div className="sidebar-card">
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 16 }}>
-                  <i className="fa-solid fa-calculator" style={{ color: 'var(--primary)', marginRight: 8 }} /> Financiación
-                </h3>
-                <div style={{ marginBottom: 12 }}>
-                  <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>Cuotas</label>
-                  <select className="form-input" value={financingMonths} onChange={e => setFinancingMonths(+e.target.value)}>
-                    <option value={12}>12 meses</option>
-                    <option value={24}>24 meses</option>
-                    <option value={36}>36 meses</option>
-                    <option value={48}>48 meses</option>
-                  </select>
-                </div>
-                <div style={{ background: 'var(--primary-bg)', borderRadius: 'var(--radius)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>Cuota estimada</span>
-                  <strong style={{ fontSize: '1.1rem', color: 'var(--primary)' }}>${monthlyPayment?.toLocaleString('es-AR')}/mes</strong>
-                </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-faint)', marginTop: 8 }}>* Estimación referencial. Sujeto a aprobación crediticia.</p>
-              </div>
-            )}
 
             {/* SAFETY */}
             <div className="sidebar-card">

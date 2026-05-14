@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -23,13 +23,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-
-  useEffect(() => {
-    if (isDebug) {
-      setLoginForm(debugDefaults.login);
-      setRegisterForm(debugDefaults.register);
-    }
-  }, [isDebug]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -74,18 +67,18 @@ export default function LoginPage() {
           AutoZona
         </div>
         <div className="visual-tagline">
-          La plataforma #1 para comprar y vender autos en Argentina
+          Plataforma para comprar autos y publicar una unidad con planes claros
         </div>
         <div className="visual-car">🚗</div>
         <div className="visual-features">
-          <div><i className="fa-solid fa-shield-check" /> Vehículos verificados</div>
-          <div><i className="fa-solid fa-credit-card" /> Financiación disponible</div>
+          <div><i className="fa-solid fa-shield-check" /> Documentación verificada según plan</div>
+          <div><i className="fa-solid fa-car-side" /> Una unidad por publicación</div>
           <div><i className="fa-brands fa-whatsapp" /> Contacto directo</div>
         </div>
         <div className="visual-stats">
-          <div><strong>9.548+</strong><span>Publicaciones</span></div>
-          <div><strong>48K+</strong><span>Usuarios</span></div>
-          <div><strong>36K+</strong><span>Ventas</span></div>
+          <div><strong>$30k</strong><span>Básico</span></div>
+          <div><strong>$55k</strong><span>Intermedio</span></div>
+          <div><strong>$80k</strong><span>Premium</span></div>
         </div>
       </div>
 
@@ -176,14 +169,14 @@ export default function LoginPage() {
             </form>
 
             <p className="auth-switch">
-              ¿No tenés cuenta? <button type="button" className="link-btn" onClick={() => switchTab('register')}>Registrate gratis</button>
+              ¿No tenés cuenta? <button type="button" className="link-btn" onClick={() => switchTab('register')}>Registrate</button>
             </p>
           </div>
 
           {/* REGISTER PANEL */}
           <div className={`auth-panel${tab === 'register' ? ' active' : ''}`} style={{ display: tab === 'register' ? 'block' : 'none' }}>
             <h2 className="form-title">Creá tu cuenta</h2>
-            <p className="form-subtitle">Gratis y sin tarjeta de crédito requerida</p>
+            <p className="form-subtitle">Creá tu usuario para gestionar consultas y publicaciones</p>
 
             <div className="social-buttons">
               <button className="btn btn-social" type="button">
@@ -267,7 +260,7 @@ export default function LoginPage() {
               </div>
 
               <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Creando cuenta…</> : <><i className="fa-solid fa-user-plus" /> Crear cuenta gratis</>}
+                {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Creando cuenta…</> : <><i className="fa-solid fa-user-plus" /> Crear cuenta</>}
               </button>
             </form>
 

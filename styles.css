@@ -215,6 +215,38 @@ h3 { font-size: clamp(1rem, 1.5vw, 1.15rem); font-weight: 600; }
 .pricing-features li i.fa-check { color: var(--success); font-size: 0.75rem; flex-shrink: 0; }
 .pricing-features li i.fa-times { color: var(--text-faint); font-size: 0.75rem; flex-shrink: 0; }
 .pricing-features li.no { color: var(--text-faint); }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+
+/* ============================================================  PLANS PAGE  ============================================================ */
+.plans-hero {
+  padding: calc(var(--nav-height) + 48px) 0 56px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #EEF3FF 55%, #FFF3EB 100%);
+  border-bottom: 1px solid var(--border);
+}
+.plans-breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-faint); margin-bottom: 22px; }
+.plans-breadcrumb a { color: var(--text-muted); }
+.plans-breadcrumb a:hover { color: var(--primary); }
+.plans-breadcrumb i { font-size: 0.68rem; }
+.plans-hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr); gap: 36px; align-items: center; }
+.plans-hero h1 { max-width: 640px; margin-bottom: 14px; }
+.plans-hero p { max-width: 620px; color: var(--text-muted); font-size: 1.05rem; }
+.plans-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.plans-summary { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); display: grid; gap: 14px; }
+.plans-summary div { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.plans-summary div:last-child { border-bottom: 0; padding-bottom: 0; }
+.plans-summary strong { font-size: 1.75rem; line-height: 1; color: var(--primary); }
+.plans-summary span { color: var(--text-muted); font-size: 0.9rem; text-align: right; }
+.plans-detail-section { background: var(--bg-2); }
+.plans-table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.plans-table { min-width: 720px; }
+.plans-table th, .plans-table td { text-align: center; }
+.plans-table th:first-child, .plans-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.step-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px; text-align: center; transition: var(--transition); }
+.step-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.step-icon { width: 54px; height: 54px; border-radius: 50%; background: var(--primary-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; margin: 0 auto 16px; }
+.step-card h3 { margin-bottom: 8px; }
+.step-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
 
 /* ============================================================  STATS  ============================================================ */
 .stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; align-items: center; gap: 16px; transition: var(--transition); }
@@ -332,6 +364,9 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   .nav-links, .nav-actions { display: none; }
   .nav-hamburger { display: flex; }
   .section { padding: 50px 0; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .plans-hero-grid { grid-template-columns: 1fr; }
+  .steps-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }

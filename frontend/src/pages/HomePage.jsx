@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { listingsApi, plansApi } from '../api';
 import ListingCard from '../components/ListingCard';
@@ -14,6 +14,52 @@ const CATEGORIES = [
   { icon: '🚌', name: 'Minivans', count: '420', q: 'Minivan' },
   { icon: '🚚', name: 'Camionetas', count: '1.100', q: 'Camioneta' },
 ];
+
+const WHATSAPP_LINK = 'https://wa.me/542665016253';
+
+const FALLBACK_PLANS = [
+  {
+    name: 'Básico',
+    price: 30000,
+    desc: 'Publicación básica para vender una unidad',
+    features: ['1 unidad', 'Publicación por 30 días', '6 imágenes del vehículo', 'Contacto por WhatsApp'],
+    icon: 'fa-solid fa-leaf',
+    bg: 'var(--bg-2)',
+    color: 'var(--text-muted)',
+    featured: false,
+  },
+  {
+    name: 'Intermedio',
+    price: 55000,
+    desc: 'Publicación con documentación verificada',
+    features: ['1 unidad', '8 imágenes del vehículo', 'Informe de Dominio y Multas', 'Insignia "Documentación Verificada"', 'Contacto por WhatsApp'],
+    icon: 'fa-solid fa-shield-check',
+    bg: 'var(--primary-bg)',
+    color: 'var(--primary)',
+    featured: true,
+  },
+  {
+    name: 'Premium',
+    price: 80000,
+    desc: 'Publicación completa con informe y beneficio de gestoría',
+    features: ['1 unidad', '10 fotos del vehículo', 'Informe de Dominio y Multas', 'Insignia "Documentación Verificada"', '15% de descuento en Honorarios de Gestoría', 'Contacto por WhatsApp'],
+    icon: 'fa-solid fa-crown',
+    bg: 'var(--accent-bg)',
+    color: 'var(--accent)',
+    featured: false,
+  },
+];
+
+const planWhatsAppLink = (planName) => `${WHATSAPP_LINK}?text=${encodeURIComponent(`Hola, quiero consultar por el plan ${planName} para publicar mi auto.`)}`;
+
+const planFeatures = (plan) => {
+  const features = plan.features?.length ? plan.features : [];
+  return [
+    '1 unidad',
+    ...features,
+    ...(features.length ? [] : [`${plan.maxImages || 6} imágenes del vehículo`, 'Contacto por WhatsApp']),
+  ].filter((feature, index, arr) => arr.indexOf(feature) === index);
+};
 
 function useScrollAnimations() {
   useEffect(() => {
@@ -62,7 +108,7 @@ export default function HomePage() {
                 <i className="fa-solid fa-star" /> La plataforma #1 de autos usados en Argentina
               </div>
               <h1 className="fade-up delay-1">Encontrá tu próximo <em>auto ideal</em> al mejor precio</h1>
-              <p className="hero-sub fade-up delay-2">Miles de vehículos verificados de particulares y concesionarias. Comprá, vendé y financiá sin salir de casa.</p>
+              <p className="hero-sub fade-up delay-2">Encontrá autos publicados y consultá por planes pagos para vender una unidad con contacto directo por WhatsApp.</p>
 
               <form className="hero-search fade-up delay-3" onSubmit={handleSearch}>
                 <div className="hero-search-grid">
@@ -95,15 +141,15 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="hero-search-footer">
-                  <span className="search-hint"><i className="fa-solid fa-fire" style={{ color: 'var(--accent)' }} /> 9.548 publicaciones activas hoy</span>
+                  <span className="search-hint"><i className="fa-solid fa-car-side" style={{ color: 'var(--accent)' }} /> Publicaciones disponibles para consultar</span>
                   <button type="submit" className="btn btn-primary"><i className="fa-solid fa-magnifying-glass" /> Buscar ahora</button>
                 </div>
               </form>
 
               <div className="hero-stats-row fade-up delay-4">
-                <div className="hero-stat"><strong>9.548+</strong><span>Publicaciones activas</span></div>
-                <div className="hero-stat"><strong>646+</strong><span>Concesionarias</span></div>
-                <div className="hero-stat"><strong>36.480+</strong><span>Ventas realizadas</span></div>
+                <div className="hero-stat"><strong>3</strong><span>Planes de publicación</span></div>
+                <div className="hero-stat"><strong>1</strong><span>Unidad por plan</span></div>
+                <div className="hero-stat"><strong>WhatsApp</strong><span>Contacto directo</span></div>
               </div>
             </div>
 
@@ -126,7 +172,7 @@ export default function HomePage() {
               <div className="hero-float-badges">
                 <div className="hero-float-badge"><i className="fa-solid fa-shield-check" style={{ color: 'var(--success)' }} /> Verificado</div>
                 <div className="hero-float-badge"><i className="fa-brands fa-whatsapp" style={{ color: '#25D366' }} /> Contacto directo</div>
-                <div className="hero-float-badge"><i className="fa-solid fa-credit-card" style={{ color: 'var(--primary)' }} /> Financiación</div>
+                <div className="hero-float-badge"><i className="fa-solid fa-car-side" style={{ color: 'var(--primary)' }} /> Una unidad</div>
               </div>
             </div>
           </div>
@@ -160,7 +206,7 @@ export default function HomePage() {
               <button key={c.name} className="category-card" onClick={() => navigate(`/publicaciones?search=${c.q}`)}>
                 <div className="cat-icon">{c.icon}</div>
                 <h3>{c.name}</h3>
-                <p>{c.count} autos</p>
+                <p>Ver autos</p>
               </button>
             ))}
           </div>
@@ -206,10 +252,10 @@ export default function HomePage() {
       <section className="stats-section">
         <div className="container">
           <div className="stats-inner">
-            <div className="stats-item fade-up"><strong>9.548+</strong><span>Publicaciones activas</span></div>
-            <div className="stats-item fade-up delay-2"><strong>646+</strong><span>Concesionarias registradas</span></div>
-            <div className="stats-item fade-up delay-3"><strong>36.480+</strong><span>Autos vendidos</span></div>
-            <div className="stats-item fade-up delay-4"><strong>98%</strong><span>Usuarios satisfechos</span></div>
+            <div className="stats-item fade-up"><strong>$30.000</strong><span>Plan Básico</span></div>
+            <div className="stats-item fade-up delay-2"><strong>$55.000</strong><span>Plan Intermedio</span></div>
+            <div className="stats-item fade-up delay-3"><strong>$80.000</strong><span>Plan Premium</span></div>
+            <div className="stats-item fade-up delay-4"><strong>1</strong><span>Unidad por plan</span></div>
           </div>
         </div>
       </section>
@@ -254,12 +300,12 @@ export default function HomePage() {
           </div>
           <div className="features-grid">
             {[
-              { bg: '#EEF3FF', color: 'var(--primary)', icon: 'fa-solid fa-shield-check', title: 'Vehículos verificados', desc: 'Cada publicación pasa por nuestro proceso de verificación. Informe de título, multas y deudas incluido.' },
-              { bg: '#FFF3EB', color: 'var(--accent)', icon: 'fa-solid fa-camera', title: 'Fotos 360°', desc: 'Publicaciones con galerías completas y recorridos virtuales del vehículo desde tu celular.' },
-              { bg: '#DCFCE7', color: 'var(--success)', icon: 'fa-solid fa-credit-card', title: 'Financiación fácil', desc: 'Simulá tu crédito en segundos. Trabajamos con los mejores bancos y financieras del país.' },
-              { bg: '#FEF3C7', color: 'var(--warning)', icon: 'fa-solid fa-bell', title: 'Alertas inteligentes', desc: 'Configurá tu búsqueda y te avisamos cuando llegue el auto que buscás al precio que querés.' },
-              { bg: '#EEF3FF', color: 'var(--primary)', icon: 'fa-brands fa-whatsapp', title: 'WhatsApp directo', desc: 'Contacto inmediato con el vendedor sin registros ni formularios. Rápido y sin fricción.' },
-              { bg: '#FFF3EB', color: 'var(--accent)', icon: 'fa-solid fa-chart-line', title: 'Tasación gratis', desc: 'Conocé el valor de mercado de tu auto en segundos con nuestra herramienta de tasación.' },
+              { bg: '#EEF3FF', color: 'var(--primary)', icon: 'fa-solid fa-list-check', title: 'Planes claros', desc: 'Tres opciones de publicación con precio fijo, duración definida y una sola unidad por plan.' },
+              { bg: '#FFF3EB', color: 'var(--accent)', icon: 'fa-solid fa-camera', title: 'Imágenes según plan', desc: 'Incluí 6, 8 o 10 fotos del vehículo según el plan que elijas.' },
+              { bg: '#DCFCE7', color: 'var(--success)', icon: 'fa-solid fa-file-shield', title: 'Documentación verificada', desc: 'Los planes Intermedio y Premium incluyen informe de dominio y multas con insignia de verificación.' },
+              { bg: '#FEF3C7', color: 'var(--warning)', icon: 'fa-solid fa-handshake', title: 'Beneficio de gestoría', desc: 'El plan Premium suma descuento en honorarios de gestoría para la transferencia de dominio.' },
+              { bg: '#EEF3FF', color: 'var(--primary)', icon: 'fa-brands fa-whatsapp', title: 'WhatsApp directo', desc: 'Consultas rápidas para elegir plan, coordinar la publicación y contactar al vendedor.' },
+              { bg: '#FFF3EB', color: 'var(--accent)', icon: 'fa-solid fa-user-gear', title: 'Carga administrada', desc: 'La gestión inicial de publicaciones y usuarios se acompaña desde el panel administrativo.' },
             ].map((f, i) => (
               <div key={f.title} className={`feature-card fade-up delay-${(i % 3) + 1}`}>
                 <div className="feature-icon" style={{ background: f.bg, color: f.color }}><i className={f.icon} /></div>
@@ -287,32 +333,32 @@ export default function HomePage() {
                   <i className={i === 0 ? 'fa-solid fa-leaf' : i === 1 ? 'fa-solid fa-rocket' : 'fa-solid fa-crown'} />
                 </div>
                 <div className="pricing-name">{p.name}</div>
-                <div className="pricing-price">${(p.price || 0).toLocaleString('es-AR')}<span>/mes</span></div>
+                <div className="pricing-price">${(p.price || 0).toLocaleString('es-AR')}<span>/publicación</span></div>
                 <p className="pricing-desc">{p.description || 'Plan para publicar tus vehículos'}</p>
                 <ul className="pricing-features">
-                  {(p.features || [`Hasta ${p.maxListings || 1} publicaciones`, 'Soporte básico']).map(f => (
+                  {planFeatures(p).map(f => (
                     <li key={f}><i className="fa-solid fa-check" /> {f}</li>
                   ))}
                 </ul>
-                <Link to="/login?tab=register" className={`btn ${i === 1 ? 'btn-primary' : 'btn-outline'} btn-block`}>Comenzar ahora</Link>
+                <a href={planWhatsAppLink(p.name)} target="_blank" rel="noreferrer" className={`btn ${i === 1 ? 'btn-primary' : 'btn-outline'} btn-block`}>
+                  Consultar por WhatsApp
+                </a>
               </div>
             )) : (
               // Fallback static plans
-              [
-                { name: 'Básico', price: '$30.000', period: '/mes', desc: 'Para particulares que quieren vender su auto', features: ['1 publicación activa', 'Fotos estándar', 'Soporte por email', 'Duración 30 días'], icon: 'fa-solid fa-leaf', bg: 'var(--bg-2)', color: 'var(--text-muted)', featured: false },
-                { name: 'Intermedio', price: '$55.000', period: '/mes', desc: 'Para vendedores frecuentes y pequeños dealers', features: ['5 publicaciones activas', 'Fotos HD + video', 'Destacado en búsquedas', 'Soporte prioritario', 'Estadísticas básicas'], icon: 'fa-solid fa-rocket', bg: 'var(--primary-bg)', color: 'var(--primary)', featured: true },
-                { name: 'Premium', price: '$80.000', period: '/mes', desc: 'Para concesionarias y vendedores profesionales', features: ['Publicaciones ilimitadas', 'Banner en homepage', 'Posicionamiento top', 'API de integración', 'Manager dedicado', 'Estadísticas avanzadas'], icon: 'fa-solid fa-crown', bg: 'var(--accent-bg)', color: 'var(--accent)', featured: false },
-              ].map((p, i) => (
+              FALLBACK_PLANS.map((p, i) => (
                 <div key={p.name} className={`pricing-card fade-up delay-${i + 1}${p.featured ? ' featured' : ''}`}>
                   {p.featured && <div className="pricing-badge">MÁS POPULAR</div>}
                   <div className="pricing-icon" style={{ background: p.bg, color: p.color }}><i className={p.icon} /></div>
                   <div className="pricing-name">{p.name}</div>
-                  <div className="pricing-price">{p.price}<span>{p.period}</span></div>
+                  <div className="pricing-price">${p.price.toLocaleString('es-AR')}<span>/publicación</span></div>
                   <p className="pricing-desc">{p.desc}</p>
                   <ul className="pricing-features">
                     {p.features.map(f => <li key={f}><i className="fa-solid fa-check" /> {f}</li>)}
                   </ul>
-                  <Link to="/login?tab=register" className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'} btn-block`}>Comenzar ahora</Link>
+                  <a href={planWhatsAppLink(p.name)} target="_blank" rel="noreferrer" className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'} btn-block`}>
+                    Consultar por WhatsApp
+                  </a>
                 </div>
               ))
             )}
@@ -331,7 +377,7 @@ export default function HomePage() {
             {[
               { init: 'MG', name: 'Martín González', role: 'Vendedor particular', text: 'Vendí mi Corolla en 4 días. La plataforma es súper fácil de usar y recibí muchas consultas de compradores serios. 100% recomendable.' },
               { init: 'LP', name: 'Laura Paz', role: 'Compradora', text: 'Encontré exactamente el auto que buscaba. El proceso fue transparente, pude verificar todo y el vendedor fue muy profesional. Excelente experiencia.' },
-              { init: 'CR', name: 'Carlos Rodríguez', role: 'Concesionaria AutoPrime', text: 'Tenemos más de 40 publicaciones activas y el panel de administración es muy completo. Nuestras ventas aumentaron un 35% desde que usamos AutoZona.' },
+              { init: 'CR', name: 'Carlos Rodríguez', role: 'Vendedor particular', text: 'Elegí el plan Intermedio por la documentación verificada. Me ayudó a publicar con más claridad y a responder consultas por WhatsApp.' },
             ].map((t, i) => (
               <div key={t.name} className={`testimonial-card fade-up delay-${i + 1}`}>
                 <div className="t-stars">★★★★★</div>
@@ -353,13 +399,13 @@ export default function HomePage() {
       <section className="cta-section">
         <div className="container">
           <h2>¿Querés vender tu auto?</h2>
-          <p>Publicá gratis y llegá a miles de compradores en todo el país. Sin comisiones ocultas.</p>
+          <p>Elegí un plan para publicar una unidad y coordiná la carga por WhatsApp.</p>
           <div className="cta-actions">
-            <Link to="/login?tab=register" className="btn btn-white btn-lg">
-              <i className="fa-solid fa-plus" /> Publicar ahora — Es gratis
-            </Link>
-            <a href="https://wa.me/542665016253" target="_blank" rel="noreferrer" className="btn btn-outline-white btn-lg" style={{ background: 'transparent', border: '2px solid rgba(255,255,255,0.4)', color: '#fff' }}>
-              <i className="fa-brands fa-whatsapp" /> Consultar
+            <a href={planWhatsAppLink('publicación')} target="_blank" rel="noreferrer" className="btn btn-white btn-lg">
+              <i className="fa-brands fa-whatsapp" /> Consultar plan
+            </a>
+            <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn btn-outline-white btn-lg" style={{ background: 'transparent', border: '2px solid rgba(255,255,255,0.4)', color: '#fff' }}>
+              <i className="fa-solid fa-circle-question" /> Hacer una consulta
             </a>
           </div>
         </div>
