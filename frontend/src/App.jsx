@@ -10,10 +10,19 @@ import PublicacionesPage from './pages/PublicacionesPage';
 import DetallePage from './pages/DetallePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import MiCuentaPage from './pages/MiCuentaPage';
 import './styles/global.css';
 
 function ProtectedAdmin({ children }) {
   const { isAdmin, user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/mi-cuenta" replace />;
+  return children;
+}
+
+function ProtectedUser({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -39,6 +48,11 @@ export default function App() {
               <Route path="/publicaciones" element={<Layout><PublicacionesPage /></Layout>} />
               <Route path="/publicaciones/:id" element={<Layout><DetallePage /></Layout>} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/mi-cuenta" element={
+                <ProtectedUser>
+                  <Layout><MiCuentaPage /></Layout>
+                </ProtectedUser>
+              } />
               <Route path="/dashboard" element={
                 <ProtectedAdmin>
                   <Layout hideFooter><DashboardPage /></Layout>

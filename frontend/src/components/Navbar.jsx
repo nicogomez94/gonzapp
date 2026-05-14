@@ -34,11 +34,13 @@ export default function Navbar() {
             <li><a href="#">Concesionarias</a></li>
             <li><a href="#">Tasaciones</a></li>
             {isAdmin && <li><NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink></li>}
+            {user && !isAdmin && <li><NavLink to="/mi-cuenta" className={({ isActive }) => isActive ? 'active' : ''}>Mi cuenta</NavLink></li>}
           </ul>
 
           <div className="nav-actions">
             {user ? (
               <>
+                <Link to="/mi-cuenta" className="btn btn-ghost btn-sm"><i className="fa-regular fa-user" /> Mi cuenta</Link>
                 {isAdmin && <Link to="/dashboard" className="btn btn-ghost btn-sm"><i className="fa-solid fa-chart-pie" /> Panel</Link>}
                 <button className="btn btn-outline-gray btn-sm" onClick={handleLogout}><i className="fa-solid fa-right-from-bracket" /> Salir</button>
               </>
@@ -63,12 +65,18 @@ export default function Navbar() {
           <li><a href="#" onClick={() => setMenuOpen(false)}>Concesionarias</a></li>
           <li><a href="#" onClick={() => setMenuOpen(false)}>Tasaciones</a></li>
           {isAdmin && <li><NavLink to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</NavLink></li>}
+          {user && <li><NavLink to="/mi-cuenta" onClick={() => setMenuOpen(false)}>Mi cuenta</NavLink></li>}
         </ul>
         <div className="mobile-actions">
           {user ? (
-            <button className="btn btn-outline-gray btn-block" onClick={() => { setMenuOpen(false); handleLogout(); }}>
-              <i className="fa-solid fa-right-from-bracket" /> Cerrar sesión
-            </button>
+            <>
+              <Link to="/mi-cuenta" className="btn btn-outline-gray btn-block" onClick={() => setMenuOpen(false)}>
+                <i className="fa-regular fa-user" /> Mi cuenta
+              </Link>
+              <button className="btn btn-outline-gray btn-block" onClick={() => { setMenuOpen(false); handleLogout(); }}>
+                <i className="fa-solid fa-right-from-bracket" /> Cerrar sesión
+              </button>
+            </>
           ) : (
             <>
               <Link to="/login" className="btn btn-outline-gray btn-block" onClick={() => setMenuOpen(false)}>Ingresar</Link>

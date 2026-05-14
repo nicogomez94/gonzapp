@@ -1,21 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-
-function toggleFav(id) {
-  const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  const idx = favs.indexOf(id);
-  if (idx === -1) favs.push(id); else favs.splice(idx, 1);
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  return idx === -1;
-}
-function isFav(id) {
-  try { return JSON.parse(localStorage.getItem('favorites') || '[]').includes(id); } catch { return false; }
-}
+import { isFavorite, toggleFavorite } from '../utils/favorites';
 
 export default function ListingCard({ listing }) {
-  const [fav, setFav] = useState(() => isFav(listing.id));
+  const [fav, setFav] = useState(() => isFavorite(listing.id));
 
-  const handleFav = (e) => { e.preventDefault(); setFav(toggleFav(listing.id)); };
+  const handleFav = (e) => { e.preventDefault(); setFav(toggleFavorite(listing.id)); };
 
   const img = listing.images?.[0];
   const price = listing.priceUsd
@@ -61,4 +51,3 @@ export default function ListingCard({ listing }) {
     </Link>
   );
 }
-

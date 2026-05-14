@@ -1,4 +1,4 @@
-![][image1]
+–![][image1]
 
 Alcance del Proyecto \- Etapa 1
 
@@ -41,7 +41,7 @@ La primera etapa de AutoZona se enfocará en el desarrollo de una plataforma bas
 Se incluirá un panel de administración con las siguientes funcionalidades manuales:[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)
 
 * **Acceso:** Login para acceder al panel.[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)  
-* **Gestión de Usuarios:** Crear, editar y eliminar usuarios.[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)  
+* **Gestión de Usuarios:** Crear, editar y eliminar=– usuarios.[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)  
 * **Gestión de Publicaciones:** Crear, editar y eliminar publicaciones.[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)  
 * **Control:**[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)  
   * Control manual de publicaciones cargadas.[1](https://docs.google.com/document/d/16AeDb0ebxYn835Tx-9OZmc6EK0Mo7_uLCUAnDH4ZYJs/edit)  

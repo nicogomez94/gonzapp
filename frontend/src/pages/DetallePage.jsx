@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
+import { isFavorite, toggleFavorite } from '../utils/favorites';
 
 export default function DetallePage() {
   const { id } = useParams();
@@ -11,8 +12,10 @@ export default function DetallePage() {
   const [activeImg, setActiveImg] = useState(0);
   const [loading, setLoading] = useState(true);
   const [financingMonths, setFinancingMonths] = useState(24);
+  const [fav, setFav] = useState(() => isFavorite(id));
 
   useEffect(() => {
+    setFav(isFavorite(id));
     window.scrollTo(0, 0);
     setLoading(true);
     listingsApi.getById(id)
@@ -84,11 +87,11 @@ export default function DetallePage() {
                 {listing.status === 'ACTIVE' && <span className="badge badge-success">Activo</span>}
               </div>
               <button
-                className="gallery-fav"
+                className={`gallery-fav${fav ? ' active' : ''}`}
                 title="Guardar"
-                onClick={() => {}}
+                onClick={() => setFav(toggleFavorite(listing.id))}
                 style={{ position: 'absolute', top: 16, right: 16, background: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}>
-                <i className="fa-regular fa-heart" style={{ color: 'var(--text-muted)' }} />
+                <i className={fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} />
               </button>
             </div>
 
