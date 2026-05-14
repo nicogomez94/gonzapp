@@ -1,14 +1,20 @@
+previews:
+  generation: off
+
 services:
   - type: web
-    name: autozona-web
+    name: z-web
     runtime: static
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
     autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - frontend/**
     envVars:
       - key: VITE_API_URL
-        value: https://autozona-api.onrender.com/api
+        value: https://z-api.onrender.com/api
       - key: VITE_DEBUG
         value: "true"
     routes:
@@ -17,7 +23,7 @@ services:
         destination: /index.html
 
   - type: web
-    name: autozona-api
+    name: z-api
     runtime: node
     rootDir: backend
     plan: free
@@ -28,11 +34,14 @@ services:
       npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - backend/**
     envVars:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://autozona-web.onrender.com
+        value: https://z-web.onrender.com
       # Cargar en Render la URL de PostgreSQL con un schema separado:
       # postgresql://.../seguros2_db?schema=gonzapp_webservice
       # Esto evita aplicar migraciones sobre el schema public existente.
