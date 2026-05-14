@@ -10,7 +10,7 @@ const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
 const TRANSMISSIONS = ['Manual', 'Automática'];
 
 const emptyListing = { title: '', brand: '', model: '', year: '', mileage: '', fuel: 'Nafta', transmission: 'Manual', engine: '', priceArs: '', priceUsd: '', location: '', phone: '', description: '', status: 'ACTIVE', featured: false, verified: false, images: [], equipment: [] };
-const emptyUser = { name: '', email: '', password: '', phone: '', role: 'USER' };
+const emptyUser = { name: '', email: '', password: '', phone: '', role: 'USER', planId: '' };
 const emptyPlan = { name: '', price: '', maxImages: '', daysActive: '', features: '' };
 
 const CHART_DATA = [
@@ -94,10 +94,10 @@ export default function DashboardPage() {
   const deleteListing = async (id) => { try { await listingsApi.remove(id); show('Publicación eliminada'); loadListings(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
   const openCreateUser = () => { setUserForm(emptyUser); setUserModal({ mode: 'create' }); };
-  const openEditUser = (u) => { setUserForm({ ...u, password: '' }); setUserModal({ mode: 'edit', id: u.id }); };
+  const openEditUser = (u) => { setUserForm({ ...u, password: '', planId: u.planId || '' }); setUserModal({ mode: 'edit', id: u.id }); };
   const saveUser = async (e) => {
     e.preventDefault();
-    const payload = { ...userForm }; if (!payload.password) delete payload.password;
+    const payload = { ...userForm, planId: userForm.planId ? +userForm.planId : null }; if (!payload.password) delete payload.password;
     try { if (userModal.mode === 'create') await usersApi.create(payload); else await usersApi.update(userModal.id, payload); show(userModal.mode === 'create' ? 'Usuario creado' : 'Usuario actualizado'); setUserModal(null); loadUsers(); } catch (err) { show(err.response?.data?.error || 'Error al guardar', 'error'); }
   };
   const deleteUser = async (id) => { try { await usersApi.remove(id); show('Usuario eliminado'); loadUsers(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
@@ -452,6 +452,13 @@ export default function DashboardPage() {
             <div className="input-group"><label className="input-label">Teléfono</label><input className="form-input" value={userForm.phone} onChange={e => setUserForm(f => ({ ...f, phone: e.target.value }))} /></div>
             <div className="input-group"><label className="input-label">Contraseña {userModal.mode === 'edit' && '(dejar vacío para no cambiar)'}</label><input className="form-input" type="password" required={userModal.mode === 'create'} value={userForm.password} onChange={e => setUserForm(f => ({ ...f, password: e.target.value }))} /></div>
             <div className="input-group"><label className="input-label">Rol</label><select className="form-input" value={userForm.role} onChange={e => setUserForm(f => ({ ...f, role: e.target.value }))}><option value="USER">USER</option><option value="ADMIN">ADMIN</option></select></div>
+            <div className="input-group">
+              <label className="input-label">Plan asignado</label>
+              <select className="form-input" value={userForm.planId} onChange={e => setUserForm(f => ({ ...f, planId: e.target.value }))}>
+                <option value="">Sin plan</option>
+                {plans.map(plan => <option key={plan.id} value={plan.id}>{plan.name}</option>)}
+              </select>
+            </div>
           </form>
         </Modal>
       )}
