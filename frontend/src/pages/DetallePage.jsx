@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
 import { isFavorite, toggleFavorite } from '../utils/favorites';
+import { cloudinaryImage } from '../utils/images';
 
 export default function DetallePage() {
   const { id } = useParams();
@@ -72,7 +73,7 @@ export default function DetallePage() {
             {/* GALLERY */}
             <div className="gallery-main">
               {imgs.length > 0 ? (
-                <img src={imgs[activeImg]} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={cloudinaryImage(imgs[activeImg], 'f_auto,q_auto,c_limit,w_1600')} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div className="img-placeholder" style={{ height: 420 }}>
                   <i className="fa-solid fa-car-side" />
@@ -96,7 +97,7 @@ export default function DetallePage() {
                 {imgs.map((img, i) => (
                   <button key={i} className={`gallery-thumb${activeImg === i ? ' active' : ''}`}
                     onClick={() => setActiveImg(i)}>
-                    <img src={img} alt="" />
+                    <img src={cloudinaryImage(img, 'f_auto,q_auto,c_fill,w_180,h_120')} alt="" />
                   </button>
                 ))}
               </div>

@@ -18,6 +18,11 @@ function StatusDot({ status }) {
   return <div className={`status-dot ${s}`} />;
 }
 
+const parseImageList = (images) => {
+  if (Array.isArray(images)) return images.filter(Boolean);
+  return (images || '').split('\n').map(s => s.trim()).filter(Boolean);
+};
+
 export default function DashboardPage() {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
@@ -41,6 +46,7 @@ export default function DashboardPage() {
   const [listingForm, setListingForm] = useState(emptyListing);
   const [userForm, setUserForm] = useState(emptyUser);
   const [planForm, setPlanForm] = useState(emptyPlan);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const loadListings = useCallback(() => {
     setLoadingL(true);
@@ -75,9 +81,29 @@ export default function DashboardPage() {
 
   const openCreateListing = () => { setListingForm(emptyListing); setListingModal({ mode: 'create' }); };
   const openEditListing = (l) => { setListingForm({ ...l, images: l.images?.join('\n') || '', equipment: l.equipment?.join(', ') || '' }); setListingModal({ mode: 'edit', id: l.id }); };
+  const uploadListingImages = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const formData = new FormData();
+    files.forEach(file => formData.append('images', file));
+    setUploadingImages(true);
+
+    try {
+      const { data } = await listingsApi.uploadImages(formData);
+      const uploaded = data.images || [];
+      setListingForm(f => ({ ...f, images: [...parseImageList(f.images), ...uploaded].join('\n') }));
+      show(`${uploaded.length} imagen${uploaded.length === 1 ? '' : 'es'} cargada${uploaded.length === 1 ? '' : 's'}`);
+    } catch (err) {
+      show(err.response?.data?.error || 'Error al cargar imágenes', 'error');
+    } finally {
+      setUploadingImages(false);
+      e.target.value = '';
+    }
+  };
   const saveListing = async (e) => {
     e.preventDefault();
-    const payload = { ...listingForm, year: +listingForm.year, mileage: +listingForm.mileage, priceArs: listingForm.priceArs ? +listingForm.priceArs : undefined, priceUsd: listingForm.priceUsd ? +listingForm.priceUsd : undefined, images: typeof listingForm.images === 'string' ? listingForm.images.split('\n').map(s => s.trim()).filter(Boolean) : listingForm.images, equipment: typeof listingForm.equipment === 'string' ? listingForm.equipment.split(',').map(s => s.trim()).filter(Boolean) : listingForm.equipment };
+    const payload = { ...listingForm, year: +listingForm.year, mileage: +listingForm.mileage, priceArs: listingForm.priceArs ? +listingForm.priceArs : undefined, priceUsd: listingForm.priceUsd ? +listingForm.priceUsd : undefined, images: parseImageList(listingForm.images), equipment: typeof listingForm.equipment === 'string' ? listingForm.equipment.split(',').map(s => s.trim()).filter(Boolean) : listingForm.equipment };
     try { if (listingModal.mode === 'create') await listingsApi.create(payload); else await listingsApi.update(listingModal.id, payload); show(listingModal.mode === 'create' ? 'Publicación creada' : 'Publicación actualizada'); setListingModal(null); loadListings(); } catch (err) { show(err.response?.data?.error || 'Error al guardar', 'error'); }
   };
   const deleteListing = async (id) => { try { await listingsApi.remove(id); show('Publicación eliminada'); loadListings(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
@@ -409,7 +435,7 @@ export default function DashboardPage() {
       {/* LISTING MODAL */}
       {listingModal && (
         <Modal title={listingModal.mode === 'create' ? 'Nueva publicación' : 'Editar publicación'} onClose={() => setListingModal(null)}
-          footer={<><button className="btn btn-outline" onClick={() => setListingModal(null)}>Cancelar</button><button className="btn btn-primary" form="listing-form" type="submit">Guardar</button></>}>
+          footer={<><button className="btn btn-outline" onClick={() => setListingModal(null)}>Cancelar</button><button className="btn btn-primary" form="listing-form" type="submit" disabled={uploadingImages}>Guardar</button></>}>
           <form id="listing-form" onSubmit={saveListing} className="modal-form">
             <div className="form-row">
               <div className="input-group"><label className="input-label">Título *</label><input className="form-input" required value={listingForm.title} onChange={e => setListingForm(f => ({ ...f, title: e.target.value }))} /></div>
@@ -440,7 +466,14 @@ export default function DashboardPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}><input type="checkbox" checked={listingForm.verified} onChange={e => setListingForm(f => ({ ...f, verified: e.target.checked }))} /> Verificado</label>
             </div>
             <div className="input-group"><label className="input-label">Descripción</label><textarea className="form-input" rows={3} value={listingForm.description} onChange={e => setListingForm(f => ({ ...f, description: e.target.value }))} /></div>
-            <div className="input-group"><label className="input-label">Imágenes (una URL por línea)</label><textarea className="form-input" rows={3} value={listingForm.images} onChange={e => setListingForm(f => ({ ...f, images: e.target.value }))} /></div>
+            <div className="input-group">
+              <label className="input-label">Imágenes</label>
+              <input className="form-input" type="file" accept="image/*" multiple onChange={uploadListingImages} disabled={uploadingImages} />
+              <div style={{ color: 'var(--text-faint)', fontSize: '0.78rem', marginTop: 6 }}>
+                {uploadingImages ? 'Cargando imágenes...' : 'Podés seleccionar varias imágenes o pegar URLs abajo.'}
+              </div>
+              <textarea className="form-input" rows={4} value={Array.isArray(listingForm.images) ? listingForm.images.join('\n') : listingForm.images} onChange={e => setListingForm(f => ({ ...f, images: e.target.value }))} placeholder="Una URL por línea" style={{ marginTop: 8 }} />
+            </div>
             <div className="input-group"><label className="input-label">Equipamiento (separado por comas)</label><input className="form-input" value={listingForm.equipment} onChange={e => setListingForm(f => ({ ...f, equipment: e.target.value }))} /></div>
           </form>
         </Modal>

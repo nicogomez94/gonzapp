@@ -201,6 +201,7 @@ export default function HomePage() {
               <div className="section-tag">Categorías</div>
               <h2 className="section-title fade-up">Explorá por tipo de vehículo</h2>
             </div>
+              <br />
             <Link to="/publicaciones" className="btn btn-outline">Ver todas <i className="fa-solid fa-arrow-right" /></Link>
           </div>
           <div className="categories-grid">
@@ -224,6 +225,7 @@ export default function HomePage() {
               <h2 className="section-title fade-up">Publicaciones destacadas</h2>
               <p className="section-subtitle">Los mejores vehículos seleccionados para vos</p>
             </div>
+            <br />
             <Link to="/publicaciones" className="btn btn-outline">Ver todas <i className="fa-solid fa-arrow-right" /></Link>
           </div>
           {loadingFeatured ? (

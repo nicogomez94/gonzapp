@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { isFavorite, toggleFavorite } from '../utils/favorites';
+import { cloudinaryImage } from '../utils/images';
 
 export default function ListingCard({ listing }) {
   const [fav, setFav] = useState(() => isFavorite(listing.id));
@@ -18,7 +19,7 @@ export default function ListingCard({ listing }) {
     <Link to={`/publicaciones/${listing.id}`} className="listing-card">
       <div className="listing-img">
         {img
-          ? <img src={img} alt={listing.title} loading="lazy" />
+          ? <img src={cloudinaryImage(img, 'f_auto,q_auto,c_fill,w_720,h_480')} alt={listing.title} loading="lazy" />
           : <div className="img-placeholder"><i className="fa-solid fa-car-side" /></div>
         }
         <div className="listing-badge-wrap">

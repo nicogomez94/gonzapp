@@ -29,6 +29,7 @@ export const authApi = {
 export const listingsApi = {
   getAll: (params) => api.get('/listings', { params }),
   getById: (id) => api.get(`/listings/${id}`),
+  uploadImages: (data) => api.post('/listings/images', data),
   create: (data) => api.post('/listings', data),
   update: (id, data) => api.put(`/listings/${id}`, data),
   remove: (id) => api.delete(`/listings/${id}`),

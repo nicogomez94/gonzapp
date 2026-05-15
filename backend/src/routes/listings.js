@@ -1,8 +1,75 @@
 const express = require('express');
+const { Readable } = require('stream');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const prisma = require('../db');
 
 const router = express.Router();
+
+const cloudinaryConfig = { secure: true };
+if (process.env.CLOUDINARY_CLOUD_NAME) cloudinaryConfig.cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+if (process.env.CLOUDINARY_API_KEY) cloudinaryConfig.api_key = process.env.CLOUDINARY_API_KEY;
+if (process.env.CLOUDINARY_API_SECRET) cloudinaryConfig.api_secret = process.env.CLOUDINARY_API_SECRET;
+cloudinary.config(cloudinaryConfig);
+
+const uploadImages = multer({
+  storage: multer.memoryStorage(),
+  limits: { files: 20, fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype?.startsWith('image/')) return cb(null, true);
+    return cb(new Error('Solo se permiten archivos de imagen'));
+  }
+}).array('images', 20);
+
+const cloudinaryReady = () => {
+  const config = cloudinary.config();
+  return !!(config.cloud_name && config.api_key && config.api_secret);
+};
+
+const uploadBufferToCloudinary = (file) => new Promise((resolve, reject) => {
+  const uploadStream = cloudinary.uploader.upload_stream({
+    folder: process.env.CLOUDINARY_FOLDER || 'gonzapp/listings',
+    resource_type: 'image',
+    use_filename: true,
+    unique_filename: true,
+    overwrite: false,
+    transformation: [
+      { width: 2200, height: 2200, crop: 'limit' }
+    ]
+  }, (error, result) => {
+    if (error) return reject(error);
+    return resolve(result);
+  });
+
+  Readable.from(file.buffer).pipe(uploadStream);
+});
+
+const cloudinaryPublicIdFromUrl = (imageUrl) => {
+  try {
+    const url = new URL(imageUrl);
+    if (!url.hostname.includes('res.cloudinary.com')) return null;
+
+    const parts = url.pathname.split('/').filter(Boolean);
+    const uploadIndex = parts.indexOf('upload');
+    if (uploadIndex === -1) return null;
+
+    const publicPath = parts.slice(uploadIndex + 1).filter(part => !/^v\d+$/.test(part)).join('/');
+    return decodeURIComponent(publicPath.replace(/\.[^/.]+$/, '')) || null;
+  } catch {
+    return null;
+  }
+};
+
+const deleteCloudinaryImages = async (imageUrls = []) => {
+  if (!cloudinaryReady()) return;
+
+  const publicIds = imageUrls.map(cloudinaryPublicIdFromUrl).filter(Boolean);
+  const results = await Promise.allSettled(publicIds.map(publicId => cloudinary.uploader.destroy(publicId, { resource_type: 'image' })));
+  results.forEach(result => {
+    if (result.status === 'rejected') console.warn('No se pudo eliminar una imagen de Cloudinary:', result.reason?.message || result.reason);
+  });
+};
 
 // GET /api/listings — public, with filters
 router.get('/', async (req, res) => {
@@ -52,6 +119,32 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /api/listings/images — admin only, upload multiple images
+router.post('/images', authMiddleware, adminMiddleware, (req, res) => {
+  uploadImages(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message || 'No se pudieron cargar las imágenes' });
+    if (!cloudinaryReady()) return res.status(500).json({ error: 'Cloudinary no está configurado en el servidor' });
+
+    try {
+      const uploaded = await Promise.all((req.files || []).map(uploadBufferToCloudinary));
+      res.status(201).json({
+        images: uploaded.map(file => file.secure_url),
+        assets: uploaded.map(file => ({
+          publicId: file.public_id,
+          url: file.secure_url,
+          width: file.width,
+          height: file.height,
+          format: file.format,
+          bytes: file.bytes
+        }))
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Cloudinary no pudo cargar las imágenes' });
+    }
+  });
+});
+
 // POST /api/listings — admin only
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
@@ -77,6 +170,9 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { title, brand, model, engine, year, mileage, fuel, transmission, description, equipment, priceArs, priceUsd, images, location, phone, status, featured, verified } = req.body;
+    const previousListing = images !== undefined
+      ? await prisma.listing.findUnique({ where: { id: parseInt(req.params.id) }, select: { images: true } })
+      : null;
     const listing = await prisma.listing.update({
       where: { id: parseInt(req.params.id) },
       data: {
@@ -94,6 +190,13 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
         ...(verified !== undefined && { verified: !!verified })
       }
     });
+
+    if (previousListing && images !== undefined) {
+      const nextImages = new Set(images || []);
+      const removedImages = (previousListing.images || []).filter(image => !nextImages.has(image));
+      deleteCloudinaryImages(removedImages).catch(error => console.warn('No se pudieron limpiar imágenes removidas:', error.message));
+    }
+
     res.json(listing);
   } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });
@@ -103,7 +206,9 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
 // DELETE /api/listings/:id — admin only
 router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
+    const listing = await prisma.listing.findUnique({ where: { id: parseInt(req.params.id) }, select: { images: true } });
     await prisma.listing.delete({ where: { id: parseInt(req.params.id) } });
+    deleteCloudinaryImages(listing?.images || []).catch(error => console.warn('No se pudieron limpiar imágenes eliminadas:', error.message));
     res.json({ message: 'Publicación eliminada' });
   } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });

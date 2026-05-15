@@ -47,3 +47,11 @@ services:
         value: 'postgresql://seguros2_db_user:iVpTPyhcuNR2L0eYfU7lwuovs4zM0hPn@dpg-d829vl7avr4c73berimg-a/seguros2_db?schema=gonzapp_webservice'
       - key: JWT_SECRET
         generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
+        value: gonzapp/listings
