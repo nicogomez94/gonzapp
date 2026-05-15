@@ -87,8 +87,7 @@ export default function LoginPage() {
       {/* LEFT VISUAL PANEL */}
       <div className="login-visual">
         <Link to="/" className="visual-logo">
-          <i className="fa-solid fa-car-side" />
-          AutoZona
+          <span className="logo-auto">AUTO</span><span className="logo-zona">ZONA</span>
         </Link>
 
         <div className="visual-car">

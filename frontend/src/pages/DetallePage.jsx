@@ -200,8 +200,8 @@ export default function DetallePage() {
                 </div>
               </div>
               <div className="seller-stats">
-                <div><strong>1</strong><span>Unidad publicada</span></div>
-                <div><strong>WhatsApp</strong><span>Contacto directo</span></div>
+                <div><strong>1</strong>&nbsp;<span>Unidad publicada</span></div>
+                <div><strong>WhatsApp</strong>&nbsp;<span>Contacto directo</span></div>
               </div>
             </div>
 

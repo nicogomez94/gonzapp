@@ -22,7 +22,7 @@ export default function Navbar() {
       <nav className={navClass}>
         <div className="nav-inner">
           <Link to="/" className="nav-logo">
-            <i className="fa-solid fa-car-side" /> AutoZona
+            <span className="logo-auto">AUTO</span><span className="logo-zona">ZONA</span>
           </Link>
 
           <ul className="nav-links">

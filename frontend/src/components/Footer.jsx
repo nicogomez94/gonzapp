@@ -7,8 +7,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
-              <i className="fa-solid fa-car-side" />
-              AutoZona
+              <span className="logo-auto">AUTO</span><span className="logo-zona">ZONA</span>
             </div>
             <p>Marketplace de autos con planes claros para publicar una unidad y contacto directo por WhatsApp.</p>
             <div className="footer-social">

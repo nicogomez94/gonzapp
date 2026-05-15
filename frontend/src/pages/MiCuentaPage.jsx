@@ -123,6 +123,7 @@ export default function MiCuentaPage() {
                   <input className="form-input" type="password" minLength={6} placeholder="Dejar vacío para no cambiar" value={profileForm.password} onChange={e => setProfileForm(f => ({ ...f, password: e.target.value }))} />
                 </div>
               </div>
+              <br />
               <button className="btn btn-primary" type="submit" disabled={saving}>
                 {saving ? <><i className="fa-solid fa-spinner fa-spin" /> Guardando</> : <><i className="fa-solid fa-floppy-disk" /> Guardar cambios</>}
               </button>

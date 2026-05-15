@@ -131,10 +131,12 @@ h3 { font-size: clamp(1rem, 1.5vw, 1.15rem); font-weight: 600; }
 }
 .nav-logo {
   font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
-  display: flex; align-items: center; gap: 7px; color: var(--primary);
+  display: flex; align-items: center; gap: 0; color: var(--primary);
 }
 .nav-logo .nav-logo-icon { color: var(--accent); }
 .nav-logo .dot { color: var(--accent); }
+.logo-auto { color: var(--primary); }
+.logo-zona { color: #5A5A6E; }
 .nav-links { display: flex; align-items: center; gap: 2px; }
 .nav-links a { padding: 7px 13px; border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.88rem; font-weight: 500; }
 .nav-links a:hover { color: var(--text); background: var(--bg); }
@@ -581,7 +583,7 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   padding: calc(var(--nav-height) + 20px) 0 20px;
 }
 .page-top-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-muted); opacity: 1; }
+.breadcrumb { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; font-size: 0.82rem; color: var(--text-muted); opacity: 1; }
 .breadcrumb a { color: var(--text-muted); }
 .breadcrumb a:hover { color: var(--primary); }
 .breadcrumb .fa-chevron-right { color: var(--text-muted); }
@@ -843,9 +845,10 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   background: repeating-linear-gradient(90deg, #fff 0 30px, transparent 30px 60px);
   opacity: 0.2;
 }
-.visual-logo { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 0; position: relative; z-index: 1; align-self: flex-start; }
+.visual-logo { display: flex; align-items: center; gap: 0; color: #fff; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 0; position: relative; z-index: 1; align-self: flex-start; }
 .visual-logo i { color: #FFB347; }
-.visual-logo span { color: #FFB347; }
+.visual-logo .logo-auto { color: var(--primary); }
+.visual-logo .logo-zona { color: #fff; }
 .visual-tagline { position: relative; z-index: 1; margin-bottom: clamp(8px, 1.2vh, 16px); align-self: flex-start; }
 .visual-tagline h2 { color: #fff; font-size: clamp(1.42rem, 2.5vh, 1.75rem); line-height: 1.16; margin-bottom: 8px; }
 .visual-tagline p { color: rgba(255,255,255,0.78); font-size: 0.92rem; line-height: 1.42; max-width: 360px; }
