@@ -156,7 +156,9 @@ export default function HomePage() {
             <div className="hero-right">
               <div className="hero-car-mockup">
                 <div className="car-listing-preview">
-                  <div className="car-preview-img">🚗</div>
+                  <div className="car-preview-img">
+                    <img src="/hilux.png" alt="Toyota Hilux SRX 4x4 destacada" />
+                  </div>
                   <div className="car-preview-body">
                     <div className="car-preview-brand">Toyota · Destacado</div>
                     <div className="car-preview-name">Hilux SRX 4×4 Automática</div>

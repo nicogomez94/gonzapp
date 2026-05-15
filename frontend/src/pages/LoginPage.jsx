@@ -91,7 +91,9 @@ export default function LoginPage() {
           AutoZona
         </Link>
 
-        <div className="visual-car">🚗</div>
+        <div className="visual-car">
+          <img src="/hilux.png" alt="Toyota Hilux" />
+        </div>
 
         <div className="visual-tagline">
           <h2>Tu próximo auto está a un clic</h2>

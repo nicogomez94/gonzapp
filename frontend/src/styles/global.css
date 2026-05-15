@@ -420,6 +420,9 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   display: flex; align-items: center; justify-content: center; font-size: 4rem;
   position: relative; overflow: hidden;
 }
+.car-preview-img img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
 .car-preview-body { padding: 14px; }
 .car-preview-brand { font-size: 0.72rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 .car-preview-name { font-size: 1rem; font-weight: 700; margin: 3px 0 8px; color: var(--text); }
@@ -847,7 +850,15 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 .visual-feature-text { font-size: 0.9rem; }
 .visual-feature-text strong { display: block; color: #fff; font-weight: 600; }
 .visual-feature-text span { font-size: 0.8rem; opacity: 0.75; }
-.visual-car { font-size: 6rem; text-align: center; position: relative; z-index: 1; margin: 28px 0; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); }
+.visual-car {
+  width: min(440px, 100%); aspect-ratio: 3 / 2; text-align: center;
+  position: relative; z-index: 1; margin: 28px 0;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3));
+}
+.visual-car img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+}
 .visual-stats { display: flex; gap: 24px; position: relative; z-index: 1; align-self: flex-start; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); width: 100%; }
 .visual-stat { text-align: left; }
 .visual-stat strong { font-size: 1.4rem; font-weight: 900; color: #fff; }

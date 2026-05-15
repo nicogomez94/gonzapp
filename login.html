@@ -46,7 +46,8 @@
     .visual-feature-text span { font-size: 0.8rem; opacity: 0.75; }
 
     /* Car illustration */
-    .visual-car { font-size: 6rem; text-align: center; position: relative; z-index: 1; margin: 28px 0; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); }
+    .visual-car { width: min(440px, 100%); aspect-ratio: 3 / 2; text-align: center; position: relative; z-index: 1; margin: 28px 0; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); }
+    .visual-car img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
     .visual-stats { display: flex; gap: 24px; position: relative; z-index: 1; align-self: flex-start; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); width: 100%; }
     .visual-stat { text-align: left; }
@@ -133,7 +134,9 @@
   <div class="login-visual">
     <a href="index.html" class="visual-logo"><i class="fa-solid fa-car-side"></i> AutoZona</a>
 
-    <div class="visual-car">🚗</div>
+    <div class="visual-car">
+      <img src="frontend/public/hilux.png" alt="Toyota Hilux">
+    </div>
 
     <div class="visual-tagline">
       <h2>Tu próximo auto está a un clic</h2>
