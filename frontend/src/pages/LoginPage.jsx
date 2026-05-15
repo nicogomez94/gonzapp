@@ -23,6 +23,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+
+  const passwordScore = (() => {
+    const value = registerForm.password || '';
+    let score = 0;
+    if (value.length >= 6) score += 1;
+    if (value.length >= 10) score += 1;
+    if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score += 1;
+    if (/\d/.test(value)) score += 1;
+    if (/[^A-Za-z0-9]/.test(value)) score += 1;
+    return Math.min(score, 4);
+  })();
+
+  const strengthMeta = [
+    { label: '', color: 'var(--border)', width: '0%' },
+    { label: 'Débil', color: 'var(--error)', width: '28%' },
+    { label: 'Media', color: 'var(--warning)', width: '52%' },
+    { label: 'Buena', color: 'var(--primary)', width: '76%' },
+    { label: 'Fuerte', color: 'var(--success)', width: '100%' }
+  ][passwordScore];
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -43,6 +63,10 @@ export default function LoginPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    if (!acceptTerms) {
+      setError('Debés aceptar los términos y condiciones');
+      return;
+    }
     setLoading(true);
     try {
       const { data } = await authApi.register(registerForm);
@@ -62,23 +86,46 @@ export default function LoginPage() {
     <div className="login-wrap">
       {/* LEFT VISUAL PANEL */}
       <div className="login-visual">
-        <div className="visual-logo">
+        <Link to="/" className="visual-logo">
           <i className="fa-solid fa-car-side" />
           AutoZona
-        </div>
-        <div className="visual-tagline">
-          Plataforma para comprar autos y publicar una unidad con planes claros
-        </div>
+        </Link>
+
         <div className="visual-car">🚗</div>
-        <div className="visual-features">
-          <div><i className="fa-solid fa-shield-check" /> Documentación verificada según plan</div>
-          <div><i className="fa-solid fa-car-side" /> Una unidad por publicación</div>
-          <div><i className="fa-brands fa-whatsapp" /> Contacto directo</div>
+
+        <div className="visual-tagline">
+          <h2>Tu próximo auto está a un clic</h2>
+          <p>Publicá, comprá y vendé autos con la plataforma más completa de Argentina.</p>
         </div>
+
+        <div className="visual-features">
+          <div className="visual-feature">
+            <div className="visual-feature-icon"><i className="fa-solid fa-shield-check" /></div>
+            <div className="visual-feature-text">
+              <strong>Transacciones 100% seguras</strong>
+              <span>Protegidas con verificación y gestión clara</span>
+            </div>
+          </div>
+          <div className="visual-feature">
+            <div className="visual-feature-icon"><i className="fa-solid fa-magnifying-glass" /></div>
+            <div className="visual-feature-text">
+              <strong>Publicaciones listas para comparar</strong>
+              <span>Encontrá exactamente lo que buscás</span>
+            </div>
+          </div>
+          <div className="visual-feature">
+            <div className="visual-feature-icon"><i className="fa-brands fa-whatsapp" /></div>
+            <div className="visual-feature-text">
+              <strong>Contacto directo con vendedores</strong>
+              <span>Sin intermediarios ni comisiones ocultas</span>
+            </div>
+          </div>
+        </div>
+
         <div className="visual-stats">
-          <div><strong>$30k</strong><span>Básico</span></div>
-          <div><strong>$55k</strong><span>Intermedio</span></div>
-          <div><strong>$80k</strong><span>Premium</span></div>
+          <div className="visual-stat"><strong>48K+</strong><span>Autos vendidos</span></div>
+          <div className="visual-stat"><strong>98%</strong><span>Satisfacción</span></div>
+          <div className="visual-stat"><strong>850+</strong><span>Concesionarias</span></div>
         </div>
       </div>
 
@@ -106,14 +153,14 @@ export default function LoginPage() {
 
             <div className="social-buttons">
               <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-google" style={{ color: '#EA4335' }} /> Continuar con Google
+                <i className="fa-brands fa-google" style={{ color: '#EA4335' }} /> Google
               </button>
               <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-facebook" style={{ color: '#1877F2' }} /> Continuar con Facebook
+                <i className="fa-brands fa-facebook" style={{ color: '#1877F2' }} /> Facebook
               </button>
             </div>
 
-            <div className="divider"><span>o con tu email</span></div>
+            <div className="divider"><span>o ingresá con tu email</span></div>
 
             {error && tab === 'login' && (
               <div className="alert alert-error" style={{ marginBottom: 16 }}>
@@ -122,72 +169,76 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleLogin}>
-              <div className="input-group">
-                <label className="input-label">Email</label>
-                <div className="input-wrap">
-                  <i className="fa-solid fa-envelope input-icon" />
-                  <input
-                    type="email"
-                    className="form-input"
-                    placeholder="tu@email.com"
-                    required
-                    value={loginForm.email}
-                    onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
-                  />
+              <div className="auth-form-stack">
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <div className="input-wrap">
+                    <i className="fa-solid fa-envelope input-icon" />
+                    <input
+                      type="email"
+                      className="form-input"
+                      placeholder="tu@email.com"
+                      required
+                      value={loginForm.email}
+                      onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="input-group">
-                <label className="input-label">Contraseña</label>
-                <div className="input-wrap">
-                  <i className="fa-solid fa-lock input-icon" />
-                  <input
-                    type={showPass ? 'text' : 'password'}
-                    className="form-input"
-                    placeholder="••••••••"
-                    required
-                    value={loginForm.password}
-                    onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
-                  />
-                  <button type="button" className="pass-toggle" onClick={() => setShowPass(!showPass)}>
-                    <i className={`fa-solid ${showPass ? 'fa-eye-slash' : 'fa-eye'}`} />
-                  </button>
+                <div className="form-group">
+                  <div className="form-label-row">
+                    <label className="form-label">Contraseña</label>
+                    <Link to="/forgot-password" className="forgot-link">¿Olvidaste tu contraseña?</Link>
+                  </div>
+                  <div className="input-wrap input-wrap-password">
+                    <i className="fa-solid fa-lock input-icon" />
+                    <input
+                      type={showPass ? 'text' : 'password'}
+                      className="form-input"
+                      placeholder="Tu contraseña"
+                      required
+                      value={loginForm.password}
+                      onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
+                    />
+                    <button type="button" className="pass-toggle" onClick={() => setShowPass(!showPass)}>
+                      <i className={`fa-solid ${showPass ? 'fa-eye-slash' : 'fa-eye'}`} />
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="check-row">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
-                  Recordarme
-                </label>
-                <Link to="/forgot-password" className="forgot-link">¿Olvidaste tu contraseña?</Link>
-              </div>
+                <div className="check-row auth-check-row">
+                  <label>
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+                    <span>Recordarme en este dispositivo</span>
+                  </label>
+                </div>
 
-              <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Ingresando…</> : <><i className="fa-solid fa-right-to-bracket" /> Ingresar</>}
-              </button>
+                <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+                  {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Ingresando…</> : <><i className="fa-solid fa-right-to-bracket" /> Ingresar</>}
+                </button>
+              </div>
             </form>
 
             <p className="auth-switch">
-              ¿No tenés cuenta? <button type="button" className="link-btn" onClick={() => switchTab('register')}>Registrate</button>
+              ¿No tenés cuenta? <button type="button" className="link-btn" onClick={() => switchTab('register')}>Registrate gratis</button>
             </p>
           </div>
 
           {/* REGISTER PANEL */}
           <div className={`auth-panel${tab === 'register' ? ' active' : ''}`} style={{ display: tab === 'register' ? 'block' : 'none' }}>
-            <h2 className="form-title">Creá tu cuenta</h2>
-            <p className="form-subtitle">Creá tu usuario para gestionar consultas y publicaciones</p>
+            <h2 className="form-title">Creá tu cuenta gratis</h2>
+            <p className="form-subtitle">Publicá tu auto y llegá a miles de compradores</p>
 
             <div className="social-buttons">
               <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-google" style={{ color: '#EA4335' }} /> Continuar con Google
+                <i className="fa-brands fa-google" style={{ color: '#EA4335' }} /> Google
               </button>
               <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-facebook" style={{ color: '#1877F2' }} /> Continuar con Facebook
+                <i className="fa-brands fa-facebook" style={{ color: '#1877F2' }} /> Facebook
               </button>
             </div>
 
-            <div className="divider"><span>o con tu email</span></div>
+            <div className="divider"><span>o registrate con tu email</span></div>
 
             {error && tab === 'register' && (
               <div className="alert alert-error" style={{ marginBottom: 16 }}>
@@ -196,72 +247,95 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleRegister}>
-              <div className="input-group">
-                <label className="input-label">Nombre completo</label>
-                <div className="input-wrap">
-                  <i className="fa-solid fa-user input-icon" />
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Juan Pérez"
-                    required
-                    value={registerForm.name}
-                    onChange={e => setRegisterForm(f => ({ ...f, name: e.target.value }))}
-                  />
+              <div className="auth-form-stack">
+                <div className="form-group">
+                  <label className="form-label">Nombre completo</label>
+                  <div className="input-wrap">
+                    <i className="fa-solid fa-user input-icon" />
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Juan Pérez"
+                      required
+                      value={registerForm.name}
+                      onChange={e => setRegisterForm(f => ({ ...f, name: e.target.value }))}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="input-group">
-                <label className="input-label">Email</label>
-                <div className="input-wrap">
-                  <i className="fa-solid fa-envelope input-icon" />
-                  <input
-                    type="email"
-                    className="form-input"
-                    placeholder="tu@email.com"
-                    required
-                    value={registerForm.email}
-                    onChange={e => setRegisterForm(f => ({ ...f, email: e.target.value }))}
-                  />
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <div className="input-wrap">
+                    <i className="fa-solid fa-envelope input-icon" />
+                    <input
+                      type="email"
+                      className="form-input"
+                      placeholder="tu@email.com"
+                      required
+                      value={registerForm.email}
+                      onChange={e => setRegisterForm(f => ({ ...f, email: e.target.value }))}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="input-group">
-                <label className="input-label">Teléfono</label>
-                <div className="input-wrap">
-                  <i className="fa-solid fa-phone input-icon" />
-                  <input
-                    type="tel"
-                    className="form-input"
-                    placeholder="1155001234"
-                    value={registerForm.phone}
-                    onChange={e => setRegisterForm(f => ({ ...f, phone: e.target.value }))}
-                  />
+                <div className="form-group">
+                  <label className="form-label">Teléfono / WhatsApp <span>(opcional)</span></label>
+                  <div className="input-wrap">
+                    <i className="fa-brands fa-whatsapp input-icon input-icon-whatsapp" />
+                    <input
+                      type="tel"
+                      className="form-input"
+                      placeholder="+54 9 11 1234-5678"
+                      value={registerForm.phone}
+                      onChange={e => setRegisterForm(f => ({ ...f, phone: e.target.value }))}
+                    />
+                  </div>
+                  <span className="form-hint"><i className="fa-solid fa-info-circle" /> Se usará para contacto directo de compradores</span>
                 </div>
-              </div>
 
-              <div className="input-group">
-                <label className="input-label">Contraseña</label>
-                <div className="input-wrap">
-                  <i className="fa-solid fa-lock input-icon" />
-                  <input
-                    type={showPass ? 'text' : 'password'}
-                    className="form-input"
-                    placeholder="Mínimo 6 caracteres"
-                    required
-                    minLength={6}
-                    value={registerForm.password}
-                    onChange={e => setRegisterForm(f => ({ ...f, password: e.target.value }))}
-                  />
-                  <button type="button" className="pass-toggle" onClick={() => setShowPass(!showPass)}>
-                    <i className={`fa-solid ${showPass ? 'fa-eye-slash' : 'fa-eye'}`} />
-                  </button>
+                <div className="form-group">
+                  <label className="form-label">Contraseña</label>
+                  <div className="input-wrap input-wrap-password">
+                    <i className="fa-solid fa-lock input-icon" />
+                    <input
+                      type={showPass ? 'text' : 'password'}
+                      className="form-input"
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      minLength={6}
+                      value={registerForm.password}
+                      onChange={e => setRegisterForm(f => ({ ...f, password: e.target.value }))}
+                    />
+                    <button type="button" className="pass-toggle" onClick={() => setShowPass(!showPass)}>
+                      <i className={`fa-solid ${showPass ? 'fa-eye-slash' : 'fa-eye'}`} />
+                    </button>
+                  </div>
+                  <div className="strength-bar"><div className="strength-bar-fill" style={{ width: strengthMeta.width, background: strengthMeta.color }} /></div>
+                  <div className="strength-row">
+                    <span className="form-hint">Usá letras, números y símbolos</span>
+                    <span className="strength-label" style={{ color: strengthMeta.color }}>{strengthMeta.label}</span>
+                  </div>
                 </div>
-              </div>
 
-              <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Creando cuenta…</> : <><i className="fa-solid fa-user-plus" /> Crear cuenta</>}
-              </button>
+                <div className="form-group">
+                  <label className="form-label">Tipo de cuenta</label>
+                  <select className="form-input" defaultValue="particular">
+                    <option value="particular">Particular - Vendo mi propio auto</option>
+                    <option value="concesionaria">Concesionaria / Empresa</option>
+                  </select>
+                </div>
+
+                <div className="check-row terms-row">
+                  <label>
+                    <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} />
+                    <span>Acepto los <a href="#">Términos y condiciones</a> y la <a href="#">Política de privacidad</a> de AutoZona</span>
+                  </label>
+                </div>
+
+                <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+                  {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Creando tu cuenta…</> : <><i className="fa-solid fa-user-plus" /> Crear cuenta gratis</>}
+                </button>
+              </div>
             </form>
 
             <p className="auth-switch">
