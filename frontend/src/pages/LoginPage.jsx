@@ -25,6 +25,13 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
+  const nextPathForUser = (userData) => {
+    if (userData.role === 'ADMIN') return '/dashboard';
+    if (userData.approvalStatus === 'PENDING_PLAN') return '/planes';
+    if (userData.approvalStatus === 'PENDING_APPROVAL') return '/mi-cuenta';
+    return '/mi-cuenta';
+  };
+
   const passwordScore = (() => {
     const value = registerForm.password || '';
     let score = 0;
@@ -52,7 +59,7 @@ export default function LoginPage() {
       const { data } = await authApi.login(loginForm);
       login(data.token, data.user);
       show('¡Bienvenido de vuelta!');
-      navigate(data.user.role === 'ADMIN' ? '/dashboard' : '/');
+      navigate(nextPathForUser(data.user));
     } catch (err) {
       setError(err.response?.data?.error || 'Credenciales incorrectas');
     } finally {
@@ -71,8 +78,8 @@ export default function LoginPage() {
     try {
       const { data } = await authApi.register(registerForm);
       login(data.token, data.user);
-      show('¡Cuenta creada con éxito!');
-      navigate('/');
+      show('¡Cuenta creada con éxito! Elegí un plan para continuar.');
+      navigate('/planes');
     } catch (err) {
       setError(err.response?.data?.error || 'Error al registrarse');
     } finally {
@@ -316,14 +323,6 @@ export default function LoginPage() {
                     <span className="form-hint">Usá letras, números y símbolos</span>
                     <span className="strength-label" style={{ color: strengthMeta.color }}>{strengthMeta.label}</span>
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Tipo de cuenta</label>
-                  <select className="form-input" defaultValue="particular">
-                    <option value="particular">Particular - Vendo mi propio auto</option>
-                    <option value="concesionaria">Concesionaria / Empresa</option>
-                  </select>
                 </div>
 
                 <div className="check-row terms-row">

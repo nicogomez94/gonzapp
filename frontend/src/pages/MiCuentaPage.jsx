@@ -7,9 +7,9 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function MiCuentaPage() {
-  const { user, login } = useAuth();
+  const { user, login, updateUser } = useAuth();
   const { show } = useToast();
-  const [profileForm, setProfileForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [profileForm, setProfileForm] = useState(() => ({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', password: '' }));
   const [saving, setSaving] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(() => getFavoriteIds());
   const [favorites, setFavorites] = useState([]);
@@ -25,13 +25,13 @@ export default function MiCuentaPage() {
   }, [profileForm.name, user?.name]);
 
   useEffect(() => {
-    if (user) setProfileForm({ name: user.name || '', email: user.email || '', phone: user.phone || '', password: '' });
     authApi.me()
       .then(({ data }) => {
+        updateUser(data.user);
         setProfileForm({ name: data.user.name || '', email: data.user.email || '', phone: data.user.phone || '', password: '' });
       })
       .catch(() => {});
-  }, [user?.id]);
+  }, [user?.id, updateUser]);
 
   useEffect(() => {
     const syncFavorites = () => setFavoriteIds(getFavoriteIds());
@@ -45,12 +45,14 @@ export default function MiCuentaPage() {
 
   useEffect(() => {
     if (!favoriteIds.length) {
-      setFavorites([]);
       return;
     }
 
-    setLoadingFavs(true);
-    Promise.allSettled(favoriteIds.map(id => listingsApi.getById(id)))
+    Promise.resolve()
+      .then(() => {
+        setLoadingFavs(true);
+        return Promise.allSettled(favoriteIds.map(id => listingsApi.getById(id)));
+      })
       .then(results => {
         setFavorites(results
           .filter(r => r.status === 'fulfilled')
@@ -58,6 +60,8 @@ export default function MiCuentaPage() {
       })
       .finally(() => setLoadingFavs(false));
   }, [favoriteIds]);
+
+  const visibleFavorites = favoriteIds.length ? favorites : [];
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -75,6 +79,45 @@ export default function MiCuentaPage() {
       setSaving(false);
     }
   };
+
+  if (user?.role !== 'ADMIN' && user?.approvalStatus === 'PENDING_APPROVAL') {
+    return (
+      <div className="page-wrap account-page">
+        <div className="container">
+          <div className="account-header">
+            <div className="account-avatar">{initials}</div>
+            <div>
+              <div className="breadcrumb" style={{ marginBottom: 8 }}>
+                <Link to="/"><i className="fa-solid fa-house" /></Link>
+                <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} />
+                <span>Validación</span>
+              </div>
+              <h1>Estamos validando tu cuenta</h1>
+              <p>Ya elegiste tu plan. El administrador tiene que aprobarte para habilitar tu panel.</p>
+            </div>
+          </div>
+
+          <section className="account-card approval-wait-card">
+            <div className="approval-wait-icon"><i className="fa-solid fa-clock" /></div>
+            <div>
+              <span className="badge badge-warning">Pendiente de validación</span>
+              <h2>Tu solicitud está en revisión</h2>
+              <p>
+                Tu cuenta quedó registrada con el plan {user.plan?.name ? <strong> {user.plan.name}</strong> : ' seleccionado'}.
+                Un administrador revisará tus datos y, una vez aprobada, vas a poder acceder al panel y operar normalmente en el sitio.
+              </p>
+              <div className="approval-wait-actions">
+                <Link to="/planes" className="btn btn-outline"><i className="fa-solid fa-crown" /> Ver planes</Link>
+                <a href="https://wa.me/542665016253?text=Hola%2C%20ya%20eleg%C3%AD%20un%20plan%20en%20AutoZona%20y%20quiero%20validar%20mi%20cuenta" target="_blank" rel="noreferrer" className="btn btn-accent">
+                  <i className="fa-brands fa-whatsapp" /> Escribir por WhatsApp
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-wrap account-page">
@@ -153,9 +196,9 @@ export default function MiCuentaPage() {
             <div className="account-loading">
               <i className="fa-solid fa-spinner fa-spin" /> Cargando favoritos
             </div>
-          ) : favorites.length > 0 ? (
+          ) : visibleFavorites.length > 0 ? (
             <div className="account-favorites-grid">
-              {favorites.map(listing => <ListingCard key={listing.id} listing={listing} />)}
+              {visibleFavorites.map(listing => <ListingCard key={listing.id} listing={listing} />)}
             </div>
           ) : (
             <div className="empty-state">

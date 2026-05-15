@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { plansApi } from '../api';
+import { Link, useNavigate } from 'react-router-dom';
+import { authApi, plansApi } from '../api';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const WHATSAPP_LINK = 'https://wa.me/542665016253';
 
@@ -48,8 +50,12 @@ const includesFeature = (plan, terms) => {
 };
 
 export default function PlanesPage() {
+  const { user, login } = useAuth();
+  const { show } = useToast();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectingPlanId, setSelectingPlanId] = useState(null);
 
   useEffect(() => {
     plansApi.getAll()
@@ -59,6 +65,63 @@ export default function PlanesPage() {
   }, []);
 
   const visiblePlans = plans.length ? plans : FALLBACK_PLANS;
+  const needsApproval = user?.role !== 'ADMIN' && user?.approvalStatus === 'PENDING_APPROVAL';
+
+  const selectPlan = async (plan) => {
+    if (!user) {
+      navigate('/login?tab=register');
+      return;
+    }
+    if (user.role === 'ADMIN') {
+      show('Los administradores gestionan planes desde el panel');
+      return;
+    }
+    if (!plan.id) {
+      show('Esperá a que carguen los planes para elegir uno', 'error');
+      return;
+    }
+
+    setSelectingPlanId(plan.id);
+    try {
+      const { data } = await authApi.selectPlan(plan.id);
+      login(data.token, data.user);
+      show('Plan elegido. Te avisamos apenas el administrador valide tu cuenta.');
+      navigate('/mi-cuenta');
+    } catch (err) {
+      show(err.response?.data?.error || 'No se pudo seleccionar el plan', 'error');
+    } finally {
+      setSelectingPlanId(null);
+    }
+  };
+
+  const planButton = (plan, featured) => {
+    if (needsApproval && user.planId === plan.id) {
+      return (
+        <button className={`btn ${featured ? 'btn-primary' : 'btn-outline'} btn-block`} disabled>
+          <i className="fa-solid fa-clock" /> Esperando validación
+        </button>
+      );
+    }
+
+    if (user?.approvalStatus === 'APPROVED' && user.planId === plan.id) {
+      return (
+        <button className="btn btn-outline btn-block" disabled>
+          <i className="fa-solid fa-circle-check" /> Plan activo
+        </button>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        className={`btn ${featured ? 'btn-primary' : 'btn-outline'} btn-block`}
+        onClick={() => selectPlan(plan)}
+        disabled={selectingPlanId === plan.id || needsApproval}
+      >
+        {selectingPlanId === plan.id ? <><i className="fa-solid fa-spinner fa-spin" /> Seleccionando</> : <><i className="fa-solid fa-check" /> Elegir este plan</>}
+      </button>
+    );
+  };
 
   return (
     <>
@@ -76,6 +139,12 @@ export default function PlanesPage() {
               <p>
                 Cada plan permite publicar una unidad, con contacto directo por WhatsApp y acompañamiento para coordinar la carga inicial.
               </p>
+              {needsApproval && (
+                <div className="plans-status-note">
+                  <i className="fa-solid fa-clock" />
+                  <span>Ya elegiste {user.plan?.name || 'un plan'}. Tu solicitud está en revisión y el administrador habilitará tu panel cuando la cuenta sea aprobada.</span>
+                </div>
+              )}
               <div className="plans-hero-actions">
                 <a href={planWhatsAppLink('publicación')} target="_blank" rel="noreferrer" className="btn btn-accent btn-lg">
                   <i className="fa-brands fa-whatsapp" /> Consultar por WhatsApp
@@ -116,9 +185,7 @@ export default function PlanesPage() {
                       <li key={feature}><i className="fa-solid fa-check" /> {feature}</li>
                     ))}
                   </ul>
-                  <a href={planWhatsAppLink(plan.name)} target="_blank" rel="noreferrer" className={`btn ${meta.featured ? 'btn-primary' : 'btn-outline'} btn-block`}>
-                    Consultar este plan
-                  </a>
+                  {planButton(plan, meta.featured)}
                 </div>
               );
             })}

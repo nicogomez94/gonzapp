@@ -54,7 +54,8 @@ async function main() {
       password: adminPassword,
       name: 'Administrador',
       phone: '2665016253',
-      role: 'ADMIN'
+      role: 'ADMIN',
+      approvalStatus: 'APPROVED'
     }
   });
 
@@ -69,7 +70,8 @@ async function main() {
       name: 'Juan Martínez',
       phone: '1150001234',
       role: 'USER',
-      planId: intermediatePlan.id
+      planId: intermediatePlan.id,
+      approvalStatus: 'APPROVED'
     }
   });
 

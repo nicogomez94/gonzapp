@@ -212,6 +212,13 @@ h3 { font-size: clamp(1rem, 1.5vw, 1.15rem); font-weight: 600; }
 .pricing-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
 .pricing-features { margin: 0 0 22px; display: flex; flex-direction: column; gap: 9px; padding: 0; }
 .pricing-features li { display: flex; align-items: center; gap: 9px; font-size: 0.88rem; color: var(--text); }
+.plans-status-note {
+  display: flex; align-items: flex-start; gap: 10px;
+  max-width: 560px; margin-top: 16px; padding: 12px 14px;
+  border: 1px solid #fde68a; border-radius: var(--radius);
+  background: var(--warning-bg); color: #92400e; font-size: 0.9rem; line-height: 1.45;
+}
+.plans-status-note i { margin-top: 2px; }
 
 /* ============================================================  STATS  ============================================================ */
 .stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; align-items: center; gap: 16px; transition: var(--transition); }
@@ -807,6 +814,18 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   padding: 38px; text-align: center; color: var(--text-muted);
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+.approval-wait-card {
+  display: grid; grid-template-columns: 68px minmax(0, 1fr);
+  gap: 18px; max-width: 760px; margin-bottom: 50px;
+}
+.approval-wait-icon {
+  width: 68px; height: 68px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--warning-bg); color: var(--warning); font-size: 1.45rem;
+}
+.approval-wait-card h2 { margin: 12px 0 8px; font-size: 1.35rem; }
+.approval-wait-card p { color: var(--text-muted); line-height: 1.65; max-width: 620px; }
+.approval-wait-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
 @media (max-width: 920px) {
   .account-layout { grid-template-columns: 1fr; }
@@ -819,6 +838,7 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   .account-card .form-row { grid-template-columns: 1fr; gap: 0; }
   .account-card-header { flex-direction: column; }
   .account-favorites-grid { grid-template-columns: 1fr; }
+  .approval-wait-card { grid-template-columns: 1fr; }
 }
 
 /* ============================================================  LOGIN PAGE  ============================================================ */

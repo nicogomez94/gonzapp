@@ -7,12 +7,21 @@ const prisma = require('../db');
 const router = express.Router();
 
 function publicUser(user) {
-  return { id: user.id, email: user.email, name: user.name, phone: user.phone, role: user.role };
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    phone: user.phone,
+    role: user.role,
+    approvalStatus: user.approvalStatus,
+    planId: user.planId,
+    plan: user.plan || null
+  };
 }
 
 function signUserToken(user) {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role, name: user.name },
+    { id: user.id, email: user.email, role: user.role, name: user.name, approvalStatus: user.approvalStatus },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -25,7 +34,7 @@ router.post('/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña requeridos' });
     }
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email }, include: { plan: true } });
     if (!user) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
@@ -54,7 +63,8 @@ router.post('/register', async (req, res) => {
     }
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { email, password: hashed, name, phone: phone || null }
+      data: { email, password: hashed, name, phone: phone || null, approvalStatus: 'PENDING_PLAN' },
+      include: { plan: true }
     });
     const token = signUserToken(user);
     res.status(201).json({ token, user: publicUser(user) });
@@ -69,10 +79,10 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, phone: true, role: true }
+      include: { plan: true }
     });
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json({ user });
+    res.json({ user: publicUser(user) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error del servidor' });
@@ -101,10 +111,42 @@ router.put('/me', authMiddleware, async (req, res) => {
     const user = await prisma.user.update({
       where: { id: req.user.id },
       data,
-      select: { id: true, email: true, name: true, phone: true, role: true }
+      include: { plan: true }
     });
 
-    res.json({ token: signUserToken(user), user });
+    res.json({ token: signUserToken(user), user: publicUser(user) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// POST /api/auth/select-plan
+router.post('/select-plan', authMiddleware, async (req, res) => {
+  try {
+    const { planId } = req.body;
+    if (!planId) {
+      return res.status(400).json({ error: 'Plan requerido' });
+    }
+
+    const plan = await prisma.plan.findUnique({ where: { id: parseInt(planId) } });
+    if (!plan) {
+      return res.status(404).json({ error: 'Plan no encontrado' });
+    }
+
+    const currentUser = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!currentUser) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (currentUser.role === 'ADMIN') {
+      return res.status(400).json({ error: 'Los administradores no necesitan validación de plan' });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { planId: plan.id, approvalStatus: 'PENDING_APPROVAL' },
+      include: { plan: true }
+    });
+
+    res.json({ token: signUserToken(user), user: publicUser(user) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error del servidor' });

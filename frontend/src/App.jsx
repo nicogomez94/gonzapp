@@ -24,6 +24,7 @@ function ProtectedAdmin({ children }) {
 function ProtectedUser({ children }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'ADMIN' && user.approvalStatus === 'PENDING_PLAN') return <Navigate to="/planes" replace />;
   return children;
 }
 

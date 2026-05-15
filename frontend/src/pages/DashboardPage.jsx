@@ -6,17 +6,24 @@ import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
 
 const LISTING_STATUSES = ['ACTIVE', 'PAUSED', 'PENDING', 'EXPIRED'];
+const USER_APPROVAL_STATUSES = ['PENDING_PLAN', 'PENDING_APPROVAL', 'APPROVED'];
 const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
 const TRANSMISSIONS = ['Manual', 'Automática'];
 
 const emptyListing = { title: '', brand: '', model: '', year: '', mileage: '', fuel: 'Nafta', transmission: 'Manual', engine: '', priceArs: '', priceUsd: '', location: '', phone: '', description: '', status: 'ACTIVE', featured: false, verified: false, images: [], equipment: [] };
-const emptyUser = { name: '', email: '', password: '', phone: '', role: 'USER', planId: '' };
+const emptyUser = { name: '', email: '', password: '', phone: '', role: 'USER', approvalStatus: 'PENDING_PLAN', planId: '' };
 const emptyPlan = { name: '', price: '', maxImages: '', daysActive: '', features: '' };
 
 function StatusDot({ status }) {
   const s = status?.toLowerCase();
   return <div className={`status-dot ${s}`} />;
 }
+
+const approvalMeta = {
+  PENDING_PLAN: { label: 'Debe elegir plan', badge: 'badge-gray' },
+  PENDING_APPROVAL: { label: 'Esperando admin', badge: 'badge-warning' },
+  APPROVED: { label: 'Aprobado', badge: 'badge-success' },
+};
 
 const parseImageList = (images) => {
   if (Array.isArray(images)) return images.filter(Boolean);
@@ -115,6 +122,15 @@ export default function DashboardPage() {
     const payload = { ...userForm, planId: userForm.planId ? +userForm.planId : null }; if (!payload.password) delete payload.password;
     try { if (userModal.mode === 'create') await usersApi.create(payload); else await usersApi.update(userModal.id, payload); show(userModal.mode === 'create' ? 'Usuario creado' : 'Usuario actualizado'); setUserModal(null); loadUsers(); } catch (err) { show(err.response?.data?.error || 'Error al guardar', 'error'); }
   };
+  const approveUser = async (id) => {
+    try {
+      await usersApi.update(id, { approvalStatus: 'APPROVED' });
+      show('Usuario aprobado');
+      loadUsers();
+    } catch (err) {
+      show(err.response?.data?.error || 'No se pudo aprobar el usuario', 'error');
+    }
+  };
   const deleteUser = async (id) => { try { await usersApi.remove(id); show('Usuario eliminado'); loadUsers(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
   const openCreatePlan = () => { setPlanForm(emptyPlan); setPlanModal({ mode: 'create' }); };
@@ -129,6 +145,7 @@ export default function DashboardPage() {
   const activeListing = listings.filter(l => l.status === 'ACTIVE').length;
   const pendingListing = listings.filter(l => l.status === 'PENDING').length;
   const usersWithPlan = users.filter(u => u.planId).length;
+  const pendingApprovalUsers = users.filter(u => u.approvalStatus === 'PENDING_APPROVAL').length;
   const usersOverLimit = users.filter(u => (u._count?.listings || 0) > 1).length;
   const getUserListingCount = (u) => u._count?.listings || u.listings?.length || 0;
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AD';
@@ -230,6 +247,10 @@ export default function DashboardPage() {
                 <div className="stat-card" style={{ boxShadow: 'none' }}>
                   <div className="stat-icon green"><i className="fa-solid fa-user-check" /></div>
                   <div className="stat-info"><h3>{usersWithPlan}</h3><p>Usuarios con plan</p></div>
+                </div>
+                <div className="stat-card" style={{ boxShadow: 'none' }}>
+                  <div className="stat-icon yellow"><i className="fa-solid fa-clock" /></div>
+                  <div className="stat-info"><h3>{pendingApprovalUsers}</h3><p>Validaciones pendientes</p></div>
                 </div>
                 <div className="stat-card" style={{ boxShadow: 'none' }}>
                   <div className="stat-icon orange"><i className="fa-solid fa-triangle-exclamation" /></div>
@@ -339,23 +360,30 @@ export default function DashboardPage() {
             <div className="chart-card">
               <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
                 <table>
-                  <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Plan</th><th>Acciones</th></tr></thead>
+                  <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Plan</th><th>Validación</th><th>Acciones</th></tr></thead>
                   <tbody>
-                    {users.map(u => (
-                      <tr key={u.id}>
-                        <td style={{ fontWeight: 600, fontSize: '0.87rem' }}>{u.name}</td>
-                        <td>{u.email}</td>
-                        <td>{u.phone || '—'}</td>
-                        <td><span className={`badge ${u.role === 'ADMIN' ? 'badge-accent' : 'badge-verified'}`}>{u.role}</span></td>
-                        <td>{u.plan?.name || 'Sin plan'}</td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            <button className="btn btn-outline btn-sm" onClick={() => openEditUser(u)}><i className="fa-solid fa-pen" /></button>
-                            <button className="btn btn-sm" style={{ background: 'var(--error-bg)', color: 'var(--error)', border: 'none' }} onClick={() => setDeleteConfirm({ type: 'user', id: u.id })}><i className="fa-solid fa-trash" /></button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {users.map(u => {
+                      const meta = approvalMeta[u.approvalStatus] || approvalMeta.PENDING_PLAN;
+                      return (
+                        <tr key={u.id}>
+                          <td style={{ fontWeight: 600, fontSize: '0.87rem' }}>{u.name}</td>
+                          <td>{u.email}</td>
+                          <td>{u.phone || '—'}</td>
+                          <td><span className={`badge ${u.role === 'ADMIN' ? 'badge-accent' : 'badge-verified'}`}>{u.role}</span></td>
+                          <td>{u.plan?.name || 'Sin plan'}</td>
+                          <td><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              {u.approvalStatus === 'PENDING_APPROVAL' && (
+                                <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}>Aprobar</button>
+                              )}
+                              <button className="btn btn-outline btn-sm" onClick={() => openEditUser(u)}><i className="fa-solid fa-pen" /></button>
+                              <button className="btn btn-sm" style={{ background: 'var(--error-bg)', color: 'var(--error)', border: 'none' }} onClick={() => setDeleteConfirm({ type: 'user', id: u.id })}><i className="fa-solid fa-trash" /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -398,11 +426,12 @@ export default function DashboardPage() {
           <div className="chart-card">
             <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
               <table>
-                <thead><tr><th>Usuario</th><th>Plan asignado</th><th>Publicaciones cargadas</th><th>Límite etapa 1</th><th>Estado</th><th /></tr></thead>
+                <thead><tr><th>Usuario</th><th>Plan asignado</th><th>Validación</th><th>Publicaciones cargadas</th><th>Límite etapa 1</th><th>Estado</th><th /></tr></thead>
                 <tbody>
                   {users.map(u => {
                     const count = getUserListingCount(u);
                     const overLimit = count > 1;
+                    const meta = approvalMeta[u.approvalStatus] || approvalMeta.PENDING_PLAN;
                     return (
                       <tr key={u.id}>
                         <td>
@@ -410,16 +439,22 @@ export default function DashboardPage() {
                           <div style={{ fontSize: '0.74rem', color: 'var(--text-faint)' }}>{u.email}</div>
                         </td>
                         <td>{u.plan?.name || 'Sin plan'}</td>
+                        <td><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
                         <td>{count}</td>
                         <td>1 unidad</td>
                         <td><span className={`badge ${overLimit ? 'badge-accent' : 'badge-success'}`}>{overLimit ? 'Revisar' : 'OK'}</span></td>
-                        <td><button className="btn btn-ghost btn-sm" onClick={() => openEditUser(u)}><i className="fa-solid fa-pen" /></button></td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {u.approvalStatus === 'PENDING_APPROVAL' && <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}>Aprobar</button>}
+                            <button className="btn btn-ghost btn-sm" onClick={() => openEditUser(u)}><i className="fa-solid fa-pen" /></button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
                   {!loadingU && users.length === 0 && (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>
                         Todavía no hay usuarios cargados.
                       </td>
                     </tr>
@@ -494,6 +529,14 @@ export default function DashboardPage() {
               <select className="form-input" value={userForm.planId} onChange={e => setUserForm(f => ({ ...f, planId: e.target.value }))}>
                 <option value="">Sin plan</option>
                 {plans.map(plan => <option key={plan.id} value={plan.id}>{plan.name}</option>)}
+              </select>
+            </div>
+            <div className="input-group">
+              <label className="input-label">Validación</label>
+              <select className="form-input" value={userForm.approvalStatus || 'PENDING_PLAN'} onChange={e => setUserForm(f => ({ ...f, approvalStatus: e.target.value }))}>
+                {USER_APPROVAL_STATUSES.map(status => (
+                  <option key={status} value={status}>{approvalMeta[status]?.label || status}</option>
+                ))}
               </select>
             </div>
           </form>
