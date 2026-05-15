@@ -4,11 +4,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["gonzapp_webservice"]
 }
 
 enum Role {
   USER
   ADMIN
+
+  @@schema("gonzapp_webservice")
 }
 
 enum ListingStatus {
@@ -16,6 +19,8 @@ enum ListingStatus {
   PAUSED
   EXPIRED
   PENDING
+
+  @@schema("gonzapp_webservice")
 }
 
 model Plan {
@@ -27,6 +32,8 @@ model Plan {
   features    String[]
   users       User[]
   createdAt   DateTime @default(now())
+
+  @@schema("gonzapp_webservice")
 }
 
 model User {
@@ -41,6 +48,8 @@ model User {
   listings  Listing[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@schema("gonzapp_webservice")
 }
 
 model Listing {
@@ -67,4 +76,6 @@ model Listing {
   userId       Int
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
+  @@schema("gonzapp_webservice")
 }
