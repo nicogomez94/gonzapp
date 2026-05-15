@@ -100,7 +100,7 @@ export default function LoginPage() {
 
         <div className="visual-features">
           <div className="visual-feature">
-            <div className="visual-feature-icon"><i className="fa-solid fa-shield-check" /></div>
+            <div className="visual-feature-icon"><i className="fa-solid fa-shield-halved" /></div>
             <div className="visual-feature-text">
               <strong>Transacciones 100% seguras</strong>
               <span>Protegidas con verificación y gestión clara</span>

@@ -27,7 +27,7 @@ const FALLBACK_PLANS = [
 
 const PLAN_META = [
   { icon: 'fa-solid fa-leaf', bg: 'var(--bg-2)', color: 'var(--text-muted)' },
-  { icon: 'fa-solid fa-shield-check', bg: 'var(--primary-bg)', color: 'var(--primary)', featured: true },
+  { icon: 'fa-solid fa-shield-halved', bg: 'var(--primary-bg)', color: 'var(--primary)', featured: true },
   { icon: 'fa-solid fa-crown', bg: 'var(--accent-bg)', color: 'var(--accent)' },
 ];
 

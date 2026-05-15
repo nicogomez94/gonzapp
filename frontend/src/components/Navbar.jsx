@@ -29,16 +29,16 @@ export default function Navbar() {
             <li><NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>Inicio</NavLink></li>
             <li><NavLink to="/publicaciones" className={({ isActive }) => isActive ? 'active' : ''}>Publicaciones</NavLink></li>
             <li><NavLink to="/planes" className={({ isActive }) => isActive ? 'active' : ''}>Planes</NavLink></li>
-            <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer">Consultar</a></li>
-            {isAdmin && <li><NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink></li>}
-            {user && !isAdmin && <li><NavLink to="/mi-cuenta" className={({ isActive }) => isActive ? 'active' : ''}>Mi cuenta</NavLink></li>}
           </ul>
 
           <div className="nav-actions">
             {user ? (
               <>
-                <Link to="/mi-cuenta" className="btn btn-ghost btn-sm"><i className="fa-regular fa-user" /> Mi cuenta</Link>
-                {isAdmin && <Link to="/dashboard" className="btn btn-ghost btn-sm"><i className="fa-solid fa-chart-pie" /> Panel</Link>}
+                {isAdmin ? (
+                  <Link to="/dashboard" className="btn btn-ghost btn-sm"><i className="fa-solid fa-chart-pie" /> Panel</Link>
+                ) : (
+                  <Link to="/mi-cuenta" className="btn btn-ghost btn-sm"><i className="fa-regular fa-user" /> Mi cuenta</Link>
+                )}
                 <button className="btn btn-outline-gray btn-sm" onClick={handleLogout}><i className="fa-solid fa-right-from-bracket" /> Salir</button>
               </>
             ) : (
@@ -60,16 +60,19 @@ export default function Navbar() {
           <li><NavLink to="/" end onClick={() => setMenuOpen(false)}>Inicio</NavLink></li>
           <li><NavLink to="/publicaciones" onClick={() => setMenuOpen(false)}>Publicaciones</NavLink></li>
           <li><NavLink to="/planes" onClick={() => setMenuOpen(false)}>Planes</NavLink></li>
-          <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer" onClick={() => setMenuOpen(false)}>Consultar</a></li>
-          {isAdmin && <li><NavLink to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</NavLink></li>}
-          {user && <li><NavLink to="/mi-cuenta" onClick={() => setMenuOpen(false)}>Mi cuenta</NavLink></li>}
         </ul>
         <div className="mobile-actions">
           {user ? (
             <>
-              <Link to="/mi-cuenta" className="btn btn-outline-gray btn-block" onClick={() => setMenuOpen(false)}>
-                <i className="fa-regular fa-user" /> Mi cuenta
-              </Link>
+              {isAdmin ? (
+                <Link to="/dashboard" className="btn btn-outline-gray btn-block" onClick={() => setMenuOpen(false)}>
+                  <i className="fa-solid fa-chart-pie" /> Panel
+                </Link>
+              ) : (
+                <Link to="/mi-cuenta" className="btn btn-outline-gray btn-block" onClick={() => setMenuOpen(false)}>
+                  <i className="fa-regular fa-user" /> Mi cuenta
+                </Link>
+              )}
               <button className="btn btn-outline-gray btn-block" onClick={() => { setMenuOpen(false); handleLogout(); }}>
                 <i className="fa-solid fa-right-from-bracket" /> Cerrar sesión
               </button>

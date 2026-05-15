@@ -43,7 +43,9 @@ export default function PublicacionesPage() {
       .finally(() => setLoading(false));
   }, [filters, page]);
 
-  useEffect(() => { fetchListings(); }, [fetchListings]);
+  useEffect(() => {
+    queueMicrotask(fetchListings);
+  }, [fetchListings]);
 
   const setFilter = (key, value) => { setFilters(f => ({ ...f, [key]: value })); setPage(1); };
 
@@ -113,7 +115,7 @@ export default function PublicacionesPage() {
                   <label key={b} className="filter-check">
                     <input type="checkbox" checked={filters.brand === b}
                       onChange={() => setFilter('brand', filters.brand === b ? '' : b)} />
-                    <label style={{ cursor: 'pointer' }}>{b}</label>
+                    <span>{b}</span>
                   </label>
                 ))}
               </div>
@@ -151,7 +153,7 @@ export default function PublicacionesPage() {
                   <label key={f} className="filter-check">
                     <input type="checkbox" checked={filters.fuel === f}
                       onChange={() => setFilter('fuel', filters.fuel === f ? '' : f)} />
-                    <label style={{ cursor: 'pointer' }}>{f}</label>
+                    <span>{f}</span>
                   </label>
                 ))}
               </div>
@@ -165,7 +167,7 @@ export default function PublicacionesPage() {
                   <label key={t} className="filter-check">
                     <input type="checkbox" checked={filters.transmission === t}
                       onChange={() => setFilter('transmission', filters.transmission === t ? '' : t)} />
-                    <label style={{ cursor: 'pointer' }}>{t}</label>
+                    <span>{t}</span>
                   </label>
                 ))}
               </div>

@@ -33,7 +33,7 @@ const FALLBACK_PLANS = [
     price: 55000,
     desc: 'Publicación con documentación verificada',
     features: ['1 unidad', '8 imágenes del vehículo', 'Informe de Dominio y Multas', 'Insignia "Documentación Verificada"', 'Contacto por WhatsApp'],
-    icon: 'fa-solid fa-shield-check',
+    icon: 'fa-solid fa-shield-halved',
     bg: 'var(--primary-bg)',
     color: 'var(--primary)',
     featured: true,
@@ -170,7 +170,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="hero-float-badges">
-                <div className="hero-float-badge"><i className="fa-solid fa-shield-check" style={{ color: 'var(--success)' }} /> Verificado</div>
+                <div className="hero-float-badge"><i className="fa-solid fa-shield-halved" style={{ color: 'var(--success)' }} /> Verificado</div>
                 <div className="hero-float-badge"><i className="fa-brands fa-whatsapp" style={{ color: '#25D366' }} /> Contacto directo</div>
                 <div className="hero-float-badge"><i className="fa-solid fa-car-side" style={{ color: 'var(--primary)' }} /> Una unidad</div>
               </div>

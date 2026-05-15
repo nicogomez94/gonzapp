@@ -23,7 +23,7 @@ export default function ListingCard({ listing }) {
         }
         <div className="listing-badge-wrap">
           {listing.featured && <span className="badge badge-accent">Destacado</span>}
-          {listing.verified && <span className="badge badge-success"><i className="fa-solid fa-shield-check" /> Verificado</span>}
+          {listing.verified && <span className="badge badge-success"><i className="fa-solid fa-shield-halved" /> Verificado</span>}
         </div>
         <button className={`listing-fav${fav ? ' active' : ''}`} onClick={handleFav} aria-label="Favorito">
           <i className={fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} />

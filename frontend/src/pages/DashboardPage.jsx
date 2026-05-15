@@ -13,24 +13,6 @@ const emptyListing = { title: '', brand: '', model: '', year: '', mileage: '', f
 const emptyUser = { name: '', email: '', password: '', phone: '', role: 'USER', planId: '' };
 const emptyPlan = { name: '', price: '', maxImages: '', daysActive: '', features: '' };
 
-const CHART_DATA = [
-  { label: 'Lun', val: 210, h: 55, color: 'var(--primary-bg)' },
-  { label: 'Mar', val: 275, h: 72, color: 'var(--primary-bg)' },
-  { label: 'Mié', val: 345, h: 90, color: 'var(--primary)' },
-  { label: 'Jue', val: 228, h: 60, color: 'var(--primary-bg)' },
-  { label: 'Vie', val: 305, h: 80, color: '#FFD9B8' },
-  { label: 'Sáb', val: 325, h: 85, color: '#FFD9B8' },
-  { label: 'Dom', val: 159, h: 45, color: 'var(--primary-bg)' },
-];
-
-const ACTIVITY = [
-  { bg: 'var(--success-bg)', color: 'var(--success)', icon: 'fa-brands fa-whatsapp', text: 'Carlos Gómez consultó por la Hilux SRX', strong: 'Carlos Gómez', time: 'hace 5 min' },
-  { bg: 'var(--primary-bg)', color: 'var(--primary)', icon: 'fa-solid fa-eye', text: 'La Corolla recibió 28 visitas hoy', time: 'hace 1 hora' },
-  { bg: 'var(--accent-bg)', color: 'var(--accent)', icon: 'fa-solid fa-heart', text: 'Valentina R. guardó tu Fortuner', time: 'hace 2 horas' },
-  { bg: 'var(--warning-bg)', color: 'var(--warning)', icon: 'fa-solid fa-bell', text: 'Publicación Hilux por vencer en 3 días', time: 'hace 4 horas' },
-  { bg: 'var(--success-bg)', color: 'var(--success)', icon: 'fa-solid fa-check', text: 'Plan Intermedio asignado a una unidad', time: 'hace 1 día' },
-];
-
 function StatusDot({ status }) {
   const s = status?.toLowerCase();
   return <div className={`status-dot ${s}`} />;
@@ -69,7 +51,7 @@ export default function DashboardPage() {
 
   const loadUsers = useCallback(() => {
     setLoadingU(true);
-    usersApi.getAll().then(r => setUsers(r.data.users || r.data || [])).catch(() => {}).finally(() => setLoadingU(false));
+    usersApi.getAll({ limit: 100 }).then(r => setUsers(r.data.users || r.data || [])).catch(() => {}).finally(() => setLoadingU(false));
   }, []);
 
   const loadPlans = useCallback(() => {
@@ -83,6 +65,13 @@ export default function DashboardPage() {
       loadListings(); loadUsers(); loadPlans();
     });
   }, [isAdmin, navigate, loadListings, loadUsers, loadPlans]);
+
+  useEffect(() => {
+    const animated = document.querySelectorAll('.dash-section .fade-up');
+    animated.forEach((el, index) => {
+      window.setTimeout(() => el.classList.add('visible'), index * 80);
+    });
+  }, [section]);
 
   const openCreateListing = () => { setListingForm(emptyListing); setListingModal({ mode: 'create' }); };
   const openEditListing = (l) => { setListingForm({ ...l, images: l.images?.join('\n') || '', equipment: l.equipment?.join(', ') || '' }); setListingModal({ mode: 'edit', id: l.id }); };
@@ -112,6 +101,10 @@ export default function DashboardPage() {
   const deletePlan = async (id) => { try { await plansApi.remove(id); show('Plan eliminado'); loadPlans(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
   const activeListing = listings.filter(l => l.status === 'ACTIVE').length;
+  const pendingListing = listings.filter(l => l.status === 'PENDING').length;
+  const usersWithPlan = users.filter(u => u.planId).length;
+  const usersOverLimit = users.filter(u => (u._count?.listings || 0) > 1).length;
+  const getUserListingCount = (u) => u._count?.listings || u.listings?.length || 0;
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AD';
 
   const nav = (s) => { setSection(s); setSidebarOpen(false); };
@@ -134,12 +127,8 @@ export default function DashboardPage() {
             <i className="fa-solid fa-chart-pie" /> Resumen
           </button>
           <button className={`sidebar-item${section === 'publicaciones' ? ' active' : ''}`} onClick={() => nav('publicaciones')}>
-            <i className="fa-solid fa-car" /> Mis publicaciones
+            <i className="fa-solid fa-car" /> Publicaciones
             <span className="sidebar-badge">{listingsTotal}</span>
-          </button>
-          <button className={`sidebar-item${section === 'mensajes' ? ' active' : ''}`} onClick={() => nav('mensajes')}>
-            <i className="fa-solid fa-comment-dots" /> Mensajes
-            <span className="sidebar-badge orange">4</span>
           </button>
           <button className={`sidebar-item${section === 'estadisticas' ? ' active' : ''}`} onClick={() => nav('estadisticas')}>
             <i className="fa-solid fa-clipboard-check" /> Control manual
@@ -158,9 +147,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="sidebar-section">
-          <div className="sidebar-section-label">Configuración</div>
-          <button className="sidebar-item"><i className="fa-solid fa-gear" /> Configuración</button>
-          <button className="sidebar-item"><i className="fa-solid fa-circle-question" /> Soporte</button>
+          <div className="sidebar-section-label">Cuenta</div>
           <button className="sidebar-item" style={{ color: 'var(--error)' }} onClick={() => { logout(); navigate('/'); }}>
             <i className="fa-solid fa-right-from-bracket" /> Cerrar sesión
           </button>
@@ -180,71 +167,63 @@ export default function DashboardPage() {
               <p>{new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} · Resumen de tu cuenta</p>
             </div>
             <button className="btn btn-accent" onClick={openCreateListing}>
-              <i className="fa-solid fa-plus" /> Nueva publicación
+              <i className="fa-solid fa-plus" /> Cargar publicación
             </button>
           </div>
 
           <div className="stats-grid-4">
             <div className="stat-card fade-up">
               <div className="stat-icon blue"><i className="fa-solid fa-car" /></div>
-              <div className="stat-info"><h3>{activeListing}</h3><p>Publicaciones activas</p><div className="stat-trend up"><i className="fa-solid fa-arrow-up" style={{ fontSize: '0.65rem' }} /> +2 este mes</div></div>
+              <div className="stat-info"><h3>{listingsTotal}</h3><p>Publicaciones cargadas</p></div>
             </div>
             <div className="stat-card fade-up delay-1">
-              <div className="stat-icon orange"><i className="fa-solid fa-eye" /></div>
-              <div className="stat-info"><h3>1.847</h3><p>Visitas esta semana</p><div className="stat-trend up"><i className="fa-solid fa-arrow-up" style={{ fontSize: '0.65rem' }} /> +14% vs semana pasada</div></div>
+              <div className="stat-icon green"><i className="fa-solid fa-circle-check" /></div>
+              <div className="stat-info"><h3>{activeListing}</h3><p>Publicaciones activas</p></div>
             </div>
             <div className="stat-card fade-up delay-2">
-              <div className="stat-icon green"><i className="fa-solid fa-comment-dots" /></div>
-              <div className="stat-info"><h3>34</h3><p>Consultas recibidas</p><div className="stat-trend up"><i className="fa-solid fa-arrow-up" style={{ fontSize: '0.65rem' }} /> +8 nuevas hoy</div></div>
+              <div className="stat-icon orange"><i className="fa-solid fa-clock" /></div>
+              <div className="stat-info"><h3>{pendingListing}</h3><p>Pendientes de revisión</p></div>
             </div>
             <div className="stat-card fade-up delay-3">
               <div className="stat-icon yellow"><i className="fa-solid fa-users" /></div>
-              <div className="stat-info"><h3>{users.length}</h3><p>Usuarios registrados</p><div className="stat-trend up"><i className="fa-solid fa-arrow-up" style={{ fontSize: '0.65rem' }} /> +5% este mes</div></div>
+              <div className="stat-info"><h3>{users.length}</h3><p>Usuarios registrados</p></div>
             </div>
           </div>
 
           <div className="three-col">
             <div className="chart-card fade-up">
               <div className="chart-header">
-                <h3>Visitas por día</h3>
-                <select style={{ border: 'none', background: 'transparent', fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer', outline: 'none' }}>
-                  <option>Últimos 7 días</option>
-                  <option>Últimos 30 días</option>
-                </select>
+                <h3>Control manual de planes</h3>
+                <button className="btn btn-outline btn-sm" onClick={() => nav('estadisticas')}>Ver control</button>
               </div>
-              <div className="chart-bars">
-                {CHART_DATA.map(d => (
-                  <div key={d.label} className="chart-bar-wrap">
-                    <div className="chart-bar" style={{ height: `${d.h}%`, background: d.color }}>
-                      <span className="chart-bar-val">{d.val}</span>
-                    </div>
-                    <span className="chart-bar-label">{d.label}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="legend" style={{ marginTop: 12 }}>
-                <div className="legend-item"><div className="legend-dot" style={{ background: 'var(--primary-bg)', border: '1.5px solid var(--primary)' }} /> Días laborales</div>
-                <div className="legend-item"><div className="legend-dot" style={{ background: '#FFD9B8', border: '1.5px solid var(--accent)' }} /> Fin de semana</div>
+              <div className="stats-grid-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 0 }}>
+                <div className="stat-card" style={{ boxShadow: 'none' }}>
+                  <div className="stat-icon blue"><i className="fa-solid fa-crown" /></div>
+                  <div className="stat-info"><h3>{plans.length}</h3><p>Planes definidos</p></div>
+                </div>
+                <div className="stat-card" style={{ boxShadow: 'none' }}>
+                  <div className="stat-icon green"><i className="fa-solid fa-user-check" /></div>
+                  <div className="stat-info"><h3>{usersWithPlan}</h3><p>Usuarios con plan</p></div>
+                </div>
+                <div className="stat-card" style={{ boxShadow: 'none' }}>
+                  <div className="stat-icon orange"><i className="fa-solid fa-triangle-exclamation" /></div>
+                  <div className="stat-info"><h3>{usersOverLimit}</h3><p>Sobre 1 unidad</p></div>
+                </div>
               </div>
             </div>
 
             <div className="chart-card fade-up delay-1">
               <div className="chart-header">
-                <h3>Actividad reciente</h3>
-                <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>En vivo</span>
+                <h3>Contacto de suscripción</h3>
               </div>
-              <div className="activity-list">
-                {ACTIVITY.map((a, i) => (
-                  <div key={i} className="activity-item">
-                    <div className="activity-icon" style={{ background: a.bg, color: a.color }}>
-                      <i className={a.icon} />
-                    </div>
-                    <div>
-                      <div className="activity-text">{a.text}</div>
-                      <div className="activity-time">{a.time}</div>
-                    </div>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="activity-icon" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}>
+                  <i className="fa-brands fa-whatsapp" />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>2665-016253</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.84rem' }}>Teléfono definido en el PRD para sumarse a la web.</div>
+                </div>
               </div>
             </div>
           </div>
@@ -273,6 +252,13 @@ export default function DashboardPage() {
                       <td><button className="btn btn-ghost btn-sm" onClick={() => openEditListing(l)}><i className="fa-solid fa-pen" /></button></td>
                     </tr>
                   ))}
+                  {!loadingL && listings.length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>
+                        Todavía no hay publicaciones cargadas.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -320,7 +306,6 @@ export default function DashboardPage() {
           <div className="dash-page-header">
             <div><h2>Usuarios</h2><p>Gestión de usuarios registrados en la plataforma</p></div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-outline btn-sm"><i className="fa-solid fa-download" /> Exportar</button>
               <button className="btn btn-accent btn-sm" onClick={openCreateUser}><i className="fa-solid fa-plus" /> Nuevo usuario</button>
             </div>
           </div>
@@ -381,21 +366,41 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* ====== MENSAJES (placeholder) ====== */}
-        <div className={`dash-section${section === 'mensajes' ? ' active' : ''}`}>
-          <div className="dash-page-header"><div><h2>Mensajes</h2><p>Próximamente disponible</p></div></div>
-          <div className="chart-card" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-            <i className="fa-solid fa-comment-dots" style={{ fontSize: '3rem', marginBottom: 16, display: 'block', color: 'var(--text-faint)' }} />
-            <p>El módulo de mensajes estará disponible próximamente.</p>
-          </div>
-        </div>
-
-        {/* ====== ESTADÍSTICAS (placeholder) ====== */}
+        {/* ====== CONTROL MANUAL ====== */}
         <div className={`dash-section${section === 'estadisticas' ? ' active' : ''}`}>
           <div className="dash-page-header"><div><h2>Control manual</h2><p>Revisión administrativa de usuarios, planes y unidad publicada</p></div></div>
-          <div className="chart-card" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-            <i className="fa-solid fa-clipboard-check" style={{ fontSize: '3rem', marginBottom: 16, display: 'block', color: 'var(--text-faint)' }} />
-            <p>Acá se mostrará el control de plan asignado y uso de la unidad por usuario.</p>
+          <div className="chart-card">
+            <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
+              <table>
+                <thead><tr><th>Usuario</th><th>Plan asignado</th><th>Publicaciones cargadas</th><th>Límite etapa 1</th><th>Estado</th><th /></tr></thead>
+                <tbody>
+                  {users.map(u => {
+                    const count = getUserListingCount(u);
+                    const overLimit = count > 1;
+                    return (
+                      <tr key={u.id}>
+                        <td>
+                          <div style={{ fontWeight: 600, fontSize: '0.87rem' }}>{u.name}</div>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-faint)' }}>{u.email}</div>
+                        </td>
+                        <td>{u.plan?.name || 'Sin plan'}</td>
+                        <td>{count}</td>
+                        <td>1 unidad</td>
+                        <td><span className={`badge ${overLimit ? 'badge-accent' : 'badge-success'}`}>{overLimit ? 'Revisar' : 'OK'}</span></td>
+                        <td><button className="btn btn-ghost btn-sm" onClick={() => openEditUser(u)}><i className="fa-solid fa-pen" /></button></td>
+                      </tr>
+                    );
+                  })}
+                  {!loadingU && users.length === 0 && (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>
+                        Todavía no hay usuarios cargados.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -432,7 +437,6 @@ export default function DashboardPage() {
             </div>
             <div className="input-group"><label className="input-label">Estado</label><select className="form-input" value={listingForm.status} onChange={e => setListingForm(f => ({ ...f, status: e.target.value }))}>{LISTING_STATUSES.map(s => <option key={s}>{s}</option>)}</select></div>
             <div className="form-row" style={{ gap: 16 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}><input type="checkbox" checked={listingForm.featured} onChange={e => setListingForm(f => ({ ...f, featured: e.target.checked }))} /> Destacado</label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}><input type="checkbox" checked={listingForm.verified} onChange={e => setListingForm(f => ({ ...f, verified: e.target.checked }))} /> Verificado</label>
             </div>
             <div className="input-group"><label className="input-label">Descripción</label><textarea className="form-input" rows={3} value={listingForm.description} onChange={e => setListingForm(f => ({ ...f, description: e.target.value }))} /></div>
@@ -474,7 +478,7 @@ export default function DashboardPage() {
               <div className="input-group"><label className="input-label">Máx. imágenes</label><input className="form-input" type="number" value={planForm.maxImages} onChange={e => setPlanForm(f => ({ ...f, maxImages: e.target.value }))} /></div>
               <div className="input-group"><label className="input-label">Días activo</label><input className="form-input" type="number" value={planForm.daysActive} onChange={e => setPlanForm(f => ({ ...f, daysActive: e.target.value }))} /></div>
             </div>
-            <div className="input-group"><label className="input-label">Características (separadas por comas)</label><input className="form-input" value={planForm.features} onChange={e => setPlanForm(f => ({ ...f, features: e.target.value }))} placeholder="6 fotos, Soporte, Destacado" /></div>
+            <div className="input-group"><label className="input-label">Características (separadas por comas)</label><input className="form-input" value={planForm.features} onChange={e => setPlanForm(f => ({ ...f, features: e.target.value }))} placeholder="6 imágenes, Informe de dominio, Documentación verificada" /></div>
           </form>
         </Modal>
       )}
