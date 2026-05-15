@@ -124,7 +124,7 @@ export default function DashboardPage() {
           <div className="sidebar-user-avatar">{initials}</div>
           <div>
             <div className="sidebar-user-name">{user?.name || 'Admin'}</div>
-            <div className="sidebar-user-role"><span className="plan-badge plan-pro">Admin</span></div>
+            {/* <div className="sidebar-user-role"><span className="plan-badge plan-pro">Admin</span></div> */}
           </div>
         </div>
 

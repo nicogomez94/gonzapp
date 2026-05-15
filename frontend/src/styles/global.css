@@ -575,9 +575,10 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   padding: calc(var(--nav-height) + 20px) 0 20px;
 }
 .page-top-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-faint); }
+.breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-muted); opacity: 1; }
 .breadcrumb a { color: var(--text-muted); }
 .breadcrumb a:hover { color: var(--primary); }
+.breadcrumb .fa-chevron-right { color: var(--text-muted); }
 
 .search-bar {
   background: #fff; border: 1.5px solid var(--border);
@@ -585,6 +586,7 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   display: flex; align-items: center; gap: 12px;
   box-shadow: var(--shadow-xs); margin-bottom: 20px;
 }
+.search-bar-icon { color: var(--text-muted); flex-shrink: 0; }
 .search-bar input {
   flex: 1; border: none; outline: none; font-size: 0.95rem;
   color: var(--text); background: transparent; font-family: inherit;
@@ -1018,10 +1020,10 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 /* ===== PUBLICACIONES PAGE ===== */
 .page-header { background: linear-gradient(135deg, #0F2B6B, #1563FF); color: white; padding: 2rem 0; }
 .page-header h1 { font-size: 1.75rem; font-weight: 700; margin: 0.5rem 0; }
-.breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; opacity: 0.8; }
-.breadcrumb a { color: white; text-decoration: none; }
-.breadcrumb a:hover { text-decoration: underline; }
-.breadcrumb .fa-chevron-right { font-size: 0.65rem; }
+.page-header .breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.85); opacity: 1; }
+.page-header .breadcrumb a { color: white; text-decoration: none; }
+.page-header .breadcrumb a:hover { text-decoration: underline; }
+.page-header .breadcrumb .fa-chevron-right { color: rgba(255,255,255,0.8); font-size: 0.65rem; }
 .search-bar-inline { display: flex; gap: 0.5rem; margin-top: 1rem; max-width: 500px; }
 .search-bar-inline input { flex: 1; padding: 0.6rem 1rem; border: 1px solid rgba(255,255,255,0.4); border-radius: var(--radius); background: rgba(255,255,255,0.15); color: white; font-size: 0.9rem; }
 .search-bar-inline input::placeholder { color: rgba(255,255,255,0.6); }

@@ -73,7 +73,7 @@ export default function PublicacionesPage() {
           </div>
 
           <div className="search-bar">
-            <i className="fa-solid fa-magnifying-glass" style={{ color: 'var(--text-faint)' }} />
+            <i className="fa-solid fa-magnifying-glass search-bar-icon" />
             <input
               type="text"
               placeholder="Buscá por marca, modelo, versión…"
