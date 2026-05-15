@@ -83,7 +83,7 @@ export default function LoginPage() {
   const switchTab = (t) => { setTab(t); setError(''); };
 
   return (
-    <div className="login-wrap">
+    <div className={`login-wrap login-${tab}`}>
       {/* LEFT VISUAL PANEL */}
       <div className="login-visual">
         <Link to="/" className="visual-logo">
