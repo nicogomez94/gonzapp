@@ -14,7 +14,7 @@ services:
         - frontend/**
     envVars:
       - key: VITE_API_URL
-        value: https://z-api.onrender.com/api
+        value: https://z-api-1icl.onrender.com/api
       - key: VITE_DEBUG
         value: "true"
     routes:
@@ -39,12 +39,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://z-web.onrender.com
-      # Cargar en Render la URL de PostgreSQL con un schema separado:
-      # postgresql://.../seguros2_db?schema=gonzapp_webservice
-      # Esto evita aplicar migraciones sobre el schema public existente.
+        value: https://z-web-70as.onrender.com
+      # Cargar en Render la URL de PostgreSQL con schema separado y SSL.
       - key: DATABASE_URL
-        value: 'postgresql://seguros2_db_user:iVpTPyhcuNR2L0eYfU7lwuovs4zM0hPn@dpg-d829vl7avr4c73berimg-a/seguros2_db?schema=gonzapp_webservice'
+        value: 'postgresql://seguros2_db_user:iVpTPyhcuNR2L0eYfU7lwuovs4zM0hPn@dpg-d829vl7avr4c73berimg-a.oregon-postgres.render.com/seguros2_db?schema=gonzapp_webservice&sslmode=require'
       - key: JWT_SECRET
         generateValue: true
       - key: CLOUDINARY_CLOUD_NAME
