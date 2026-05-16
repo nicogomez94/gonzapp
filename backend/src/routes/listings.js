@@ -1,4 +1,7 @@
 const express = require('express');
+const crypto = require('crypto');
+const fs = require('fs/promises');
+const path = require('path');
 const { Readable } = require('stream');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
@@ -22,6 +25,9 @@ const uploadImages = multer({
     return cb(new Error('Solo se permiten archivos de imagen'));
   }
 }).array('images', 20);
+
+const uploadStorage = () => (process.env.UPLOAD_STORAGE || 'local').toLowerCase();
+const localUploadDir = () => process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
 
 const cloudinaryReady = () => {
   const config = cloudinary.config();
@@ -95,6 +101,41 @@ const uploadBufferToCloudinary = (file) => new Promise((resolve, reject) => {
   Readable.from(file.buffer).pipe(uploadStream);
 });
 
+const extensionByMime = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+  'image/avif': '.avif',
+  'image/svg+xml': '.svg',
+};
+
+const publicUrlForRequest = (req, relativePath) => {
+  const baseUrl = process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}`;
+  return `${baseUrl.replace(/\/$/, '')}${relativePath}`;
+};
+
+const uploadBufferToLocal = async (req, file) => {
+  const uploadDir = localUploadDir();
+  await fs.mkdir(uploadDir, { recursive: true });
+
+  const ext = extensionByMime[file.mimetype] || path.extname(file.originalname || '').toLowerCase() || '.jpg';
+  const filename = `${Date.now()}-${crypto.randomUUID()}${ext}`;
+  const filepath = path.join(uploadDir, filename);
+  await fs.writeFile(filepath, file.buffer, { flag: 'wx' });
+
+  const url = publicUrlForRequest(req, `/uploads/${encodeURIComponent(filename)}`);
+  return {
+    publicId: filename,
+    url,
+    secure_url: url,
+    width: null,
+    height: null,
+    format: ext.replace('.', ''),
+    bytes: file.size
+  };
+};
+
 const cloudinaryPublicIdFromUrl = (imageUrl) => {
   try {
     const url = new URL(imageUrl);
@@ -119,6 +160,36 @@ const deleteCloudinaryImages = async (imageUrls = []) => {
   results.forEach(result => {
     if (result.status === 'rejected') console.warn('No se pudo eliminar una imagen de Cloudinary:', result.reason?.message || result.reason);
   });
+};
+
+const localFilenameFromUrl = (imageUrl) => {
+  try {
+    const url = new URL(imageUrl);
+    if (url.pathname.startsWith('/uploads/')) return decodeURIComponent(path.basename(url.pathname));
+  } catch {
+    if (typeof imageUrl === 'string' && imageUrl.startsWith('/uploads/')) {
+      return decodeURIComponent(path.basename(imageUrl));
+    }
+  }
+  return null;
+};
+
+const deleteLocalImages = async (imageUrls = []) => {
+  const uploadDir = localUploadDir();
+  const filenames = imageUrls.map(localFilenameFromUrl).filter(Boolean);
+  const results = await Promise.allSettled(filenames.map(filename => fs.unlink(path.join(uploadDir, filename))));
+  results.forEach(result => {
+    if (result.status === 'rejected' && result.reason?.code !== 'ENOENT') {
+      console.warn('No se pudo eliminar una imagen local:', result.reason?.message || result.reason);
+    }
+  });
+};
+
+const deleteStoredImages = async (imageUrls = []) => {
+  await Promise.all([
+    deleteLocalImages(imageUrls),
+    deleteCloudinaryImages(imageUrls)
+  ]);
 };
 
 // GET /api/listings — public active listings; admins see all listings
@@ -190,7 +261,6 @@ router.get('/:id', optionalAuth, async (req, res) => {
 router.post('/images', authMiddleware, async (req, res) => {
   uploadImages(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message || 'No se pudieron cargar las imágenes' });
-    if (!cloudinaryReady()) return res.status(500).json({ error: 'Cloudinary no está configurado en el servidor' });
 
     try {
       const currentUser = await getApprovedUser(req.user.id);
@@ -199,11 +269,18 @@ router.post('/images', authMiddleware, async (req, res) => {
         return res.status(403).json({ error: 'Tu cuenta debe estar aprobada para cargar imágenes' });
       }
 
-      const uploaded = await Promise.all((req.files || []).map(uploadBufferToCloudinary));
+      if (uploadStorage() === 'cloudinary' && !cloudinaryReady()) {
+        return res.status(500).json({ error: 'Cloudinary no está configurado en el servidor' });
+      }
+
+      const files = req.files || [];
+      const uploaded = uploadStorage() === 'cloudinary'
+        ? await Promise.all(files.map(uploadBufferToCloudinary))
+        : await Promise.all(files.map(file => uploadBufferToLocal(req, file)));
       res.status(201).json({
         images: uploaded.map(file => file.secure_url),
         assets: uploaded.map(file => ({
-          publicId: file.public_id,
+          publicId: file.public_id || file.publicId,
           url: file.secure_url,
           width: file.width,
           height: file.height,
@@ -213,7 +290,7 @@ router.post('/images', authMiddleware, async (req, res) => {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Cloudinary no pudo cargar las imágenes' });
+      res.status(500).json({ error: 'No se pudieron cargar las imágenes' });
     }
   });
 });
@@ -281,7 +358,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
     if (previousListing && images !== undefined) {
       const nextImages = new Set(images || []);
       const removedImages = (previousListing.images || []).filter(image => !nextImages.has(image));
-      deleteCloudinaryImages(removedImages).catch(error => console.warn('No se pudieron limpiar imágenes removidas:', error.message));
+      deleteStoredImages(removedImages).catch(error => console.warn('No se pudieron limpiar imágenes removidas:', error.message));
     }
 
     res.json(listing);
@@ -295,7 +372,7 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const listing = await prisma.listing.findUnique({ where: { id: parseInt(req.params.id) }, select: { images: true } });
     await prisma.listing.delete({ where: { id: parseInt(req.params.id) } });
-    deleteCloudinaryImages(listing?.images || []).catch(error => console.warn('No se pudieron limpiar imágenes eliminadas:', error.message));
+    deleteStoredImages(listing?.images || []).catch(error => console.warn('No se pudieron limpiar imágenes eliminadas:', error.message));
     res.json({ message: 'Publicación eliminada' });
   } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -23,6 +24,11 @@ app.use(cors({
 }));
 app.set('trust proxy', 1);
 app.use(express.json());
+
+const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+app.use('/uploads', express.static(uploadDir, {
+  maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);

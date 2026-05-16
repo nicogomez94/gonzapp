@@ -45,6 +45,12 @@ services:
         value: 'postgresql://seguros2_db_user:iVpTPyhcuNR2L0eYfU7lwuovs4zM0hPn@dpg-d829vl7avr4c73berimg-a.oregon-postgres.render.com/seguros2_db?schema=gonzapp_webservice&sslmode=require'
       - key: JWT_SECRET
         generateValue: true
+      - key: UPLOAD_STORAGE
+        value: local
+      - key: UPLOAD_DIR
+        value: /opt/render/project/src/uploads
+      # Cloudinary queda listo pero apagado. Para usarlo, cambiar UPLOAD_STORAGE a cloudinary
+      # y cargar estas credenciales en Render.
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
@@ -53,3 +59,9 @@ services:
         sync: false
       - key: CLOUDINARY_FOLDER
         value: gonzapp/listings
+    # En plan free, los archivos locales de Render son efimeros. Para persistirlos,
+    # activar un disk requiere pasar el servicio a un plan pago.
+    # disk:
+    #   name: uploads
+    #   mountPath: /opt/render/project/src/uploads
+    #   sizeGB: 1
