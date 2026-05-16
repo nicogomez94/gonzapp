@@ -113,6 +113,15 @@ export default function DashboardPage() {
     const payload = { ...listingForm, year: +listingForm.year, mileage: +listingForm.mileage, priceArs: listingForm.priceArs ? +listingForm.priceArs : undefined, priceUsd: listingForm.priceUsd ? +listingForm.priceUsd : undefined, images: parseImageList(listingForm.images), equipment: typeof listingForm.equipment === 'string' ? listingForm.equipment.split(',').map(s => s.trim()).filter(Boolean) : listingForm.equipment };
     try { if (listingModal.mode === 'create') await listingsApi.create(payload); else await listingsApi.update(listingModal.id, payload); show(listingModal.mode === 'create' ? 'Publicación creada' : 'Publicación actualizada'); setListingModal(null); loadListings(); } catch (err) { show(err.response?.data?.error || 'Error al guardar', 'error'); }
   };
+  const approveListing = async (id) => {
+    try {
+      await listingsApi.update(id, { status: 'ACTIVE' });
+      show('Publicación aprobada y publicada');
+      loadListings();
+    } catch (err) {
+      show(err.response?.data?.error || 'No se pudo aprobar la publicación', 'error');
+    }
+  };
   const deleteListing = async (id) => { try { await listingsApi.remove(id); show('Publicación eliminada'); loadListings(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
   const openCreateUser = () => { setUserForm(emptyUser); setUserModal({ mode: 'create' }); };
@@ -296,7 +305,12 @@ export default function DashboardPage() {
                         </div>
                       </td>
                       <td><span style={{ fontSize: '0.82rem' }}>{new Date(l.createdAt).toLocaleDateString('es-AR')}</span></td>
-                      <td><button className="btn btn-ghost btn-sm" onClick={() => openEditListing(l)}><i className="fa-solid fa-pen" /></button></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {l.status === 'PENDING' && <button className="btn btn-primary btn-sm" onClick={() => approveListing(l.id)}>Aprobar</button>}
+                          <button className="btn btn-ghost btn-sm" onClick={() => openEditListing(l)}><i className="fa-solid fa-pen" /></button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                   {!loadingL && listings.length === 0 && (
@@ -335,6 +349,7 @@ export default function DashboardPage() {
                         <td><div className="pub-status"><StatusDot status={l.status} /><span style={{ fontSize: '0.82rem' }}>{l.status}</span></div></td>
                         <td>
                           <div style={{ display: 'flex', gap: 4 }}>
+                            {l.status === 'PENDING' && <button className="btn btn-primary btn-sm" onClick={() => approveListing(l.id)}>Aprobar</button>}
                             <button className="btn btn-outline btn-sm" onClick={() => openEditListing(l)}><i className="fa-solid fa-pen" /></button>
                             <button className="btn btn-sm" style={{ background: 'var(--error-bg)', color: 'var(--error)', border: 'none' }} onClick={() => setDeleteConfirm({ type: 'listing', id: l.id })}><i className="fa-solid fa-trash" /></button>
                           </div>

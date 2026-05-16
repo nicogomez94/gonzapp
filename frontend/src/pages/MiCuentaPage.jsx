@@ -2,9 +2,36 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi, listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
+import Modal from '../components/Modal';
 import { FAVORITES_CHANGED, getFavoriteIds } from '../utils/favorites';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+
+const emptyListingForm = {
+  title: '',
+  brand: '',
+  model: '',
+  year: '',
+  mileage: '',
+  fuel: 'Nafta',
+  transmission: 'Manual',
+  engine: '',
+  priceArs: '',
+  priceUsd: '',
+  location: '',
+  phone: '',
+  description: '',
+  images: '',
+  equipment: '',
+};
+
+const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
+const TRANSMISSIONS = ['Manual', 'Automática', 'CVT'];
+
+const parseList = (value, separator = '\n') => (value || '')
+  .split(separator)
+  .map(item => item.trim())
+  .filter(Boolean);
 
 export default function MiCuentaPage() {
   const { user, login, updateUser } = useAuth();
@@ -14,6 +41,12 @@ export default function MiCuentaPage() {
   const [favoriteIds, setFavoriteIds] = useState(() => getFavoriteIds());
   const [favorites, setFavorites] = useState([]);
   const [loadingFavs, setLoadingFavs] = useState(false);
+  const [myListings, setMyListings] = useState([]);
+  const [loadingMyListings, setLoadingMyListings] = useState(false);
+  const [listingModalOpen, setListingModalOpen] = useState(false);
+  const [listingForm, setListingForm] = useState(() => ({ ...emptyListingForm, phone: user?.phone || '' }));
+  const [savingListing, setSavingListing] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const initials = useMemo(() => {
     return (profileForm.name || user?.name || 'U')
@@ -62,6 +95,20 @@ export default function MiCuentaPage() {
   }, [favoriteIds]);
 
   const visibleFavorites = favoriteIds.length ? favorites : [];
+  const isApprovedUser = user?.role !== 'ADMIN' && user?.approvalStatus === 'APPROVED';
+
+  const loadMyListings = () => {
+    if (!isApprovedUser) return;
+    setLoadingMyListings(true);
+    listingsApi.getMine()
+      .then(({ data }) => setMyListings(data.listings || []))
+      .catch(() => show('No se pudieron cargar tus publicaciones', 'error'))
+      .finally(() => setLoadingMyListings(false));
+  };
+
+  useEffect(() => {
+    loadMyListings();
+  }, [isApprovedUser]);
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -77,6 +124,58 @@ export default function MiCuentaPage() {
       show(err.response?.data?.error || 'No se pudieron guardar los datos', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openListingModal = () => {
+    setListingForm({ ...emptyListingForm, phone: user?.phone || '' });
+    setListingModalOpen(true);
+  };
+
+  const uploadListingImages = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const formData = new FormData();
+    files.forEach(file => formData.append('images', file));
+    setUploadingImages(true);
+
+    try {
+      const { data } = await listingsApi.uploadImages(formData);
+      const nextImages = [...parseList(listingForm.images), ...(data.images || [])];
+      setListingForm(f => ({ ...f, images: nextImages.join('\n') }));
+      show(`${data.images?.length || 0} imagen${data.images?.length === 1 ? '' : 'es'} cargada${data.images?.length === 1 ? '' : 's'}`);
+    } catch (err) {
+      show(err.response?.data?.error || 'No se pudieron cargar las imágenes', 'error');
+    } finally {
+      setUploadingImages(false);
+      e.target.value = '';
+    }
+  };
+
+  const saveListing = async (e) => {
+    e.preventDefault();
+    setSavingListing(true);
+
+    const payload = {
+      ...listingForm,
+      year: +listingForm.year,
+      mileage: +listingForm.mileage,
+      priceArs: +listingForm.priceArs,
+      priceUsd: listingForm.priceUsd ? +listingForm.priceUsd : undefined,
+      images: parseList(listingForm.images),
+      equipment: parseList(listingForm.equipment, ','),
+    };
+
+    try {
+      await listingsApi.create(payload);
+      show('Publicación enviada para revisión');
+      setListingModalOpen(false);
+      loadMyListings();
+    } catch (err) {
+      show(err.response?.data?.error || 'No se pudo enviar la publicación', 'error');
+    } finally {
+      setSavingListing(false);
     }
   };
 
@@ -175,13 +274,46 @@ export default function MiCuentaPage() {
 
           <aside className="account-card account-publish-card">
             <div className="stat-icon orange"><i className="fa-solid fa-car" /></div>
-            <h2>¿Querés publicar?</h2>
-            <p>La carga se gestiona por WhatsApp para mantener el proceso simple en esta etapa.</p>
-            <a href="https://wa.me/542665016253?text=Hola%2C%20quiero%20publicar%20mi%20auto%20en%20AutoZona" target="_blank" rel="noreferrer" className="btn btn-accent btn-block">
-              <i className="fa-brands fa-whatsapp" /> Consultar publicación
-            </a>
+            <h2>Publicar vehículo</h2>
+            <p>Tu publicación se enviará a revisión y quedará visible cuando el administrador la apruebe.</p>
+            <button type="button" className="btn btn-accent btn-block" onClick={openListingModal}>
+              <i className="fa-solid fa-plus" /> Cargar publicación
+            </button>
           </aside>
         </div>
+
+        {isApprovedUser && (
+          <section className="account-card account-listings-card">
+            <div className="account-card-header">
+              <div>
+                <h2>Mis publicaciones</h2>
+                <p>Las publicaciones pendientes se revisan antes de mostrarse en el sitio.</p>
+              </div>
+              <button type="button" className="btn btn-primary btn-sm" onClick={openListingModal}>
+                <i className="fa-solid fa-plus" /> Nueva publicación
+              </button>
+            </div>
+
+            {loadingMyListings ? (
+              <div className="account-loading">
+                <i className="fa-solid fa-spinner fa-spin" /> Cargando publicaciones
+              </div>
+            ) : myListings.length > 0 ? (
+              <div className="account-favorites-grid">
+                {myListings.map(listing => <ListingCard key={listing.id} listing={listing} />)}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <i className="fa-solid fa-car-side" />
+                <h3>Todavía no cargaste publicaciones</h3>
+                <p>Creá tu primera publicación y quedará pendiente hasta la aprobación administrativa.</p>
+                <button type="button" className="btn btn-primary" onClick={openListingModal}>
+                  <i className="fa-solid fa-plus" /> Cargar publicación
+                </button>
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="account-card account-favorites-card">
           <div className="account-card-header">
@@ -209,6 +341,51 @@ export default function MiCuentaPage() {
             </div>
           )}
         </section>
+
+        {listingModalOpen && (
+          <Modal
+            title="Nueva publicación"
+            onClose={() => setListingModalOpen(false)}
+            footer={<><button className="btn btn-outline" onClick={() => setListingModalOpen(false)}>Cancelar</button><button className="btn btn-primary" form="account-listing-form" type="submit" disabled={savingListing || uploadingImages}>{savingListing ? 'Enviando' : 'Enviar a revisión'}</button></>}
+          >
+            <form id="account-listing-form" onSubmit={saveListing} className="modal-form">
+              <div className="form-row">
+                <div className="input-group"><label className="input-label">Título *</label><input className="form-input" required value={listingForm.title} onChange={e => setListingForm(f => ({ ...f, title: e.target.value }))} placeholder="Toyota Corolla XEI 2.0" /></div>
+                <div className="input-group"><label className="input-label">Marca *</label><input className="form-input" required value={listingForm.brand} onChange={e => setListingForm(f => ({ ...f, brand: e.target.value }))} /></div>
+              </div>
+              <div className="form-row">
+                <div className="input-group"><label className="input-label">Modelo *</label><input className="form-input" required value={listingForm.model} onChange={e => setListingForm(f => ({ ...f, model: e.target.value }))} /></div>
+                <div className="input-group"><label className="input-label">Año *</label><input className="form-input" type="number" required value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))} /></div>
+              </div>
+              <div className="form-row">
+                <div className="input-group"><label className="input-label">Kilometraje *</label><input className="form-input" type="number" required value={listingForm.mileage} onChange={e => setListingForm(f => ({ ...f, mileage: e.target.value }))} /></div>
+                <div className="input-group"><label className="input-label">Motor</label><input className="form-input" value={listingForm.engine} onChange={e => setListingForm(f => ({ ...f, engine: e.target.value }))} placeholder="2.0" /></div>
+              </div>
+              <div className="form-row">
+                <div className="input-group"><label className="input-label">Combustible *</label><select className="form-input" value={listingForm.fuel} onChange={e => setListingForm(f => ({ ...f, fuel: e.target.value }))}>{FUELS.map(fuel => <option key={fuel}>{fuel}</option>)}</select></div>
+                <div className="input-group"><label className="input-label">Transmisión *</label><select className="form-input" value={listingForm.transmission} onChange={e => setListingForm(f => ({ ...f, transmission: e.target.value }))}>{TRANSMISSIONS.map(transmission => <option key={transmission}>{transmission}</option>)}</select></div>
+              </div>
+              <div className="form-row">
+                <div className="input-group"><label className="input-label">Precio ARS *</label><input className="form-input" type="number" required value={listingForm.priceArs} onChange={e => setListingForm(f => ({ ...f, priceArs: e.target.value }))} /></div>
+                <div className="input-group"><label className="input-label">Precio USD</label><input className="form-input" type="number" value={listingForm.priceUsd} onChange={e => setListingForm(f => ({ ...f, priceUsd: e.target.value }))} /></div>
+              </div>
+              <div className="form-row">
+                <div className="input-group"><label className="input-label">Ubicación *</label><input className="form-input" required value={listingForm.location} onChange={e => setListingForm(f => ({ ...f, location: e.target.value }))} /></div>
+                <div className="input-group"><label className="input-label">Teléfono *</label><input className="form-input" required value={listingForm.phone} onChange={e => setListingForm(f => ({ ...f, phone: e.target.value }))} /></div>
+              </div>
+              <div className="input-group"><label className="input-label">Descripción</label><textarea className="form-input" rows={3} value={listingForm.description} onChange={e => setListingForm(f => ({ ...f, description: e.target.value }))} /></div>
+              <div className="input-group">
+                <label className="input-label">Imágenes</label>
+                <input className="form-input" type="file" accept="image/*" multiple onChange={uploadListingImages} disabled={uploadingImages} />
+                <div style={{ color: 'var(--text-faint)', fontSize: '0.78rem', marginTop: 6 }}>
+                  {uploadingImages ? 'Cargando imágenes...' : 'También podés pegar URLs, una por línea.'}
+                </div>
+                <textarea className="form-input" rows={4} value={listingForm.images} onChange={e => setListingForm(f => ({ ...f, images: e.target.value }))} placeholder="Una URL por línea" style={{ marginTop: 8 }} />
+              </div>
+              <div className="input-group"><label className="input-label">Equipamiento</label><input className="form-input" value={listingForm.equipment} onChange={e => setListingForm(f => ({ ...f, equipment: e.target.value }))} placeholder="Airbag, ABS, Cámara de reversa" /></div>
+            </form>
+          </Modal>
+        )}
       </div>
     </div>
   );

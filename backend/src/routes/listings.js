@@ -2,6 +2,7 @@ const express = require('express');
 const { Readable } = require('stream');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
+const jwt = require('jsonwebtoken');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const prisma = require('../db');
 
@@ -26,6 +27,55 @@ const cloudinaryReady = () => {
   const config = cloudinary.config();
   return !!(config.cloud_name && config.api_key && config.api_secret);
 };
+
+function optionalAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) return next();
+
+  try {
+    req.user = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+  } catch {
+    req.user = null;
+  }
+  return next();
+}
+
+async function getApprovedUser(userId) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true, approvalStatus: true, planId: true, plan: true }
+  });
+}
+
+function listingPayload(body) {
+  return {
+    title: body.title,
+    brand: body.brand,
+    model: body.model,
+    engine: body.engine || '',
+    year: parseInt(body.year),
+    mileage: parseInt(body.mileage),
+    fuel: body.fuel,
+    transmission: body.transmission,
+    description: body.description || '',
+    equipment: body.equipment || [],
+    priceArs: parseFloat(body.priceArs),
+    priceUsd: body.priceUsd ? parseFloat(body.priceUsd) : null,
+    images: body.images || [],
+    location: body.location,
+    phone: body.phone,
+  };
+}
+
+function validateListingPayload(body) {
+  const required = ['title', 'brand', 'model', 'year', 'mileage', 'fuel', 'transmission', 'priceArs', 'location', 'phone'];
+  const missing = required.filter(field => body[field] === undefined || body[field] === null || body[field] === '');
+  if (missing.length) return 'Completá los datos requeridos de la publicación';
+  if (Number.isNaN(parseInt(body.year)) || Number.isNaN(parseInt(body.mileage)) || Number.isNaN(parseFloat(body.priceArs))) {
+    return 'Año, kilometraje y precio deben ser valores numéricos';
+  }
+  return null;
+}
 
 const uploadBufferToCloudinary = (file) => new Promise((resolve, reject) => {
   const uploadStream = cloudinary.uploader.upload_stream({
@@ -71,11 +121,11 @@ const deleteCloudinaryImages = async (imageUrls = []) => {
   });
 };
 
-// GET /api/listings — public, with filters
-router.get('/', async (req, res) => {
+// GET /api/listings — public active listings; admins see all listings
+router.get('/', optionalAuth, async (req, res) => {
   try {
     const { brand, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, page = 1, limit = 9, sort = 'newest' } = req.query;
-    const where = { status: 'ACTIVE' };
+    const where = req.user?.role === 'ADMIN' ? {} : { status: 'ACTIVE' };
     if (brand) where.brand = { equals: brand, mode: 'insensitive' };
     if (fuel) where.fuel = { equals: fuel, mode: 'insensitive' };
     if (transmission) where.transmission = { equals: transmission, mode: 'insensitive' };
@@ -105,27 +155,49 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/listings/mine — authenticated user listings, including pending
+router.get('/mine', authMiddleware, async (req, res) => {
+  try {
+    const listings = await prisma.listing.findMany({
+      where: { userId: req.user.id },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json({ listings });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 // GET /api/listings/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const listing = await prisma.listing.findUnique({
       where: { id: parseInt(req.params.id) },
       include: { user: { select: { name: true, phone: true, email: true } } }
     });
     if (!listing) return res.status(404).json({ error: 'Publicación no encontrada' });
+    const canView = listing.status === 'ACTIVE' || req.user?.role === 'ADMIN' || req.user?.id === listing.userId;
+    if (!canView) return res.status(404).json({ error: 'Publicación no encontrada' });
     res.json(listing);
   } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
 
-// POST /api/listings/images — admin only, upload multiple images
-router.post('/images', authMiddleware, adminMiddleware, (req, res) => {
+// POST /api/listings/images — approved users and admins can upload multiple images
+router.post('/images', authMiddleware, async (req, res) => {
   uploadImages(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message || 'No se pudieron cargar las imágenes' });
     if (!cloudinaryReady()) return res.status(500).json({ error: 'Cloudinary no está configurado en el servidor' });
 
     try {
+      const currentUser = await getApprovedUser(req.user.id);
+      if (!currentUser) return res.status(404).json({ error: 'Usuario no encontrado' });
+      if (currentUser.role !== 'ADMIN' && currentUser.approvalStatus !== 'APPROVED') {
+        return res.status(403).json({ error: 'Tu cuenta debe estar aprobada para cargar imágenes' });
+      }
+
       const uploaded = await Promise.all((req.files || []).map(uploadBufferToCloudinary));
       res.status(201).json({
         images: uploaded.map(file => file.secure_url),
@@ -145,18 +217,32 @@ router.post('/images', authMiddleware, adminMiddleware, (req, res) => {
   });
 });
 
-// POST /api/listings — admin only
-router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
+// POST /api/listings — approved users create pending listings; admins can publish directly
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { title, brand, model, engine, year, mileage, fuel, transmission, description, equipment, priceArs, priceUsd, images, location, phone, featured, verified, userId } = req.body;
+    const validationError = validateListingPayload(req.body);
+    if (validationError) return res.status(400).json({ error: validationError });
+
+    const currentUser = await getApprovedUser(req.user.id);
+    if (!currentUser) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (currentUser.role !== 'ADMIN') {
+      if (currentUser.approvalStatus !== 'APPROVED') {
+        return res.status(403).json({ error: 'Tu cuenta debe estar aprobada para publicar' });
+      }
+      if (!currentUser.planId) {
+        return res.status(403).json({ error: 'Necesitás tener un plan aprobado para publicar' });
+      }
+    }
+
+    const isAdmin = currentUser.role === 'ADMIN';
     const listing = await prisma.listing.create({
       data: {
-        title, brand, model, engine, year: parseInt(year), mileage: parseInt(mileage),
-        fuel, transmission, description, equipment: equipment || [],
-        priceArs: parseFloat(priceArs), priceUsd: priceUsd ? parseFloat(priceUsd) : null,
-        images: images || [], location, phone,
-        featured: !!featured, verified: !!verified,
-        userId: parseInt(userId || req.user.id)
+        ...listingPayload(req.body),
+        status: isAdmin ? (req.body.status || 'ACTIVE') : 'PENDING',
+        featured: isAdmin ? !!req.body.featured : false,
+        verified: isAdmin ? !!req.body.verified : false,
+        userId: isAdmin ? parseInt(req.body.userId || req.user.id) : req.user.id
       }
     });
     res.status(201).json(listing);
