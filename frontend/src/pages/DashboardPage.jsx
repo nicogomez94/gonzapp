@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listingsApi, usersApi, plansApi } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useDebug } from '../context/DebugContext';
+import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
 
@@ -32,6 +34,7 @@ const parseImageList = (images) => {
 
 export default function DashboardPage() {
   const { user, isAdmin, logout } = useAuth();
+  const isDebug = useDebug();
   const navigate = useNavigate();
   const { show } = useToast();
   const [section, setSection] = useState('resumen');
@@ -50,9 +53,18 @@ export default function DashboardPage() {
   const [planModal, setPlanModal] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const [listingForm, setListingForm] = useState(emptyListing);
-  const [userForm, setUserForm] = useState(emptyUser);
-  const [planForm, setPlanForm] = useState(emptyPlan);
+  const getListingDefaults = () => ({
+    ...emptyListing,
+    ...(isDebug ? debugDefaults.listing : {}),
+    images: isDebug ? debugDefaults.listing.images : emptyListing.images,
+    equipment: isDebug ? debugDefaults.listing.equipment : emptyListing.equipment,
+  });
+  const getUserDefaults = () => ({ ...emptyUser, ...(isDebug ? debugDefaults.user : {}) });
+  const getPlanDefaults = () => ({ ...emptyPlan, ...(isDebug ? debugDefaults.plan : {}) });
+
+  const [listingForm, setListingForm] = useState(() => getListingDefaults());
+  const [userForm, setUserForm] = useState(() => getUserDefaults());
+  const [planForm, setPlanForm] = useState(() => getPlanDefaults());
   const [uploadingImages, setUploadingImages] = useState(false);
 
   const loadListings = useCallback(() => {
@@ -86,7 +98,7 @@ export default function DashboardPage() {
     });
   }, [section]);
 
-  const openCreateListing = () => { setListingForm(emptyListing); setListingModal({ mode: 'create' }); };
+  const openCreateListing = () => { setListingForm(getListingDefaults()); setListingModal({ mode: 'create' }); };
   const openEditListing = (l) => { setListingForm({ ...l, images: l.images?.join('\n') || '', equipment: l.equipment?.join(', ') || '' }); setListingModal({ mode: 'edit', id: l.id }); };
   const uploadListingImages = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -124,7 +136,7 @@ export default function DashboardPage() {
   };
   const deleteListing = async (id) => { try { await listingsApi.remove(id); show('Publicación eliminada'); loadListings(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
-  const openCreateUser = () => { setUserForm(emptyUser); setUserModal({ mode: 'create' }); };
+  const openCreateUser = () => { setUserForm(getUserDefaults()); setUserModal({ mode: 'create' }); };
   const openEditUser = (u) => { setUserForm({ ...u, password: '', planId: u.planId || '' }); setUserModal({ mode: 'edit', id: u.id }); };
   const saveUser = async (e) => {
     e.preventDefault();
@@ -142,7 +154,7 @@ export default function DashboardPage() {
   };
   const deleteUser = async (id) => { try { await usersApi.remove(id); show('Usuario eliminado'); loadUsers(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
-  const openCreatePlan = () => { setPlanForm(emptyPlan); setPlanModal({ mode: 'create' }); };
+  const openCreatePlan = () => { setPlanForm(getPlanDefaults()); setPlanModal({ mode: 'create' }); };
   const openEditPlan = (p) => { setPlanForm({ ...p, features: p.features?.join(', ') || '' }); setPlanModal({ mode: 'edit', id: p.id }); };
   const savePlan = async (e) => {
     e.preventDefault();

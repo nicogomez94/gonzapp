@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
+import { useDebug } from '../context/DebugContext';
+import { debugDefaults } from '../context/debugDefaults';
 
 const BRANDS = ['Toyota', 'Ford', 'Volkswagen', 'Honda', 'Chevrolet', 'Renault', 'Peugeot', 'Fiat', 'Jeep', 'Nissan'];
 const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
@@ -9,6 +11,7 @@ const TRANSMISSIONS = ['Manual', 'Automática'];
 
 export default function PublicacionesPage() {
   const [searchParams] = useSearchParams();
+  const isDebug = useDebug();
   const [listings, setListings] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -17,18 +20,24 @@ export default function PublicacionesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const LIMIT = 12;
 
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    brand: searchParams.get('brand') || '',
-    fuel: '',
-    transmission: '',
-    yearFrom: '',
-    yearTo: '',
-    priceMin: '',
-    priceMax: searchParams.get('priceMax') || '',
-    kmMax: '',
-    sort: 'newest',
-  });
+  const [filters, setFilters] = useState(() => ({
+    ...(isDebug ? debugDefaults.filters : {
+      search: '',
+      brand: '',
+      fuel: '',
+      transmission: '',
+      yearFrom: '',
+      yearTo: '',
+      priceMin: '',
+      priceMax: '',
+      kmMax: '',
+      sort: 'newest',
+    }),
+    search: searchParams.get('search') || (isDebug ? debugDefaults.filters.search : ''),
+    brand: searchParams.get('brand') || (isDebug ? debugDefaults.filters.brand : ''),
+    priceMax: searchParams.get('priceMax') || (isDebug ? debugDefaults.filters.priceMax : ''),
+    location: searchParams.get('location') || (isDebug ? debugDefaults.search.location : ''),
+  }));
 
   const fetchListings = useCallback(() => {
     setLoading(true);
@@ -50,13 +59,13 @@ export default function PublicacionesPage() {
   const setFilter = (key, value) => { setFilters(f => ({ ...f, [key]: value })); setPage(1); };
 
   const clearFilters = () => {
-    setFilters({ search: '', brand: '', fuel: '', transmission: '', yearFrom: '', yearTo: '', priceMin: '', priceMax: '', kmMax: '', sort: 'newest' });
+    setFilters({ search: '', brand: '', fuel: '', transmission: '', yearFrom: '', yearTo: '', priceMin: '', priceMax: '', kmMax: '', sort: 'newest', location: '' });
     setPage(1);
   };
 
   const totalPages = Math.ceil(total / LIMIT);
 
-  const activeFilterCount = [filters.brand, filters.fuel, filters.transmission, filters.priceMin, filters.priceMax, filters.kmMax].filter(Boolean).length;
+  const activeFilterCount = [filters.brand, filters.fuel, filters.transmission, filters.priceMin, filters.priceMax, filters.kmMax, filters.search, filters.location].filter(Boolean).length;
 
   return (
     <>
@@ -83,11 +92,11 @@ export default function PublicacionesPage() {
               onChange={e => setFilter('search', e.target.value)}
             />
             <div className="search-divider" />
-            <select className="form-input" style={{ border: 'none', background: 'transparent', width: 150, padding: '0 8px', fontSize: '0.88rem' }}>
-              <option>Todo el país</option>
-              <option>Buenos Aires</option>
-              <option>Córdoba</option>
-              <option>Rosario</option>
+            <select className="form-input" value={filters.location} onChange={e => setFilter('location', e.target.value)} style={{ border: 'none', background: 'transparent', width: 150, padding: '0 8px', fontSize: '0.88rem' }}>
+              <option value="">Todo el país</option>
+              <option value="Buenos Aires">Buenos Aires</option>
+              <option value="Córdoba">Córdoba</option>
+              <option value="Rosario">Rosario</option>
             </select>
             <button className="btn btn-primary btn-sm" onClick={() => fetchListings()}>
               <i className="fa-solid fa-magnifying-glass" /> Buscar

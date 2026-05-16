@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { listingsApi, plansApi } from '../api';
 import ListingCard from '../components/ListingCard';
+import { useDebug } from '../context/DebugContext';
+import { debugDefaults } from '../context/debugDefaults';
 
 const BRANDS = ['Toyota', 'Ford', 'Volkswagen', 'Honda', 'Chevrolet', 'Renault', 'Fiat', 'Jeep', 'Nissan', 'Peugeot'];
 const CATEGORIES = [
@@ -73,7 +75,10 @@ function useScrollAnimations() {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState({ brand: '', priceMax: '', location: '' });
+  const isDebug = useDebug();
+  const [search, setSearch] = useState(() => (
+    isDebug ? debugDefaults.search : { brand: '', priceMax: '', location: '' }
+  ));
   const [featured, setFeatured] = useState([]);
   const [plans, setPlans] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
@@ -93,6 +98,7 @@ export default function HomePage() {
     const params = new URLSearchParams();
     if (search.brand) params.set('brand', search.brand);
     if (search.priceMax) params.set('priceMax', search.priceMax);
+    if (search.location) params.set('location', search.location);
     navigate(`/publicaciones?${params.toString()}`);
   };
 
@@ -131,7 +137,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <label>Ubicación</label>
-                    <select>
+                    <select value={search.location} onChange={e => setSearch({ ...search, location: e.target.value })}>
                       <option value="">Todo el país</option>
                       <option>Buenos Aires</option>
                       <option>Córdoba</option>

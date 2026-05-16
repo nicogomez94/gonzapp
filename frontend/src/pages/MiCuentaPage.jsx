@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi, listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
 import Modal from '../components/Modal';
 import { FAVORITES_CHANGED, getFavoriteIds } from '../utils/favorites';
 import { useAuth } from '../context/AuthContext';
+import { useDebug } from '../context/DebugContext';
+import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
 
 const emptyListingForm = {
@@ -35,8 +37,21 @@ const parseList = (value, separator = '\n') => (value || '')
 
 export default function MiCuentaPage() {
   const { user, login, updateUser } = useAuth();
+  const isDebug = useDebug();
   const { show } = useToast();
-  const [profileForm, setProfileForm] = useState(() => ({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '', password: '' }));
+  const getProfileForm = useCallback((nextUser) => ({
+    ...(isDebug ? debugDefaults.profile : { name: '', email: '', phone: '', password: '' }),
+    name: nextUser?.name || (isDebug ? debugDefaults.profile.name : ''),
+    email: nextUser?.email || (isDebug ? debugDefaults.profile.email : ''),
+    phone: nextUser?.phone || (isDebug ? debugDefaults.profile.phone : ''),
+    password: '',
+  }), [isDebug]);
+  const getListingForm = useCallback((phone) => ({
+    ...emptyListingForm,
+    ...(isDebug ? debugDefaults.listing : {}),
+    phone: phone || (isDebug ? debugDefaults.listing.phone : ''),
+  }), [isDebug]);
+  const [profileForm, setProfileForm] = useState(() => getProfileForm(user));
   const [saving, setSaving] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState(() => getFavoriteIds());
   const [favorites, setFavorites] = useState([]);
@@ -44,7 +59,7 @@ export default function MiCuentaPage() {
   const [myListings, setMyListings] = useState([]);
   const [loadingMyListings, setLoadingMyListings] = useState(false);
   const [listingModalOpen, setListingModalOpen] = useState(false);
-  const [listingForm, setListingForm] = useState(() => ({ ...emptyListingForm, phone: user?.phone || '' }));
+  const [listingForm, setListingForm] = useState(() => getListingForm(user?.phone));
   const [savingListing, setSavingListing] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
 
@@ -61,10 +76,10 @@ export default function MiCuentaPage() {
     authApi.me()
       .then(({ data }) => {
         updateUser(data.user);
-        setProfileForm({ name: data.user.name || '', email: data.user.email || '', phone: data.user.phone || '', password: '' });
+        setProfileForm(getProfileForm(data.user));
       })
       .catch(() => {});
-  }, [user?.id, updateUser]);
+  }, [user?.id, updateUser, getProfileForm]);
 
   useEffect(() => {
     const syncFavorites = () => setFavoriteIds(getFavoriteIds());
@@ -97,18 +112,18 @@ export default function MiCuentaPage() {
   const visibleFavorites = favoriteIds.length ? favorites : [];
   const isApprovedUser = user?.role !== 'ADMIN' && user?.approvalStatus === 'APPROVED';
 
-  const loadMyListings = () => {
+  const loadMyListings = useCallback(() => {
     if (!isApprovedUser) return;
     setLoadingMyListings(true);
     listingsApi.getMine()
       .then(({ data }) => setMyListings(data.listings || []))
       .catch(() => show('No se pudieron cargar tus publicaciones', 'error'))
       .finally(() => setLoadingMyListings(false));
-  };
+  }, [isApprovedUser, show]);
 
   useEffect(() => {
-    loadMyListings();
-  }, [isApprovedUser]);
+    queueMicrotask(loadMyListings);
+  }, [loadMyListings]);
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -128,7 +143,7 @@ export default function MiCuentaPage() {
   };
 
   const openListingModal = () => {
-    setListingForm({ ...emptyListingForm, phone: user?.phone || '' });
+    setListingForm(getListingForm(user?.phone));
     setListingModalOpen(true);
   };
 

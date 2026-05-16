@@ -124,11 +124,12 @@ const deleteCloudinaryImages = async (imageUrls = []) => {
 // GET /api/listings — public active listings; admins see all listings
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    const { brand, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, page = 1, limit = 9, sort = 'newest' } = req.query;
+    const { brand, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, location, page = 1, limit = 9, sort = 'newest' } = req.query;
     const where = req.user?.role === 'ADMIN' ? {} : { status: 'ACTIVE' };
     if (brand) where.brand = { equals: brand, mode: 'insensitive' };
     if (fuel) where.fuel = { equals: fuel, mode: 'insensitive' };
     if (transmission) where.transmission = { equals: transmission, mode: 'insensitive' };
+    if (location) where.location = { contains: location, mode: 'insensitive' };
     if (yearFrom || yearTo) where.year = { gte: yearFrom ? parseInt(yearFrom) : undefined, lte: yearTo ? parseInt(yearTo) : undefined };
     if (priceMin || priceMax) where.priceArs = { gte: priceMin ? parseFloat(priceMin) : undefined, lte: priceMax ? parseFloat(priceMax) : undefined };
     if (kmMax) where.mileage = { lte: parseInt(kmMax) };

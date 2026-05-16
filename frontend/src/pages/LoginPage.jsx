@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { useDebug, debugDefaults } from '../context/DebugContext';
+import { useDebug } from '../context/DebugContext';
+import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
 
 export default function LoginPage() {
