@@ -923,7 +923,7 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 .check-row label { display: flex; align-items: flex-start; gap: 9px; font-size: 0.84rem; color: var(--text-muted); cursor: pointer; line-height: 1.4; }
 .check-row label a { color: var(--primary); font-weight: 500; }
 .forgot-link { font-size: 0.82rem; color: var(--primary); font-weight: 500; display: inline-block; margin-top: -4px; }
-.input-label { font-size: 0.83rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px; }
+.input-label { font-size: 0.83rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 8px; }
 .form-label span { color: var(--text-faint); font-weight: 400; }
 .form-hint { display: inline-flex; align-items: center; gap: 5px; }
 .form-hint i { color: var(--primary); }
@@ -1182,7 +1182,9 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 .modal-close:hover { color: var(--error); }
 .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
 .modal-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; }
+.modal-form { display: flex; flex-direction: column; gap: 1.1rem; }
 .modal-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.modal-form .input-group { display: flex; flex-direction: column; }
 .modal-form .form-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer; }
 
 /* ===== TOAST ===== */

@@ -1,63 +1,59 @@
-const nodemailer = require('nodemailer');
+const CONTACT_SERVICE_URL = process.env.CONTACT_EMAIL_SERVICE_URL || 'https://contact-form-service-e8aa.onrender.com/api/contact';
+const SITE_NAME = process.env.CONTACT_SITE || 'AutoZona';
+const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || 'info@autozona.com.ar';
 
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+async function sendEmail({ to, name, subject, message }) {
+  const response = await fetch(CONTACT_SERVICE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name || SITE_NAME,
+      email: FROM_EMAIL,
+      to,
+      message: `${subject}\n\n${message}`,
+      site: SITE_NAME,
+      company: '',
+    }),
   });
-}
 
-const FROM = () => process.env.SMTP_FROM || `"AutoZona" <${process.env.SMTP_USER}>`;
-
-async function sendListingActiveEmail({ to, userName, listingTitle, listingId }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('[mailer] SMTP no configurado (SMTP_USER / SMTP_PASS), email no enviado');
-    return;
+  let data = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
   }
 
-  const listingUrl = process.env.FRONTEND_URL
-    ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/publicaciones/${listingId}`
-    : null;
+  if (!response.ok || data?.success !== true) {
+    throw new Error(data?.error || `Email service failed with status ${response.status}`);
+  }
+}
 
-  const transporter = createTransporter();
+async function sendRegistrationConfirmationEmail({ to, userName }) {
+  const safeName = userName || 'Usuario';
+  const baseUrl = process.env.FRONTEND_URL?.split(',')[0]?.trim().replace(/\/$/, '');
+  const plansUrl = baseUrl ? `\n\nElegí tu plan acá: ${baseUrl}/planes` : '';
 
-  await transporter.sendMail({
-    from: FROM(),
+  await sendEmail({
     to,
-    subject: '¡Tu publicación está activa en AutoZona!',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a2e;">
-        <div style="background: #1a56db; padding: 24px 32px; border-radius: 12px 12px 0 0;">
-          <h1 style="color: #fff; margin: 0; font-size: 1.4rem;">AutoZona</h1>
-        </div>
-        <div style="background: #f9fafb; padding: 32px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb;">
-          <h2 style="margin-top: 0; color: #1a1a2e;">¡Hola, ${userName}!</h2>
-          <p style="color: #374151; line-height: 1.6;">
-            Tu publicación <strong>"${listingTitle}"</strong> fue revisada por nuestro equipo y ya está
-            <span style="color: #16a34a; font-weight: 700;">activa</span> en AutoZona.
-          </p>
-          <p style="color: #374151; line-height: 1.6;">
-            Los interesados ya pueden verla y ponerse en contacto con vos.
-          </p>
-          ${listingUrl ? `
-          <div style="margin: 28px 0;">
-            <a href="${listingUrl}" style="background: #1a56db; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
-              Ver mi publicación
-            </a>
-          </div>` : ''}
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
-          <p style="color: #9ca3af; font-size: 0.82rem; margin: 0;">
-            Este es un mensaje automático de AutoZona. Por favor, no respondas este email.
-          </p>
-        </div>
-      </div>
-    `,
+    name: SITE_NAME,
+    subject: 'Confirmamos la creación de tu cuenta en AutoZona',
+    message: `Hola, ${safeName}.\n\nTu cuenta fue creada correctamente. Ya podés ingresar a AutoZona y elegir un plan para publicar tu auto.${plansUrl}\n\nSi no fuiste vos quien creó esta cuenta, podés ignorar este mensaje.`,
   });
 }
 
-module.exports = { sendListingActiveEmail };
+async function sendListingActiveEmail({ to, userName, listingTitle, listingId }) {
+  const safeName = userName || 'Usuario';
+  const safeTitle = listingTitle || 'Tu publicación';
+  const listingUrl = process.env.FRONTEND_URL
+    ? `\n\nVer mi publicación: ${process.env.FRONTEND_URL.replace(/\/$/, '')}/publicaciones/${listingId}`
+    : '';
+
+  await sendEmail({
+    to,
+    name: SITE_NAME,
+    subject: 'Tu publicación está activa en AutoZona',
+    message: `Hola, ${safeName}.\n\nTu publicación "${safeTitle}" fue revisada por nuestro equipo y ya está activa en AutoZona. Los interesados ya pueden verla y ponerse en contacto con vos.${listingUrl}`,
+  });
+}
+
+module.exports = { sendListingActiveEmail, sendRegistrationConfirmationEmail };

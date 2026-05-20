@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMiddleware } = require('../middleware/auth');
 const prisma = require('../db');
+const { sendRegistrationConfirmationEmail } = require('../mailer');
 
 const router = express.Router();
 
@@ -30,7 +31,8 @@ function signUserToken(user) {
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = (req.body.email || '').trim().toLowerCase();
+    const { password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña requeridos' });
     }
@@ -53,7 +55,10 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
+    const email = (req.body.email || '').trim().toLowerCase();
+    const { password } = req.body;
+    const name = (req.body.name || '').trim();
+    const phone = (req.body.phone || '').trim();
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Nombre, email y contraseña requeridos' });
     }
@@ -66,6 +71,11 @@ router.post('/register', async (req, res) => {
       data: { email, password: hashed, name, phone: phone || null, approvalStatus: 'PENDING_PLAN' },
       include: { plan: true }
     });
+    sendRegistrationConfirmationEmail({
+      to: user.email,
+      userName: user.name
+    }).catch(err => console.warn('[mailer] No se pudo enviar email de confirmación:', err.message));
+
     const token = signUserToken(user);
     res.status(201).json({ token, user: publicUser(user) });
   } catch (err) {
