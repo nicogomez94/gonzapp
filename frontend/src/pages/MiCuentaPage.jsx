@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { authApi, listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
 import Modal from '../components/Modal';
+import ImageUploadPreview from '../components/ImageUploadPreview';
 import { FAVORITES_CHANGED, getFavoriteIds } from '../utils/favorites';
 import { useAuth } from '../context/AuthContext';
 import { useDebug } from '../context/DebugContext';
@@ -30,10 +31,10 @@ const emptyListingForm = {
 const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
 const TRANSMISSIONS = ['Manual', 'Automática', 'CVT'];
 
-const parseList = (value, separator = '\n') => (value || '')
-  .split(separator)
-  .map(item => item.trim())
-  .filter(Boolean);
+const parseList = (value, separator = '\n') => {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  return (value || '').split(separator).map(item => item.trim()).filter(Boolean);
+};
 
 export default function MiCuentaPage() {
   const { user, login, updateUser } = useAuth();
@@ -158,7 +159,7 @@ export default function MiCuentaPage() {
     try {
       const { data } = await listingsApi.uploadImages(formData);
       const nextImages = [...parseList(listingForm.images), ...(data.images || [])];
-      setListingForm(f => ({ ...f, images: nextImages.join('\n') }));
+      setListingForm(f => ({ ...f, images: nextImages }));
       show(`${data.images?.length || 0} imagen${data.images?.length === 1 ? '' : 'es'} cargada${data.images?.length === 1 ? '' : 's'}`);
     } catch (err) {
       show(err.response?.data?.error || 'No se pudieron cargar las imágenes', 'error');
@@ -391,11 +392,12 @@ export default function MiCuentaPage() {
               <div className="input-group"><label className="input-label">Descripción</label><textarea className="form-input" rows={3} value={listingForm.description} onChange={e => setListingForm(f => ({ ...f, description: e.target.value }))} /></div>
               <div className="input-group">
                 <label className="input-label">Imágenes</label>
-                <input className="form-input" type="file" accept="image/*" multiple onChange={uploadListingImages} disabled={uploadingImages} />
-                <div style={{ color: 'var(--text-faint)', fontSize: '0.78rem', marginTop: 6 }}>
-                  {uploadingImages ? 'Cargando imágenes...' : 'También podés pegar URLs, una por línea.'}
-                </div>
-                <textarea className="form-input" rows={4} value={listingForm.images} onChange={e => setListingForm(f => ({ ...f, images: e.target.value }))} placeholder="Una URL por línea" style={{ marginTop: 8 }} />
+                <ImageUploadPreview
+                  images={parseList(listingForm.images)}
+                  onUpload={uploadListingImages}
+                  onChange={arr => setListingForm(f => ({ ...f, images: arr }))}
+                  uploading={uploadingImages}
+                />
               </div>
               <div className="input-group"><label className="input-label">Equipamiento</label><input className="form-input" value={listingForm.equipment} onChange={e => setListingForm(f => ({ ...f, equipment: e.target.value }))} placeholder="Airbag, ABS, Cámara de reversa" /></div>
             </form>

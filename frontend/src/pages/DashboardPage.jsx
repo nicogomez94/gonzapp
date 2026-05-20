@@ -6,6 +6,7 @@ import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
+import ImageUploadPreview from '../components/ImageUploadPreview';
 
 const LISTING_STATUSES = ['ACTIVE', 'PAUSED', 'PENDING', 'EXPIRED'];
 const USER_APPROVAL_STATUSES = ['PENDING_PLAN', 'PENDING_APPROVAL', 'APPROVED'];
@@ -99,7 +100,7 @@ export default function DashboardPage() {
   }, [section]);
 
   const openCreateListing = () => { setListingForm(getListingDefaults()); setListingModal({ mode: 'create' }); };
-  const openEditListing = (l) => { setListingForm({ ...l, images: l.images?.join('\n') || '', equipment: l.equipment?.join(', ') || '' }); setListingModal({ mode: 'edit', id: l.id }); };
+  const openEditListing = (l) => { setListingForm({ ...l, images: l.images || [], equipment: l.equipment?.join(', ') || '' }); setListingModal({ mode: 'edit', id: l.id }); };
   const uploadListingImages = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -111,7 +112,7 @@ export default function DashboardPage() {
     try {
       const { data } = await listingsApi.uploadImages(formData);
       const uploaded = data.images || [];
-      setListingForm(f => ({ ...f, images: [...parseImageList(f.images), ...uploaded].join('\n') }));
+      setListingForm(f => ({ ...f, images: [...parseImageList(f.images), ...uploaded] }));
       show(`${uploaded.length} imagen${uploaded.length === 1 ? '' : 'es'} cargada${uploaded.length === 1 ? '' : 's'}`);
     } catch (err) {
       show(err.response?.data?.error || 'Error al cargar imágenes', 'error');
@@ -530,11 +531,12 @@ export default function DashboardPage() {
             <div className="input-group"><label className="input-label">Descripción</label><textarea className="form-input" rows={3} value={listingForm.description} onChange={e => setListingForm(f => ({ ...f, description: e.target.value }))} /></div>
             <div className="input-group">
               <label className="input-label">Imágenes</label>
-              <input className="form-input" type="file" accept="image/*" multiple onChange={uploadListingImages} disabled={uploadingImages} />
-              <div style={{ color: 'var(--text-faint)', fontSize: '0.78rem', marginTop: 6 }}>
-                {uploadingImages ? 'Cargando imágenes...' : 'Podés seleccionar varias imágenes o pegar URLs abajo.'}
-              </div>
-              <textarea className="form-input" rows={4} value={Array.isArray(listingForm.images) ? listingForm.images.join('\n') : listingForm.images} onChange={e => setListingForm(f => ({ ...f, images: e.target.value }))} placeholder="Una URL por línea" style={{ marginTop: 8 }} />
+              <ImageUploadPreview
+                images={parseImageList(listingForm.images)}
+                onUpload={uploadListingImages}
+                onChange={arr => setListingForm(f => ({ ...f, images: arr }))}
+                uploading={uploadingImages}
+              />
             </div>
             <div className="input-group"><label className="input-label">Equipamiento (separado por comas)</label><input className="form-input" value={listingForm.equipment} onChange={e => setListingForm(f => ({ ...f, equipment: e.target.value }))} /></div>
           </form>

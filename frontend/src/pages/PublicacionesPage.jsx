@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { listingsApi } from '../api';
+import { useSearchParams, Link } from 'react-router-dom';import { listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
 import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
@@ -51,6 +50,18 @@ export default function PublicacionesPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [filters, page]);
+
+  // Sync URL-sourced filters when searchParams change (e.g. nav link removes ?brand=Toyota)
+  useEffect(() => {
+    setFilters(f => ({
+      ...f,
+      search: searchParams.get('search') || '',
+      brand: searchParams.get('brand') || '',
+      priceMax: searchParams.get('priceMax') || '',
+      location: searchParams.get('location') || '',
+    }));
+    setPage(1);
+  }, [searchParams]);
 
   useEffect(() => {
     queueMicrotask(fetchListings);

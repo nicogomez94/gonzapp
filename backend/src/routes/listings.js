@@ -8,6 +8,7 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const prisma = require('../db');
+const { sendListingActiveEmail } = require('../mailer');
 
 const router = express.Router();
 
@@ -334,9 +335,10 @@ router.post('/', authMiddleware, async (req, res) => {
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { title, brand, model, engine, year, mileage, fuel, transmission, description, equipment, priceArs, priceUsd, images, location, phone, status, featured, verified } = req.body;
-    const previousListing = images !== undefined
-      ? await prisma.listing.findUnique({ where: { id: parseInt(req.params.id) }, select: { images: true } })
-      : null;
+    const previousListing = await prisma.listing.findUnique({
+      where: { id: parseInt(req.params.id) },
+      select: { status: true, images: true, user: { select: { email: true, name: true } } }
+    });
     const listing = await prisma.listing.update({
       where: { id: parseInt(req.params.id) },
       data: {
@@ -359,6 +361,15 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
       const nextImages = new Set(images || []);
       const removedImages = (previousListing.images || []).filter(image => !nextImages.has(image));
       deleteStoredImages(removedImages).catch(error => console.warn('No se pudieron limpiar imágenes removidas:', error.message));
+    }
+
+    if (status === 'ACTIVE' && previousListing?.status !== 'ACTIVE' && previousListing?.user?.email) {
+      sendListingActiveEmail({
+        to: previousListing.user.email,
+        userName: previousListing.user.name || 'Usuario',
+        listingTitle: listing.title,
+        listingId: listing.id,
+      }).catch(err => console.warn('[mailer] No se pudo enviar email de activación:', err.message));
     }
 
     res.json(listing);
