@@ -329,7 +329,7 @@ export default function LoginPage() {
                 <div className="check-row terms-row">
                   <label>
                     <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} />
-                    <span>Acepto los <a href="#">Términos y condiciones</a> y la <a href="#">Política de privacidad</a> de AutoZona</span>
+                    <span>Acepto los <Link to="/terminos-y-condiciones">Términos y condiciones</Link> y la <Link to="/terminos-y-condiciones#privacidad">Política de privacidad</Link> de AutoZona</span>
                   </label>
                 </div>
 

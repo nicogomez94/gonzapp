@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DebugProvider } from './context/DebugContext';
 import { ToastProvider } from './context/ToastContext';
@@ -12,6 +13,8 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import MiCuentaPage from './pages/MiCuentaPage';
 import PlanesPage from './pages/PlanesPage';
+import TerminosPage from './pages/TerminosPage';
+import SobreNosotrosPage from './pages/SobreNosotrosPage';
 import './styles/global.css';
 
 function ProtectedAdmin({ children }) {
@@ -39,15 +42,36 @@ function Layout({ children, hideFooter }) {
   );
 }
 
+function ScrollToTop() {
+  const { pathname, hash, key } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const target = document.querySelector(hash);
+      if (target) {
+        target.scrollIntoView({ block: 'start' });
+        return;
+      }
+    }
+
+    window.scrollTo({ top: 0, left: 0 });
+  }, [pathname, hash, key]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <DebugProvider>
         <AuthProvider>
           <ToastProvider>
             <Routes>
               <Route path="/" element={<Layout><HomePage /></Layout>} />
               <Route path="/planes" element={<Layout><PlanesPage /></Layout>} />
+              <Route path="/terminos-y-condiciones" element={<Layout><TerminosPage /></Layout>} />
+              <Route path="/sobre-nosotros" element={<Layout><SobreNosotrosPage /></Layout>} />
               <Route path="/publicaciones" element={<Layout><PublicacionesPage /></Layout>} />
               <Route path="/publicaciones/:id" element={<Layout><DetallePage /></Layout>} />
               <Route path="/login" element={<LoginPage />} />

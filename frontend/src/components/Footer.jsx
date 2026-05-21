@@ -31,11 +31,10 @@ export default function Footer() {
           <div className="footer-col">
             <h4>Información</h4>
             <ul>
-              <li><a href="#">Sobre nosotros</a></li>
-              <li><a href="#">Términos y condiciones</a></li>
-              <li><a href="#">Política de privacidad</a></li>
+              <li><Link to="/sobre-nosotros">Sobre nosotros</Link></li>
+              <li><Link to="/terminos-y-condiciones">Términos y condiciones</Link></li>
+              <li><Link to="/terminos-y-condiciones#privacidad">Política de privacidad</Link></li>
               <li><a href="#">Centro de ayuda</a></li>
-              <li><a href="#">Blog</a></li>
             </ul>
           </div>
 
