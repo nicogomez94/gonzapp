@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
+import BrandLogo from '../components/BrandLogo';
 import Modal from '../components/Modal';
 import ImageUploadPreview from '../components/ImageUploadPreview';
 
@@ -178,6 +179,10 @@ export default function DashboardPage() {
     <div className="dash-wrap">
       {/* SIDEBAR */}
       <aside className={`dash-sidebar${sidebarOpen ? ' mobile-open' : ''}`}>
+        <div className="dash-sidebar-logo">
+          <BrandLogo variant="admin" />
+        </div>
+
         <div className="sidebar-user">
           <div className="sidebar-user-avatar">{initials}</div>
           <div>

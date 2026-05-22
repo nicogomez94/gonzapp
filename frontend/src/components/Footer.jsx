@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 
 export default function Footer() {
   return (
@@ -7,7 +8,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
-              <span className="logo-auto">AUTO</span><span className="logo-zona">ZONA</span>
+              <BrandLogo variant="footer" />
             </div>
             <p>Marketplace de autos con planes claros para publicar una unidad y contacto directo por WhatsApp.</p>
             <div className="footer-social">

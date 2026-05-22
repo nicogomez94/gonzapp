@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import BrandLogo from './BrandLogo';
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
@@ -22,7 +23,7 @@ export default function Navbar() {
       <nav className={navClass}>
         <div className="nav-inner">
           <Link to="/" className="nav-logo">
-            <span className="logo-auto">AUTO</span><span className="logo-zona">ZONA</span>
+            <BrandLogo variant="nav" />
           </Link>
 
           <ul className="nav-links">

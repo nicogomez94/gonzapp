@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
+import BrandLogo from '../components/BrandLogo';
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
@@ -95,7 +96,7 @@ export default function LoginPage() {
       {/* LEFT VISUAL PANEL */}
       <div className="login-visual">
         <Link to="/" className="visual-logo">
-          <span className="logo-auto">AUTO</span><span className="logo-zona">ZONA</span>
+          <BrandLogo variant="login" />
         </Link>
 
         <div className="visual-car">
