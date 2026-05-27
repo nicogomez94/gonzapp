@@ -86,7 +86,7 @@ export default function HomePage() {
   useScrollAnimations();
 
   useEffect(() => {
-    listingsApi.getAll({ limit: 6 })
+    listingsApi.getAll({ featured: true, limit: 6 })
       .then(r => setFeatured(r.data.listings || r.data || []))
       .catch(() => {})
       .finally(() => setLoadingFeatured(false));

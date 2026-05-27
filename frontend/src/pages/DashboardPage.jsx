@@ -136,6 +136,15 @@ export default function DashboardPage() {
       show(err.response?.data?.error || 'No se pudo aprobar la publicación', 'error');
     }
   };
+  const toggleFeaturedListing = async (listing) => {
+    try {
+      await listingsApi.update(listing.id, { featured: !listing.featured });
+      show(!listing.featured ? 'Publicación marcada como destacada' : 'Publicación quitada de destacadas');
+      loadListings();
+    } catch (err) {
+      show(err.response?.data?.error || 'No se pudo actualizar el destacado', 'error');
+    }
+  };
   const deleteListing = async (id) => { try { await listingsApi.remove(id); show('Publicación eliminada'); loadListings(); } catch { show('Error al eliminar', 'error'); } setDeleteConfirm(null); };
 
   const openCreateUser = () => { setUserForm(getUserDefaults()); setUserModal({ mode: 'create' }); };
@@ -326,6 +335,9 @@ export default function DashboardPage() {
                       <td>
                         <div style={{ display: 'flex', gap: 4 }}>
                           {l.status === 'PENDING' && <button className="btn btn-primary btn-sm" onClick={() => approveListing(l.id)}>Aprobar</button>}
+                          <button className={`btn ${l.featured ? 'btn-primary' : 'btn-outline'} btn-sm`} onClick={() => toggleFeaturedListing(l)} title={l.featured ? 'Quitar de destacadas' : 'Marcar como destacada'}>
+                            <i className="fa-solid fa-star" />
+                          </button>
                           <button className="btn btn-ghost btn-sm" onClick={() => openEditListing(l)}><i className="fa-solid fa-pen" /></button>
                         </div>
                       </td>
@@ -356,7 +368,7 @@ export default function DashboardPage() {
             <div className="chart-card">
               <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
                 <table>
-                  <thead><tr><th>Título</th><th>Marca</th><th>Año</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                  <thead><tr><th>Título</th><th>Marca</th><th>Año</th><th>Precio</th><th>Estado</th><th>Destacado</th><th>Acciones</th></tr></thead>
                   <tbody>
                     {listings.map(l => (
                       <tr key={l.id}>
@@ -365,6 +377,11 @@ export default function DashboardPage() {
                         <td>{l.year}</td>
                         <td>{l.priceUsd ? `USD ${l.priceUsd.toLocaleString('es-AR')}` : `$${l.priceArs?.toLocaleString('es-AR')}`}</td>
                         <td><div className="pub-status"><StatusDot status={l.status} /><span style={{ fontSize: '0.82rem' }}>{l.status}</span></div></td>
+                        <td>
+                          <button className={`btn ${l.featured ? 'btn-primary' : 'btn-outline'} btn-sm`} onClick={() => toggleFeaturedListing(l)} title={l.featured ? 'Quitar de destacadas' : 'Marcar como destacada'}>
+                            <i className="fa-solid fa-star" /> {l.featured ? 'Sí' : 'No'}
+                          </button>
+                        </td>
                         <td>
                           <div style={{ display: 'flex', gap: 4 }}>
                             {l.status === 'PENDING' && <button className="btn btn-primary btn-sm" onClick={() => approveListing(l.id)}>Aprobar</button>}
@@ -531,6 +548,7 @@ export default function DashboardPage() {
             </div>
             <div className="input-group"><label className="input-label">Estado</label><select className="form-input" value={listingForm.status} onChange={e => setListingForm(f => ({ ...f, status: e.target.value }))}>{LISTING_STATUSES.map(s => <option key={s}>{s}</option>)}</select></div>
             <div className="form-row" style={{ gap: 16 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}><input type="checkbox" checked={listingForm.featured} onChange={e => setListingForm(f => ({ ...f, featured: e.target.checked }))} /> Destacada</label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}><input type="checkbox" checked={listingForm.verified} onChange={e => setListingForm(f => ({ ...f, verified: e.target.checked }))} /> Verificado</label>
             </div>
             <div className="input-group"><label className="input-label">Descripción</label><textarea className="form-input" rows={3} value={listingForm.description} onChange={e => setListingForm(f => ({ ...f, description: e.target.value }))} /></div>
