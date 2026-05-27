@@ -41,8 +41,8 @@ export default function Footer() {
             <h4>Contacto</h4>
             <ul>
               <li><a href="tel:2665016253"><i className="fa-solid fa-phone" style={{ marginRight: 6 }} />2665-016253</a></li>
-              <li><a href="mailto:info@autozona.com.ar"><i className="fa-solid fa-envelope" style={{ marginRight: 6 }} />info@autozona.com.ar</a></li>
-              <li><span><i className="fa-solid fa-location-dot" style={{ marginRight: 6 }} />Buenos Aires, Argentina</span></li>
+              <li><a href="mailto:autozonacomercial@gmail.com"><i className="fa-solid fa-envelope" style={{ marginRight: 6 }} />autozonacomercial@gmail.com</a></li>
+              <li><span><i className="fa-solid fa-location-dot" style={{ marginRight: 6 }} />Merlo, San Luis</span></li>
               <li><a href="https://wa.me/542665016253" target="_blank" rel="noreferrer"><i className="fa-brands fa-whatsapp" style={{ marginRight: 6 }} />WhatsApp</a></li>
             </ul>
           </div>
