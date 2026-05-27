@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(searchParams.get('tab') === 'register' ? 'register' : 'login');
   const { login } = useAuth();
-  const { show } = useToast();
+  const { show, clear: clearToasts } = useToast();
   const navigate = useNavigate();
   const isDebug = useDebug();
 
@@ -56,14 +56,20 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    clearToasts();
     setLoading(true);
     try {
       const { data } = await authApi.login(loginForm);
+      if (!data?.token || !data?.user) {
+        throw new Error('INVALID_LOGIN_RESPONSE');
+      }
       login(data.token, data.user);
       show('¡Bienvenido de vuelta!');
       navigate(nextPathForUser(data.user));
     } catch (err) {
-      setError(err.response?.data?.error || 'Credenciales incorrectas');
+      const message = err.response?.data?.error || 'Credenciales incorrectas';
+      setError(message);
+      show(message, 'error');
     } finally {
       setLoading(false);
     }
