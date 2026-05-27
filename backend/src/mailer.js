@@ -56,4 +56,15 @@ async function sendListingActiveEmail({ to, userName, listingTitle, listingId })
   });
 }
 
-module.exports = { sendListingActiveEmail, sendRegistrationConfirmationEmail };
+async function sendPasswordResetEmail({ to, userName, resetUrl }) {
+  const safeName = userName || 'Usuario';
+
+  await sendEmail({
+    to,
+    name: SITE_NAME,
+    subject: 'Restablecé tu contraseña en AutoZona',
+    message: `Hola, ${safeName}.\n\nRecibimos una solicitud para restablecer la contraseña de tu cuenta.\n\nHacé clic en el siguiente enlace para crear una nueva contraseña (válido por 1 hora):\n${resetUrl}\n\nSi no fuiste vos quien lo solicitó, podés ignorar este mensaje. Tu contraseña no cambiará.`,
+  });
+}
+
+module.exports = { sendListingActiveEmail, sendRegistrationConfirmationEmail, sendPasswordResetEmail };

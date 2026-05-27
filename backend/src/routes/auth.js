@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMiddleware } = require('../middleware/auth');
 const prisma = require('../db');
-const { sendRegistrationConfirmationEmail } = require('../mailer');
+const crypto = require('crypto');
+const { sendRegistrationConfirmationEmail, sendPasswordResetEmail } = require('../mailer');
 
 const router = express.Router();
 
@@ -157,6 +158,68 @@ router.post('/select-plan', authMiddleware, async (req, res) => {
     });
 
     res.json({ token: signUserToken(user), user: publicUser(user) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const email = (req.body.email || '').trim().toLowerCase();
+    if (!email) return res.status(400).json({ error: 'Email requerido' });
+
+    // Always respond with success to avoid user enumeration
+    res.json({ message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña.' });
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return;
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: hashedToken, resetTokenExpiry: expiry }
+    });
+
+    const frontendUrl = (process.env.FRONTEND_URL || '').split(',')[0].trim().replace(/\/$/, '');
+    const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+
+    sendPasswordResetEmail({ to: user.email, userName: user.name, resetUrl })
+      .catch(err => console.warn('[mailer] No se pudo enviar email de reset:', err.message));
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Token y contraseña requeridos' });
+    if (password.length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: hashedToken,
+        resetTokenExpiry: { gt: new Date() }
+      }
+    });
+
+    if (!user) return res.status(400).json({ error: 'El enlace es inválido o ya expiró' });
+
+    const hashed = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashed, resetToken: null, resetTokenExpiry: null }
+    });
+
+    res.json({ message: 'Contraseña actualizada correctamente' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error del servidor' });

@@ -25,6 +25,8 @@ export const authApi = {
   me: () => api.get('/auth/me'),
   updateMe: (data) => api.put('/auth/me', data),
   selectPlan: (planId) => api.post('/auth/select-plan', { planId }),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
 };
 
 export const listingsApi = {

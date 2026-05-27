@@ -54,9 +54,11 @@ model User {
   approvalStatus UserApprovalStatus @default(PENDING_PLAN)
   plan           Plan?              @relation(fields: [planId], references: [id])
   planId         Int?
-  listings       Listing[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  listings          Listing[]
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@schema("gonzapp_webservice")
 }

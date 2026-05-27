@@ -15,6 +15,8 @@ import MiCuentaPage from './pages/MiCuentaPage';
 import PlanesPage from './pages/PlanesPage';
 import TerminosPage from './pages/TerminosPage';
 import SobreNosotrosPage from './pages/SobreNosotrosPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import './styles/global.css';
 
 function ProtectedAdmin({ children }) {
@@ -75,6 +77,8 @@ export default function App() {
               <Route path="/publicaciones" element={<Layout><PublicacionesPage /></Layout>} />
               <Route path="/publicaciones/:id" element={<Layout><DetallePage /></Layout>} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/mi-cuenta" element={
                 <ProtectedUser>
                   <Layout><MiCuentaPage /></Layout>
