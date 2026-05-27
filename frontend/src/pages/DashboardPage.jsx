@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
   const loadListings = useCallback(() => {
     setLoadingL(true);
-    listingsApi.getAll({ limit: 100 })
+    listingsApi.getAll({ limit: 100, includeAll: true })
       .then(r => { const d = r.data.listings || r.data || []; setListings(d); setListingsTotal(r.data.total || d.length); })
       .catch(() => {}).finally(() => setLoadingL(false));
   }, []);

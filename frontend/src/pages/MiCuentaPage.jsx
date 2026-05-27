@@ -316,7 +316,7 @@ export default function MiCuentaPage() {
               </div>
             ) : myListings.length > 0 ? (
               <div className="account-favorites-grid">
-                {myListings.map(listing => <ListingCard key={listing.id} listing={listing} />)}
+                {myListings.map(listing => <ListingCard key={listing.id} listing={listing} showStatus />)}
               </div>
             ) : (
               <div className="empty-state">

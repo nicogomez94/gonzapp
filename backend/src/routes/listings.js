@@ -74,6 +74,11 @@ function listingPayload(body) {
   };
 }
 
+function hidePublicStatus(listing) {
+  const { status, ...publicListing } = listing;
+  return publicListing;
+}
+
 function validateListingPayload(body) {
   const required = ['title', 'brand', 'model', 'year', 'mileage', 'fuel', 'transmission', 'priceArs', 'location', 'phone'];
   const missing = required.filter(field => body[field] === undefined || body[field] === null || body[field] === '');
@@ -193,11 +198,12 @@ const deleteStoredImages = async (imageUrls = []) => {
   ]);
 };
 
-// GET /api/listings — public active listings; admins see all listings
+// GET /api/listings — public active listings; admins can explicitly request all listings
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    const { brand, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, location, featured, page = 1, limit = 9, sort = 'newest' } = req.query;
-    const where = req.user?.role === 'ADMIN' ? {} : { status: 'ACTIVE' };
+    const { brand, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, location, featured, page = 1, limit = 9, sort = 'newest', includeAll } = req.query;
+    const canIncludeAll = req.user?.role === 'ADMIN' && ['true', '1', true].includes(includeAll);
+    const where = canIncludeAll ? {} : { status: 'ACTIVE' };
     if (brand) where.brand = { equals: brand, mode: 'insensitive' };
     if (fuel) where.fuel = { equals: fuel, mode: 'insensitive' };
     if (transmission) where.transmission = { equals: transmission, mode: 'insensitive' };
@@ -223,7 +229,12 @@ router.get('/', optionalAuth, async (req, res) => {
       prisma.listing.findMany({ where, orderBy, skip, take: parseInt(limit), include: { user: { select: { name: true, phone: true } } } }),
       prisma.listing.count({ where })
     ]);
-    res.json({ listings, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
+    res.json({
+      listings: canIncludeAll ? listings : listings.map(hidePublicStatus),
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / parseInt(limit))
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error del servidor' });
@@ -252,9 +263,10 @@ router.get('/:id', optionalAuth, async (req, res) => {
       include: { user: { select: { name: true, phone: true, email: true } } }
     });
     if (!listing) return res.status(404).json({ error: 'Publicación no encontrada' });
-    const canView = listing.status === 'ACTIVE' || req.user?.role === 'ADMIN' || req.user?.id === listing.userId;
+    const canViewInactive = req.user?.role === 'ADMIN' || req.user?.id === listing.userId;
+    const canView = listing.status === 'ACTIVE' || canViewInactive;
     if (!canView) return res.status(404).json({ error: 'Publicación no encontrada' });
-    res.json(listing);
+    res.json(listing.status === 'ACTIVE' ? hidePublicStatus(listing) : listing);
   } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });
   }

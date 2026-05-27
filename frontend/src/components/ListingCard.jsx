@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { isFavorite, toggleFavorite } from '../utils/favorites';
 import { cloudinaryImage } from '../utils/images';
 
-export default function ListingCard({ listing }) {
+export default function ListingCard({ listing, showStatus = false }) {
   const [fav, setFav] = useState(() => isFavorite(listing.id));
 
   const handleFav = (e) => { e.preventDefault(); setFav(toggleFavorite(listing.id)); };
@@ -44,9 +44,11 @@ export default function ListingCard({ listing }) {
         </div>
         <div className="listing-meta">
           <span><i className="fa-solid fa-location-dot" style={{ marginRight: 4 }} />{listing.location}</span>
-          <span className={`badge badge-${listing.status === 'ACTIVE' ? 'success' : listing.status === 'PAUSED' ? 'warning' : 'gray'}`}>
-            {statusMap[listing.status] || listing.status}
-          </span>
+          {showStatus && (
+            <span className={`badge badge-${listing.status === 'ACTIVE' ? 'success' : listing.status === 'PAUSED' ? 'warning' : 'gray'}`}>
+              {statusMap[listing.status] || listing.status}
+            </span>
+          )}
         </div>
       </div>
     </Link>

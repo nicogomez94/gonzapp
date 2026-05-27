@@ -81,7 +81,6 @@ export default function DetallePage() {
               )}
               <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 8 }}>
                 {listing.featured && <span className="badge badge-accent">Destacado</span>}
-                {listing.status === 'ACTIVE' && <span className="badge badge-success">Activo</span>}
               </div>
               <button
                 className={`gallery-fav${fav ? ' active' : ''}`}
