@@ -132,11 +132,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="visual-stats">
-          <div className="visual-stat"><strong>48K+</strong><span>Autos vendidos</span></div>
-          <div className="visual-stat"><strong>98%</strong><span>Satisfacción</span></div>
-          <div className="visual-stat"><strong>850+</strong><span>Concesionarias</span></div>
-        </div>
+        {/*
+          <div className="visual-stats">
+            <div className="visual-stat"><strong>48K+</strong><span>Autos vendidos</span></div>
+            <div className="visual-stat"><strong>98%</strong><span>Satisfacción</span></div>
+            <div className="visual-stat"><strong>850+</strong><span>Concesionarias</span></div>
+          </div>
+        */}
       </div>
 
       {/* RIGHT FORM PANEL */}
@@ -160,17 +162,6 @@ export default function LoginPage() {
           <div className={`auth-panel${tab === 'login' ? ' active' : ''}`} style={{ display: tab === 'login' ? 'block' : 'none' }}>
             <h2 className="form-title">Bienvenido de vuelta</h2>
             <p className="form-subtitle">Ingresá a tu cuenta para gestionar tus publicaciones</p>
-
-            <div className="social-buttons">
-              <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-google" style={{ color: '#EA4335' }} /> Google
-              </button>
-              <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-facebook" style={{ color: '#1877F2' }} /> Facebook
-              </button>
-            </div>
-
-            <div className="divider"><span>o ingresá con tu email</span></div>
 
             {error && tab === 'login' && (
               <div className="alert alert-error" style={{ marginBottom: 16 }}>
@@ -238,17 +229,6 @@ export default function LoginPage() {
           <div className={`auth-panel${tab === 'register' ? ' active' : ''}`} style={{ display: tab === 'register' ? 'block' : 'none' }}>
             <h2 className="form-title">Creá tu cuenta gratis</h2>
             <p className="form-subtitle">Publicá tu auto y llegá a miles de compradores</p>
-
-            <div className="social-buttons">
-              <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-google" style={{ color: '#EA4335' }} /> Google
-              </button>
-              <button className="btn btn-social" type="button">
-                <i className="fa-brands fa-facebook" style={{ color: '#1877F2' }} /> Facebook
-              </button>
-            </div>
-
-            <div className="divider"><span>o registrate con tu email</span></div>
 
             {error && tab === 'register' && (
               <div className="alert alert-error" style={{ marginBottom: 16 }}>

@@ -12,10 +12,8 @@ export default function Footer() {
             </div>
             <p>Marketplace de autos con planes claros para publicar una unidad y contacto directo por WhatsApp.</p>
             <div className="footer-social">
-              <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f" /></a>
-              <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram" /></a>
-              <a href="#" aria-label="Twitter"><i className="fa-brands fa-twitter" /></a>
-              <a href="#" aria-label="YouTube"><i className="fa-brands fa-youtube" /></a>
+              <a href="https://www.facebook.com/share/1CoxcMa1TQ/" target="_blank" rel="noreferrer" aria-label="Facebook de Auto Zona Merlo"><i className="fa-brands fa-facebook-f" /></a>
+              <a href="https://www.instagram.com/autozonamsl?igsh=djYyZjZqdHhmNTEx" target="_blank" rel="noreferrer" aria-label="Instagram de Auto Zona Merlo"><i className="fa-brands fa-instagram" /></a>
             </div>
           </div>
 

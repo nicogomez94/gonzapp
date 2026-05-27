@@ -111,7 +111,7 @@ export default function HomePage() {
           <div className="hero-content">
             <div className="hero-left">
               <div className="hero-eyebrow fade-in">
-                <i className="fa-solid fa-star" /> La plataforma #1 de autos usados en Argentina
+                <i className="fa-solid fa-star" /> La plataforma #1 de usados en: Valle del Conlara (San Luis), Traslasierra (Cba), Río Cuarto, Villa Mercedes, San Luis Capital.
               </div>
               <h1 className="fade-up delay-1">Encontrá tu próximo <em>auto ideal</em> al mejor precio</h1>
               <p className="hero-sub fade-up delay-2">Encontrá autos publicados y consultá por planes pagos para vender una unidad con contacto directo por WhatsApp.</p>

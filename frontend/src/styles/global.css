@@ -387,12 +387,13 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
 }
 .hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+  max-width: 100%; line-height: 1.45;
   background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 100px; padding: 5px 14px; font-size: 0.8rem; font-weight: 600;
+  border-radius: 18px; padding: 5px 14px; font-size: 0.8rem; font-weight: 600;
   color: #fff; margin-bottom: 20px;
 }
-.hero-eyebrow i { color: #FFD700; }
+.hero-eyebrow i { color: #FFD700; margin-top: 2px; }
 .hero h1 { color: #fff; margin-bottom: 16px; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 .hero h1 em { font-style: normal; color: #FFB347; }
 .hero-sub { color: rgba(255,255,255,0.82); font-size: 1.1rem; margin-bottom: 32px; max-width: 460px; line-height: 1.65; }
@@ -705,20 +706,44 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 .about-value-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
 
 .about-team {
-  background: var(--primary-bg);
-  border: 1px solid #d8e4ff;
+  background: #f7faff;
+  border: 1px solid #cfe0ff;
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: clamp(24px, 4vw, 38px);
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  gap: 22px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 18px;
   align-items: start;
   max-width: 980px;
+  box-shadow: 0 14px 36px rgba(21, 99, 255, 0.08);
 }
 
-.about-team-icon { background: #fff; color: var(--primary); font-size: 1.25rem; }
-.about-team h2 { line-height: 1.15; margin-bottom: 10px; }
-.about-closing { font-weight: 700; color: var(--text) !important; margin-bottom: 0 !important; }
+.about-team-icon {
+  background: #fff;
+  color: var(--primary);
+  font-size: 1.15rem;
+  box-shadow: 0 8px 18px rgba(21, 99, 255, 0.12);
+}
+.about-team .section-tag {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  margin-bottom: 10px;
+}
+.about-team h2 {
+  max-width: 720px;
+  line-height: 1.12;
+  margin-bottom: 14px;
+}
+.about-team p { max-width: 830px; }
+.about-closing {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  font-weight: 700;
+  color: var(--text) !important;
+  margin-bottom: 0 !important;
+}
 
 /* Testimonials */
 .testimonials-section { background: var(--bg-2); }
@@ -776,6 +801,13 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
   .about-team { padding: 22px; }
   .legal-index { padding: 14px; }
   .about-panel { min-height: 170px; padding: 22px; }
+  .about-team {
+    gap: 16px;
+  }
+  .about-team-icon {
+    width: 42px;
+    height: 42px;
+  }
 }
 
 /* ============================================================  PUBLICACIONES PAGE  ============================================================ */
