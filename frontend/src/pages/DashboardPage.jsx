@@ -275,7 +275,7 @@ export default function DashboardPage() {
                 <h3>Control manual de planes</h3>
                 <button className="btn btn-outline btn-sm" onClick={() => nav('estadisticas')}>Ver control</button>
               </div>
-              <div className="stats-grid-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 0 }}>
+              <div className="stats-grid-4 plan-control-stats">
                 <div className="stat-card" style={{ boxShadow: 'none' }}>
                   <div className="stat-icon blue"><i className="fa-solid fa-crown" /></div>
                   <div className="stat-info"><h3>{plans.length}</h3><p>Planes definidos</p></div>

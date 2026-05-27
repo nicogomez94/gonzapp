@@ -229,15 +229,16 @@ h3 { font-size: clamp(1rem, 1.5vw, 1.15rem); font-weight: 600; }
 .plans-status-note i { margin-top: 2px; }
 
 /* ============================================================  STATS  ============================================================ */
-.stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; align-items: center; gap: 16px; transition: var(--transition); }
+.stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; align-items: center; gap: 16px; transition: var(--transition); min-width: 0; }
 .stat-card:hover { box-shadow: var(--shadow); border-color: var(--border-hover); }
 .stat-icon { width: 48px; height: 48px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
 .stat-icon.blue { background: var(--primary-bg); color: var(--primary); }
 .stat-icon.orange { background: var(--accent-bg); color: var(--accent); }
 .stat-icon.green { background: var(--success-bg); color: var(--success); }
 .stat-icon.yellow { background: var(--warning-bg); color: var(--warning); }
+.stat-info { min-width: 0; flex: 1; }
 .stat-info h3 { font-size: 1.75rem; font-weight: 800; line-height: 1; color: var(--text); }
-.stat-info p { font-size: 0.82rem; color: var(--text-muted); margin-top: 3px; }
+.stat-info p { font-size: 0.82rem; color: var(--text-muted); margin-top: 3px; line-height: 1.35; overflow-wrap: anywhere; hyphens: auto; }
 .stat-trend { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 600; margin-top: 4px; }
 .stat-trend.up { color: var(--success); }
 .stat-trend.down { color: var(--error); }
@@ -1215,11 +1216,32 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 .dash-page-header h2 { font-size: 1.4rem; font-weight: 800; }
 .dash-page-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
-.stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stats-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card .stat-icon.blue { background: var(--primary-bg); color: var(--primary); }
 .stat-card .stat-icon.orange { background: var(--accent-bg); color: var(--accent); }
 .stat-card .stat-icon.green { background: var(--success-bg); color: var(--success); }
 .stat-card .stat-icon.yellow { background: var(--warning-bg); color: var(--warning); }
+.plan-control-stats {
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  margin-bottom: 0;
+}
+.plan-control-stats .stat-card {
+  gap: 14px;
+  padding: 18px;
+  box-shadow: none;
+}
+.plan-control-stats .stat-icon {
+  width: 46px;
+  height: 46px;
+  font-size: 1.08rem;
+}
+.plan-control-stats .stat-info h3 {
+  font-size: clamp(1.55rem, 2vw, 1.75rem);
+}
+.plan-control-stats .stat-info p {
+  font-size: 0.8rem;
+  max-width: 9.5rem;
+}
 
 .chart-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; }
 .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
@@ -1253,13 +1275,19 @@ footer { background: var(--text); color: #CBD5E1; padding: 56px 0 24px; }
 .plan-pro  { background: var(--primary-bg); color: var(--primary); }
 .plan-premium { background: var(--accent-bg); color: var(--accent-dark); }
 
-@media (max-width: 1024px) { .stats-grid-4 { grid-template-columns: repeat(2, 1fr); } .three-col { grid-template-columns: 1fr; } }
+@media (max-width: 1024px) { .stats-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .three-col { grid-template-columns: 1fr; } }
 @media (max-width: 860px) {
   .dash-sidebar { transform: translateX(-100%); }
   .dash-sidebar.mobile-open { transform: translateX(0); }
   .dash-main { margin-left: 0; }
 }
-@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } .dash-main { padding: 16px; } }
+@media (max-width: 600px) {
+  .two-col,
+  .stats-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .dash-main { padding: 16px; }
+}
 
 /* ===== STATS ===== */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; }
