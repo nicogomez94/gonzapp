@@ -31,7 +31,7 @@ export default function ListingCard({ listing, showStatus = false }) {
         </button>
       </div>
       <div className="listing-body">
-        <div className="listing-cat">{listing.brand} · {listing.year}</div>
+        <div className="listing-cat">{listing.brand} · {listing.vehicleType || 'Auto'} · {listing.year}</div>
         <h3 className="listing-title">{listing.title}</h3>
         <div className="listing-price">{price}</div>
         <div className="listing-price-sub">

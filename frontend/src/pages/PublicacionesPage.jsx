@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';import { listingsApi } from '../api';
+import { useSearchParams, Link } from 'react-router-dom';
+import { listingsApi } from '../api';
 import ListingCard from '../components/ListingCard';
 import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
+import { VEHICLE_TYPES } from '../constants/vehicleTypes';
 
 const BRANDS = ['Toyota', 'Ford', 'Volkswagen', 'Honda', 'Chevrolet', 'Renault', 'Peugeot', 'Fiat', 'Jeep', 'Nissan'];
 const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
@@ -22,6 +24,7 @@ export default function PublicacionesPage() {
   const [filters, setFilters] = useState(() => ({
     ...(isDebug ? debugDefaults.filters : {
       search: '',
+      vehicleType: '',
       brand: '',
       fuel: '',
       transmission: '',
@@ -33,6 +36,7 @@ export default function PublicacionesPage() {
       sort: 'newest',
     }),
     search: searchParams.get('search') || (isDebug ? debugDefaults.filters.search : ''),
+    vehicleType: searchParams.get('vehicleType') || (isDebug ? debugDefaults.filters.vehicleType : ''),
     brand: searchParams.get('brand') || (isDebug ? debugDefaults.filters.brand : ''),
     priceMax: searchParams.get('priceMax') || (isDebug ? debugDefaults.filters.priceMax : ''),
     location: searchParams.get('location') || (isDebug ? debugDefaults.search.location : ''),
@@ -53,14 +57,17 @@ export default function PublicacionesPage() {
 
   // Sync URL-sourced filters when searchParams change (e.g. nav link removes ?brand=Toyota)
   useEffect(() => {
-    setFilters(f => ({
-      ...f,
-      search: searchParams.get('search') || '',
-      brand: searchParams.get('brand') || '',
-      priceMax: searchParams.get('priceMax') || '',
-      location: searchParams.get('location') || '',
-    }));
-    setPage(1);
+    queueMicrotask(() => {
+      setFilters(f => ({
+        ...f,
+        search: searchParams.get('search') || '',
+        vehicleType: searchParams.get('vehicleType') || '',
+        brand: searchParams.get('brand') || '',
+        priceMax: searchParams.get('priceMax') || '',
+        location: searchParams.get('location') || '',
+      }));
+      setPage(1);
+    });
   }, [searchParams]);
 
   useEffect(() => {
@@ -70,13 +77,13 @@ export default function PublicacionesPage() {
   const setFilter = (key, value) => { setFilters(f => ({ ...f, [key]: value })); setPage(1); };
 
   const clearFilters = () => {
-    setFilters({ search: '', brand: '', fuel: '', transmission: '', yearFrom: '', yearTo: '', priceMin: '', priceMax: '', kmMax: '', sort: 'newest', location: '' });
+    setFilters({ search: '', vehicleType: '', brand: '', fuel: '', transmission: '', yearFrom: '', yearTo: '', priceMin: '', priceMax: '', kmMax: '', sort: 'newest', location: '' });
     setPage(1);
   };
 
   const totalPages = Math.ceil(total / LIMIT);
 
-  const activeFilterCount = [filters.brand, filters.fuel, filters.transmission, filters.priceMin, filters.priceMax, filters.kmMax, filters.search, filters.location].filter(Boolean).length;
+  const activeFilterCount = [filters.vehicleType, filters.brand, filters.fuel, filters.transmission, filters.priceMin, filters.priceMax, filters.kmMax, filters.search, filters.location].filter(Boolean).length;
 
   return (
     <>
@@ -125,6 +132,20 @@ export default function PublicacionesPage() {
               {activeFilterCount > 0 && (
                 <span className="filter-reset" onClick={clearFilters}>Limpiar todo</span>
               )}
+            </div>
+
+            {/* Tipo de vehículo */}
+            <div className="filter-section">
+              <div className="filter-title">Tipo de vehículo <i className="fa-solid fa-chevron-down" /></div>
+              <div className="filter-checks">
+                {VEHICLE_TYPES.map(type => (
+                  <label key={type.value} className="filter-check">
+                    <input type="checkbox" checked={filters.vehicleType === type.value}
+                      onChange={() => setFilter('vehicleType', filters.vehicleType === type.value ? '' : type.value)} />
+                    <span>{type.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* Marca */}
@@ -232,6 +253,7 @@ export default function PublicacionesPage() {
 
             {activeFilterCount > 0 && (
               <div className="active-filters">
+                {filters.vehicleType && <span className="active-filter">{filters.vehicleType} <button onClick={() => setFilter('vehicleType', '')}><i className="fa-solid fa-times" /></button></span>}
                 {filters.brand && <span className="active-filter">{filters.brand} <button onClick={() => setFilter('brand', '')}><i className="fa-solid fa-times" /></button></span>}
                 {filters.fuel && <span className="active-filter">{filters.fuel} <button onClick={() => setFilter('fuel', '')}><i className="fa-solid fa-times" /></button></span>}
                 {filters.transmission && <span className="active-filter">{filters.transmission} <button onClick={() => setFilter('transmission', '')}><i className="fa-solid fa-times" /></button></span>}

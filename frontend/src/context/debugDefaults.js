@@ -19,6 +19,7 @@ export const debugDefaults = {
   },
   filters: {
     search: '',
+    vehicleType: '',
     brand: '',
     fuel: '',
     transmission: '',
@@ -33,6 +34,7 @@ export const debugDefaults = {
     title: 'Toyota Corolla 2022 TEST',
     brand: 'Toyota',
     model: 'Corolla',
+    vehicleType: 'Sedán',
     year: '2022',
     mileage: '15000',
     fuel: 'Nafta',

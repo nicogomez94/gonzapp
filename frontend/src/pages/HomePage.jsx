@@ -4,18 +4,9 @@ import { listingsApi, plansApi } from '../api';
 import ListingCard from '../components/ListingCard';
 import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
+import { VEHICLE_TYPES } from '../constants/vehicleTypes';
 
 const BRANDS = ['Toyota', 'Ford', 'Volkswagen', 'Honda', 'Chevrolet', 'Renault', 'Fiat', 'Jeep', 'Nissan', 'Peugeot'];
-const CATEGORIES = [
-  { icon: '🚗', name: 'Sedanes', count: '2.340', q: 'Sedan' },
-  { icon: '🚙', name: 'SUVs', count: '4.120', q: 'SUV' },
-  { icon: '🛻', name: 'Pickups', count: '1.890', q: 'Pickup' },
-  { icon: '🚘', name: 'Hatchbacks', count: '3.210', q: 'Hatchback' },
-  { icon: '🚐', name: 'Utilitarios', count: '890', q: 'Utilitario' },
-  { icon: '🏎️', name: 'Deportivos', count: '560', q: 'Deportivo' },
-  { icon: '🚌', name: 'Minivans', count: '420', q: 'Minivan' },
-  { icon: '🚚', name: 'Camionetas', count: '1.100', q: 'Camioneta' },
-];
 
 const WHATSAPP_LINK = 'https://wa.me/542665016253';
 
@@ -211,10 +202,10 @@ export default function HomePage() {
             <Link to="/publicaciones" className="btn btn-outline">Ver todas <i className="fa-solid fa-arrow-right" /></Link>
           </div>
           <div className="categories-grid">
-            {CATEGORIES.map(c => (
-              <button key={c.name} className="category-card" onClick={() => navigate(`/publicaciones?search=${c.q}`)}>
+            {VEHICLE_TYPES.map(c => (
+              <button key={c.value} className="category-card" onClick={() => navigate(`/publicaciones?vehicleType=${encodeURIComponent(c.value)}`)}>
                 <div className="cat-icon">{c.icon}</div>
-                <h3>{c.name}</h3>
+                <h3>{c.plural}</h3>
                 <p>Ver autos</p>
               </button>
             ))}

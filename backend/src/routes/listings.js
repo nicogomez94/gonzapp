@@ -59,6 +59,7 @@ function listingPayload(body) {
     title: body.title,
     brand: body.brand,
     model: body.model,
+    vehicleType: body.vehicleType || 'Auto',
     engine: body.engine || '',
     year: parseInt(body.year),
     mileage: parseInt(body.mileage),
@@ -201,10 +202,11 @@ const deleteStoredImages = async (imageUrls = []) => {
 // GET /api/listings — public active listings; admins can explicitly request all listings
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    const { brand, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, location, featured, page = 1, limit = 9, sort = 'newest', includeAll } = req.query;
+    const { brand, vehicleType, fuel, transmission, yearFrom, yearTo, priceMin, priceMax, kmMax, search, location, featured, page = 1, limit = 9, sort = 'newest', includeAll } = req.query;
     const canIncludeAll = req.user?.role === 'ADMIN' && ['true', '1', true].includes(includeAll);
     const where = canIncludeAll ? {} : { status: 'ACTIVE' };
     if (brand) where.brand = { equals: brand, mode: 'insensitive' };
+    if (vehicleType) where.vehicleType = { equals: vehicleType, mode: 'insensitive' };
     if (fuel) where.fuel = { equals: fuel, mode: 'insensitive' };
     if (transmission) where.transmission = { equals: transmission, mode: 'insensitive' };
     if (location) where.location = { contains: location, mode: 'insensitive' };
@@ -214,6 +216,7 @@ router.get('/', optionalAuth, async (req, res) => {
     if (kmMax) where.mileage = { lte: parseInt(kmMax) };
     if (search) where.OR = [
       { brand: { contains: search, mode: 'insensitive' } },
+      { vehicleType: { contains: search, mode: 'insensitive' } },
       { model: { contains: search, mode: 'insensitive' } },
       { title: { contains: search, mode: 'insensitive' } }
     ];
@@ -348,7 +351,7 @@ router.post('/', authMiddleware, async (req, res) => {
 // PUT /api/listings/:id — admin only
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { title, brand, model, engine, year, mileage, fuel, transmission, description, equipment, priceArs, priceUsd, images, location, phone, status, featured, verified } = req.body;
+    const { title, brand, model, vehicleType, engine, year, mileage, fuel, transmission, description, equipment, priceArs, priceUsd, images, location, phone, status, featured, verified } = req.body;
     const previousListing = await prisma.listing.findUnique({
       where: { id: parseInt(req.params.id) },
       select: { status: true, images: true, user: { select: { email: true, name: true } } }
@@ -356,7 +359,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
     const listing = await prisma.listing.update({
       where: { id: parseInt(req.params.id) },
       data: {
-        title, brand, model, engine,
+        title, brand, model, vehicleType, engine,
         ...(year && { year: parseInt(year) }),
         ...(mileage && { mileage: parseInt(mileage) }),
         fuel, transmission, description,

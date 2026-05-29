@@ -44,6 +44,7 @@ export default function DetallePage() {
   const sellerSince = listing.user?.createdAt ? new Date(listing.user.createdAt).getFullYear() : 'fecha no disponible';
 
   const SPECS = [
+    { icon: 'fa-solid fa-car-side', label: 'Tipo', value: listing.vehicleType },
     { icon: 'fa-solid fa-calendar', label: 'Año', value: listing.year },
     { icon: 'fa-solid fa-road', label: 'Kilómetros', value: listing.mileage ? `${listing.mileage.toLocaleString('es-AR')} km` : null },
     { icon: 'fa-solid fa-gas-pump', label: 'Combustible', value: listing.fuel },
@@ -105,7 +106,7 @@ export default function DetallePage() {
             {/* TITLE ROW */}
             <div className="detail-title-row">
               <div>
-                <div className="listing-cat" style={{ marginBottom: 8 }}>{listing.brand} · {listing.category}</div>
+                <div className="listing-cat" style={{ marginBottom: 8 }}>{listing.brand} · {listing.vehicleType || 'Auto'}</div>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.2, margin: 0 }}>{listing.title}</h1>
                 <div style={{ display: 'flex', gap: 16, marginTop: 8, color: 'var(--text-muted)', fontSize: '0.88rem' }}>
                   <span><i className="fa-solid fa-location-dot" /> {listing.location || 'Argentina'}</span>

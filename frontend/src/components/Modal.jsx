@@ -1,18 +1,20 @@
 import { useEffect } from 'react';
 
-export default function Modal({ title, onClose, children, footer }) {
+export default function Modal({ title, onClose, children, footer, closeOnOverlay = true, closeOnEscape = true }) {
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose();
+    const onKey = (e) => {
+      if (closeOnEscape && e.key === 'Escape') onClose();
+    };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [onClose]);
+  }, [closeOnEscape, onClose]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={closeOnOverlay ? onClose : undefined}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{title}</h3>

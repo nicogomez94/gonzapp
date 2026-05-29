@@ -68,6 +68,7 @@ model Listing {
   title        String
   brand        String
   model        String
+  vehicleType  String        @default("Auto")
   engine       String
   year         Int
   mileage      Int

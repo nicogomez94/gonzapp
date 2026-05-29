@@ -8,13 +8,14 @@ import { useToast } from '../context/ToastContext';
 import BrandLogo from '../components/BrandLogo';
 import Modal from '../components/Modal';
 import ImageUploadPreview from '../components/ImageUploadPreview';
+import { VEHICLE_TYPES } from '../constants/vehicleTypes';
 
 const LISTING_STATUSES = ['ACTIVE', 'PAUSED', 'PENDING', 'EXPIRED'];
 const USER_APPROVAL_STATUSES = ['PENDING_PLAN', 'PENDING_APPROVAL', 'APPROVED'];
 const FUELS = ['Nafta', 'Diesel', 'Eléctrico', 'Híbrido', 'GNC'];
 const TRANSMISSIONS = ['Manual', 'Automática'];
 
-const emptyListing = { title: '', brand: '', model: '', year: '', mileage: '', fuel: 'Nafta', transmission: 'Manual', engine: '', priceArs: '', priceUsd: '', location: '', phone: '', description: '', status: 'ACTIVE', featured: false, verified: false, images: [], equipment: [] };
+const emptyListing = { title: '', brand: '', model: '', vehicleType: 'Sedán', year: '', mileage: '', fuel: 'Nafta', transmission: 'Manual', engine: '', priceArs: '', priceUsd: '', location: '', phone: '', description: '', status: 'ACTIVE', featured: false, verified: false, images: [], equipment: [] };
 const emptyUser = { name: '', email: '', password: '', phone: '', role: 'USER', approvalStatus: 'PENDING_PLAN', planId: '' };
 const emptyPlan = { name: '', price: '', maxImages: '', daysActive: '', features: '' };
 
@@ -519,8 +520,13 @@ export default function DashboardPage() {
 
       {/* LISTING MODAL */}
       {listingModal && (
-        <Modal title={listingModal.mode === 'create' ? 'Nueva publicación' : 'Editar publicación'} onClose={() => setListingModal(null)}
-          footer={<><button className="btn btn-outline" onClick={() => setListingModal(null)}>Cancelar</button><button className="btn btn-primary" form="listing-form" type="submit" disabled={uploadingImages}>Guardar</button></>}>
+        <Modal
+          title={listingModal.mode === 'create' ? 'Nueva publicación' : 'Editar publicación'}
+          onClose={() => setListingModal(null)}
+          closeOnOverlay={false}
+          closeOnEscape={false}
+          footer={<button className="btn btn-primary" form="listing-form" type="submit" disabled={uploadingImages}>Guardar</button>}
+        >
           <form id="listing-form" onSubmit={saveListing} className="modal-form">
             <div className="form-row">
               <div className="input-group"><label className="input-label">Título *</label><input className="form-input" required value={listingForm.title} onChange={e => setListingForm(f => ({ ...f, title: e.target.value }))} /></div>
@@ -528,12 +534,13 @@ export default function DashboardPage() {
             </div>
             <div className="form-row">
               <div className="input-group"><label className="input-label">Modelo *</label><input className="form-input" required value={listingForm.model} onChange={e => setListingForm(f => ({ ...f, model: e.target.value }))} /></div>
-              <div className="input-group"><label className="input-label">Año *</label><input className="form-input" type="number" required value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))} /></div>
+              <div className="input-group"><label className="input-label">Tipo de vehículo *</label><select className="form-input" required value={listingForm.vehicleType || 'Sedán'} onChange={e => setListingForm(f => ({ ...f, vehicleType: e.target.value }))}>{VEHICLE_TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}</select></div>
             </div>
             <div className="form-row">
+              <div className="input-group"><label className="input-label">Año *</label><input className="form-input" type="number" required value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))} /></div>
               <div className="input-group"><label className="input-label">Km</label><input className="form-input" type="number" value={listingForm.mileage} onChange={e => setListingForm(f => ({ ...f, mileage: e.target.value }))} /></div>
-              <div className="input-group"><label className="input-label">Motor</label><input className="form-input" value={listingForm.engine} onChange={e => setListingForm(f => ({ ...f, engine: e.target.value }))} /></div>
             </div>
+            <div className="input-group"><label className="input-label">Motor</label><input className="form-input" value={listingForm.engine} onChange={e => setListingForm(f => ({ ...f, engine: e.target.value }))} /></div>
             <div className="form-row">
               <div className="input-group"><label className="input-label">Combustible</label><select className="form-input" value={listingForm.fuel} onChange={e => setListingForm(f => ({ ...f, fuel: e.target.value }))}>{FUELS.map(x => <option key={x}>{x}</option>)}</select></div>
               <div className="input-group"><label className="input-label">Transmisión</label><select className="form-input" value={listingForm.transmission} onChange={e => setListingForm(f => ({ ...f, transmission: e.target.value }))}>{TRANSMISSIONS.map(x => <option key={x}>{x}</option>)}</select></div>

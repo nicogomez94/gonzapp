@@ -9,11 +9,13 @@ import { useAuth } from '../context/AuthContext';
 import { useDebug } from '../context/DebugContext';
 import { debugDefaults } from '../context/debugDefaults';
 import { useToast } from '../context/ToastContext';
+import { VEHICLE_TYPES } from '../constants/vehicleTypes';
 
 const emptyListingForm = {
   title: '',
   brand: '',
   model: '',
+  vehicleType: 'Sedán',
   year: '',
   mileage: '',
   fuel: 'Nafta',
@@ -362,7 +364,9 @@ export default function MiCuentaPage() {
           <Modal
             title="Nueva publicación"
             onClose={() => setListingModalOpen(false)}
-            footer={<><button className="btn btn-outline" onClick={() => setListingModalOpen(false)}>Cancelar</button><button className="btn btn-primary" form="account-listing-form" type="submit" disabled={savingListing || uploadingImages}>{savingListing ? 'Enviando' : 'Enviar a revisión'}</button></>}
+            closeOnOverlay={false}
+            closeOnEscape={false}
+            footer={<button className="btn btn-primary" form="account-listing-form" type="submit" disabled={savingListing || uploadingImages}>{savingListing ? 'Enviando' : 'Enviar a revisión'}</button>}
           >
             <form id="account-listing-form" onSubmit={saveListing} className="modal-form">
               <div className="form-row">
@@ -371,12 +375,13 @@ export default function MiCuentaPage() {
               </div>
               <div className="form-row">
                 <div className="input-group"><label className="input-label">Modelo *</label><input className="form-input" required value={listingForm.model} onChange={e => setListingForm(f => ({ ...f, model: e.target.value }))} /></div>
-                <div className="input-group"><label className="input-label">Año *</label><input className="form-input" type="number" required value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))} /></div>
+                <div className="input-group"><label className="input-label">Tipo de vehículo *</label><select className="form-input" required value={listingForm.vehicleType || 'Sedán'} onChange={e => setListingForm(f => ({ ...f, vehicleType: e.target.value }))}>{VEHICLE_TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}</select></div>
               </div>
               <div className="form-row">
+                <div className="input-group"><label className="input-label">Año *</label><input className="form-input" type="number" required value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))} /></div>
                 <div className="input-group"><label className="input-label">Kilometraje *</label><input className="form-input" type="number" required value={listingForm.mileage} onChange={e => setListingForm(f => ({ ...f, mileage: e.target.value }))} /></div>
-                <div className="input-group"><label className="input-label">Motor</label><input className="form-input" value={listingForm.engine} onChange={e => setListingForm(f => ({ ...f, engine: e.target.value }))} placeholder="2.0" /></div>
               </div>
+              <div className="input-group"><label className="input-label">Motor</label><input className="form-input" value={listingForm.engine} onChange={e => setListingForm(f => ({ ...f, engine: e.target.value }))} placeholder="2.0" /></div>
               <div className="form-row">
                 <div className="input-group"><label className="input-label">Combustible *</label><select className="form-input" value={listingForm.fuel} onChange={e => setListingForm(f => ({ ...f, fuel: e.target.value }))}>{FUELS.map(fuel => <option key={fuel}>{fuel}</option>)}</select></div>
                 <div className="input-group"><label className="input-label">Transmisión *</label><select className="form-input" value={listingForm.transmission} onChange={e => setListingForm(f => ({ ...f, transmission: e.target.value }))}>{TRANSMISSIONS.map(transmission => <option key={transmission}>{transmission}</option>)}</select></div>
