@@ -182,6 +182,13 @@ export default function DashboardPage() {
   const usersOverLimit = users.filter(u => (u._count?.listings || 0) > 1).length;
   const getUserListingCount = (u) => u._count?.listings || u.listings?.length || 0;
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AD';
+  const currentSectionLabel = {
+    resumen: 'Resumen',
+    publicaciones: 'Publicaciones',
+    usuarios: 'Usuarios',
+    planes: 'Planes',
+    estadisticas: 'Control manual',
+  }[section] || 'Panel';
 
   const nav = (s) => { setSection(s); setSidebarOpen(false); };
 
@@ -234,10 +241,23 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {sidebarOpen && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 99 }} onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && <div className="dash-sidebar-overlay" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
 
       {/* MAIN */}
       <main className="dash-main">
+        <div className="dash-mobile-bar">
+          <button
+            className="dash-menu-button"
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Abrir navegación del panel"
+            aria-expanded={sidebarOpen}
+          >
+            <i className="fa-solid fa-bars" />
+            <span>Panel</span>
+          </button>
+          <span className="dash-mobile-title">{currentSectionLabel}</span>
+        </div>
 
         {/* ====== RESUMEN ====== */}
         <div className={`dash-section${section === 'resumen' ? ' active' : ''}`}>
@@ -318,23 +338,23 @@ export default function DashboardPage() {
               <h3>Publicaciones recientes</h3>
               <button className="btn btn-outline btn-sm" onClick={() => nav('publicaciones')}>Ver todas</button>
             </div>
-            <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px', marginTop: 0 }}>
-              <table>
+            <div className="table-wrap dash-table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px', marginTop: 0 }}>
+              <table className="dash-table">
                 <thead><tr><th>Vehículo</th><th>Precio</th><th>Estado</th><th>Fecha</th><th /></tr></thead>
                 <tbody>
                   {listings.slice(0, 6).map(l => (
                     <tr key={l.id}>
-                      <td><div style={{ fontWeight: 600, fontSize: '0.87rem' }}>{l.title}</div><div style={{ fontSize: '0.74rem', color: 'var(--text-faint)' }}>{l.brand} · {l.year}</div></td>
-                      <td><strong>{l.priceUsd ? `USD ${l.priceUsd.toLocaleString('es-AR')}` : `$${l.priceArs?.toLocaleString('es-AR')}`}</strong></td>
-                      <td>
+                      <td data-label="Vehículo"><div style={{ fontWeight: 600, fontSize: '0.87rem' }}>{l.title}</div><div style={{ fontSize: '0.74rem', color: 'var(--text-faint)' }}>{l.brand} · {l.year}</div></td>
+                      <td data-label="Precio"><strong>{l.priceUsd ? `USD ${l.priceUsd.toLocaleString('es-AR')}` : `$${l.priceArs?.toLocaleString('es-AR')}`}</strong></td>
+                      <td data-label="Estado">
                         <div className="pub-status">
                           <StatusDot status={l.status} />
                           <span style={{ fontSize: '0.82rem' }}>{l.status === 'ACTIVE' ? 'Activa' : l.status === 'PAUSED' ? 'Pausada' : l.status}</span>
                         </div>
                       </td>
-                      <td><span style={{ fontSize: '0.82rem' }}>{new Date(l.createdAt).toLocaleDateString('es-AR')}</span></td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 4 }}>
+                      <td data-label="Fecha"><span style={{ fontSize: '0.82rem' }}>{new Date(l.createdAt).toLocaleDateString('es-AR')}</span></td>
+                      <td data-label="Acciones">
+                        <div className="dash-row-actions" style={{ display: 'flex', gap: 4 }}>
                           {l.status === 'PENDING' && <button className="btn btn-primary btn-sm" onClick={() => approveListing(l.id)}>Aprobar</button>}
                           <button className={`btn ${l.featured ? 'btn-primary' : 'btn-outline'} btn-sm`} onClick={() => toggleFeaturedListing(l)} title={l.featured ? 'Quitar de destacadas' : 'Marcar como destacada'}>
                             <i className="fa-solid fa-star" />
@@ -367,24 +387,24 @@ export default function DashboardPage() {
           </div>
           {loadingL ? <div style={{ padding: 40, textAlign: 'center' }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.5rem', color: 'var(--primary)' }} /></div> : (
             <div className="chart-card">
-              <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
-                <table>
+              <div className="table-wrap dash-table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
+                <table className="dash-table">
                   <thead><tr><th>Título</th><th>Marca</th><th>Año</th><th>Precio</th><th>Estado</th><th>Destacado</th><th>Acciones</th></tr></thead>
                   <tbody>
                     {listings.map(l => (
                       <tr key={l.id}>
-                        <td style={{ fontWeight: 600, fontSize: '0.87rem' }}>{l.title}</td>
-                        <td>{l.brand}</td>
-                        <td>{l.year}</td>
-                        <td>{l.priceUsd ? `USD ${l.priceUsd.toLocaleString('es-AR')}` : `$${l.priceArs?.toLocaleString('es-AR')}`}</td>
-                        <td><div className="pub-status"><StatusDot status={l.status} /><span style={{ fontSize: '0.82rem' }}>{l.status}</span></div></td>
-                        <td>
+                        <td data-label="Título" style={{ fontWeight: 600, fontSize: '0.87rem' }}>{l.title}</td>
+                        <td data-label="Marca">{l.brand}</td>
+                        <td data-label="Año">{l.year}</td>
+                        <td data-label="Precio">{l.priceUsd ? `USD ${l.priceUsd.toLocaleString('es-AR')}` : `$${l.priceArs?.toLocaleString('es-AR')}`}</td>
+                        <td data-label="Estado"><div className="pub-status"><StatusDot status={l.status} /><span style={{ fontSize: '0.82rem' }}>{l.status}</span></div></td>
+                        <td data-label="Destacado">
                           <button className={`btn ${l.featured ? 'btn-primary' : 'btn-outline'} btn-sm`} onClick={() => toggleFeaturedListing(l)} title={l.featured ? 'Quitar de destacadas' : 'Marcar como destacada'}>
                             <i className="fa-solid fa-star" /> {l.featured ? 'Sí' : 'No'}
                           </button>
                         </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 4 }}>
+                        <td data-label="Acciones">
+                          <div className="dash-row-actions" style={{ display: 'flex', gap: 4 }}>
                             {l.status === 'PENDING' && <button className="btn btn-primary btn-sm" onClick={() => approveListing(l.id)}>Aprobar</button>}
                             <button className="btn btn-outline btn-sm" onClick={() => openEditListing(l)}><i className="fa-solid fa-pen" /></button>
                             <button className="btn btn-sm" style={{ background: 'var(--error-bg)', color: 'var(--error)', border: 'none' }} onClick={() => setDeleteConfirm({ type: 'listing', id: l.id })}><i className="fa-solid fa-trash" /></button>
@@ -409,22 +429,22 @@ export default function DashboardPage() {
           </div>
           {loadingU ? <div style={{ padding: 40, textAlign: 'center' }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.5rem', color: 'var(--primary)' }} /></div> : (
             <div className="chart-card">
-              <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
-                <table>
+              <div className="table-wrap dash-table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
+                <table className="dash-table">
                   <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Plan</th><th>Validación</th><th>Acciones</th></tr></thead>
                   <tbody>
                     {users.map(u => {
                       const meta = approvalMeta[u.approvalStatus] || approvalMeta.PENDING_PLAN;
                       return (
                         <tr key={u.id}>
-                          <td style={{ fontWeight: 600, fontSize: '0.87rem' }}>{u.name}</td>
-                          <td>{u.email}</td>
-                          <td>{u.phone || '—'}</td>
-                          <td><span className={`badge ${u.role === 'ADMIN' ? 'badge-accent' : 'badge-verified'}`}>{u.role}</span></td>
-                          <td>{u.plan?.name || 'Sin plan'}</td>
-                          <td><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
-                          <td>
-                            <div style={{ display: 'flex', gap: 4 }}>
+                          <td data-label="Nombre" style={{ fontWeight: 600, fontSize: '0.87rem' }}>{u.name}</td>
+                          <td data-label="Email">{u.email}</td>
+                          <td data-label="Teléfono">{u.phone || '—'}</td>
+                          <td data-label="Rol"><span className={`badge ${u.role === 'ADMIN' ? 'badge-accent' : 'badge-verified'}`}>{u.role}</span></td>
+                          <td data-label="Plan">{u.plan?.name || 'Sin plan'}</td>
+                          <td data-label="Validación"><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
+                          <td data-label="Acciones">
+                            <div className="dash-row-actions" style={{ display: 'flex', gap: 4 }}>
                               {u.approvalStatus === 'PENDING_APPROVAL' && (
                                 <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}>Aprobar</button>
                               )}
@@ -475,8 +495,8 @@ export default function DashboardPage() {
         <div className={`dash-section${section === 'estadisticas' ? ' active' : ''}`}>
           <div className="dash-page-header"><div><h2>Control manual</h2><p>Revisión administrativa de usuarios, planes y unidad publicada</p></div></div>
           <div className="chart-card">
-            <div className="table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
-              <table>
+            <div className="table-wrap dash-table-wrap" style={{ border: 'none', borderRadius: 0, margin: '-22px' }}>
+              <table className="dash-table">
                 <thead><tr><th>Usuario</th><th>Plan asignado</th><th>Validación</th><th>Publicaciones cargadas</th><th>Límite etapa 1</th><th>Estado</th><th /></tr></thead>
                 <tbody>
                   {users.map(u => {
@@ -485,17 +505,17 @@ export default function DashboardPage() {
                     const meta = approvalMeta[u.approvalStatus] || approvalMeta.PENDING_PLAN;
                     return (
                       <tr key={u.id}>
-                        <td>
+                        <td data-label="Usuario">
                           <div style={{ fontWeight: 600, fontSize: '0.87rem' }}>{u.name}</div>
                           <div style={{ fontSize: '0.74rem', color: 'var(--text-faint)' }}>{u.email}</div>
                         </td>
-                        <td>{u.plan?.name || 'Sin plan'}</td>
-                        <td><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
-                        <td>{count}</td>
-                        <td>1 unidad</td>
-                        <td><span className={`badge ${overLimit ? 'badge-accent' : 'badge-success'}`}>{overLimit ? 'Revisar' : 'OK'}</span></td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 4 }}>
+                        <td data-label="Plan asignado">{u.plan?.name || 'Sin plan'}</td>
+                        <td data-label="Validación"><span className={`badge ${meta.badge}`}>{meta.label}</span></td>
+                        <td data-label="Publicaciones cargadas">{count}</td>
+                        <td data-label="Límite etapa 1">1 unidad</td>
+                        <td data-label="Estado"><span className={`badge ${overLimit ? 'badge-accent' : 'badge-success'}`}>{overLimit ? 'Revisar' : 'OK'}</span></td>
+                        <td data-label="Acciones">
+                          <div className="dash-row-actions" style={{ display: 'flex', gap: 4 }}>
                             {u.approvalStatus === 'PENDING_APPROVAL' && <button className="btn btn-primary btn-sm" onClick={() => approveUser(u.id)}>Aprobar</button>}
                             <button className="btn btn-ghost btn-sm" onClick={() => openEditUser(u)}><i className="fa-solid fa-pen" /></button>
                           </div>
