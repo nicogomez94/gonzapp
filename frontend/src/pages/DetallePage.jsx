@@ -11,12 +11,17 @@ export default function DetallePage() {
   const [listing, setListing] = useState(null);
   const [related, setRelated] = useState([]);
   const [activeImg, setActiveImg] = useState(0);
+  const [galleryLightboxOpen, setGalleryLightboxOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [favoriteState, setFavoriteState] = useState(() => ({ id, value: isFavorite(id) }));
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    queueMicrotask(() => setLoading(true));
+    queueMicrotask(() => {
+      setGalleryLightboxOpen(false);
+      setActiveImg(0);
+      setLoading(true);
+    });
     listingsApi.getById(id)
       .then(r => {
         setListing(r.data);
@@ -26,6 +31,24 @@ export default function DetallePage() {
       .catch(() => navigate('/publicaciones'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (!galleryLightboxOpen) return undefined;
+
+    const handleKeyDown = (e) => {
+      const totalImages = listing?.images?.length || 0;
+      if (e.key === 'Escape') setGalleryLightboxOpen(false);
+      if (e.key === 'ArrowRight' && totalImages > 1) {
+        setActiveImg(index => (index + 1) % totalImages);
+      }
+      if (e.key === 'ArrowLeft' && totalImages > 1) {
+        setActiveImg(index => (index - 1 + totalImages) % totalImages);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [galleryLightboxOpen, listing?.images?.length]);
 
   if (loading) return (
     <div className="page-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
@@ -90,6 +113,17 @@ export default function DetallePage() {
                 style={{ position: 'absolute', top: 16, right: 16, background: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}>
                 <i className={fav ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} />
               </button>
+              {imgs.length > 0 && (
+                <button
+                  type="button"
+                  className="gallery-zoom-btn"
+                  onClick={() => setGalleryLightboxOpen(true)}
+                  title="Ver imagen completa"
+                  aria-label="Ver imagen completa"
+                >
+                  <i className="fa-solid fa-magnifying-glass-plus" />
+                </button>
+              )}
             </div>
 
             {imgs.length > 1 && (
@@ -233,6 +267,53 @@ export default function DetallePage() {
           </div>
         )}
       </div>
+
+      {galleryLightboxOpen && imgs.length > 0 && (
+        <div
+          className="image-lightbox-overlay"
+          onClick={() => setGalleryLightboxOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Imagen completa"
+        >
+          <div className="image-lightbox-inner" onClick={e => e.stopPropagation()}>
+            <img
+              src={cloudinaryImage(imgs[activeImg], 'f_auto,q_auto,c_limit,w_2200')}
+              alt={`${listing.title} - imagen ${activeImg + 1}`}
+              className="image-lightbox-img"
+            />
+            {imgs.length > 1 && (
+              <div className="image-lightbox-toolbar">
+                <button
+                  type="button"
+                  className="image-lightbox-nav"
+                  onClick={() => setActiveImg(index => (index - 1 + imgs.length) % imgs.length)}
+                  title="Anterior"
+                >
+                  <i className="fa-solid fa-chevron-left" />
+                </button>
+                <span className="image-lightbox-counter">{activeImg + 1} / {imgs.length}</span>
+                <button
+                  type="button"
+                  className="image-lightbox-nav"
+                  onClick={() => setActiveImg(index => (index + 1) % imgs.length)}
+                  title="Siguiente"
+                >
+                  <i className="fa-solid fa-chevron-right" />
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            className="image-lightbox-close"
+            onClick={() => setGalleryLightboxOpen(false)}
+            title="Cerrar"
+          >
+            <i className="fa-solid fa-xmark" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

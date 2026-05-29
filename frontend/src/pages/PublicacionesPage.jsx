@@ -19,6 +19,7 @@ export default function PublicacionesPage() {
   const [view, setView] = useState('grid');
   const [page, setPage] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsedFilters, setCollapsedFilters] = useState({});
   const LIMIT = 12;
 
   const [filters, setFilters] = useState(() => ({
@@ -84,6 +85,22 @@ export default function PublicacionesPage() {
   const totalPages = Math.ceil(total / LIMIT);
 
   const activeFilterCount = [filters.vehicleType, filters.brand, filters.fuel, filters.transmission, filters.priceMin, filters.priceMax, filters.kmMax, filters.search, filters.location].filter(Boolean).length;
+  const isFilterOpen = (key) => !collapsedFilters[key];
+  const toggleFilterSection = (key) => setCollapsedFilters(prev => ({ ...prev, [key]: !prev[key] }));
+  const filterTitle = (key, label) => {
+    const open = isFilterOpen(key);
+    return (
+      <button
+        type="button"
+        className={`filter-title${open ? ' open' : ''}`}
+        onClick={() => toggleFilterSection(key)}
+        aria-expanded={open}
+      >
+        <span>{label}</span>
+        <i className="fa-solid fa-chevron-down" />
+      </button>
+    );
+  };
 
   return (
     <>
@@ -136,94 +153,108 @@ export default function PublicacionesPage() {
 
             {/* Tipo de vehículo */}
             <div className="filter-section">
-              <div className="filter-title">Tipo de vehículo <i className="fa-solid fa-chevron-down" /></div>
-              <div className="filter-checks">
-                {VEHICLE_TYPES.map(type => (
-                  <label key={type.value} className="filter-check">
-                    <input type="checkbox" checked={filters.vehicleType === type.value}
-                      onChange={() => setFilter('vehicleType', filters.vehicleType === type.value ? '' : type.value)} />
-                    <span>{type.label}</span>
-                  </label>
-                ))}
-              </div>
+              {filterTitle('vehicleType', 'Tipo de vehículo')}
+              {isFilterOpen('vehicleType') && (
+                <div className="filter-checks">
+                  {VEHICLE_TYPES.map(type => (
+                    <label key={type.value} className="filter-check">
+                      <input type="checkbox" checked={filters.vehicleType === type.value}
+                        onChange={() => setFilter('vehicleType', filters.vehicleType === type.value ? '' : type.value)} />
+                      <span>{type.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Marca */}
             <div className="filter-section">
-              <div className="filter-title">Marca <i className="fa-solid fa-chevron-down" /></div>
-              <div className="filter-checks">
-                {BRANDS.map(b => (
-                  <label key={b} className="filter-check">
-                    <input type="checkbox" checked={filters.brand === b}
-                      onChange={() => setFilter('brand', filters.brand === b ? '' : b)} />
-                    <span>{b}</span>
-                  </label>
-                ))}
-              </div>
+              {filterTitle('brand', 'Marca')}
+              {isFilterOpen('brand') && (
+                <div className="filter-checks">
+                  {BRANDS.map(b => (
+                    <label key={b} className="filter-check">
+                      <input type="checkbox" checked={filters.brand === b}
+                        onChange={() => setFilter('brand', filters.brand === b ? '' : b)} />
+                      <span>{b}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Precio */}
             <div className="filter-section">
-              <div className="filter-title">Precio (ARS) <i className="fa-solid fa-chevron-down" /></div>
-              <div className="price-range">
-                <input type="number" placeholder="Mín" value={filters.priceMin}
-                  onChange={e => setFilter('priceMin', e.target.value)} />
-                <span>—</span>
-                <input type="number" placeholder="Máx" value={filters.priceMax}
-                  onChange={e => setFilter('priceMax', e.target.value)} />
-              </div>
+              {filterTitle('price', 'Precio (ARS)')}
+              {isFilterOpen('price') && (
+                <div className="price-range">
+                  <input type="number" placeholder="Mín" value={filters.priceMin}
+                    onChange={e => setFilter('priceMin', e.target.value)} />
+                  <span>—</span>
+                  <input type="number" placeholder="Máx" value={filters.priceMax}
+                    onChange={e => setFilter('priceMax', e.target.value)} />
+                </div>
+              )}
             </div>
 
             {/* Año */}
             <div className="filter-section">
-              <div className="filter-title">Año <i className="fa-solid fa-chevron-down" /></div>
-              <div className="price-range">
-                <input type="number" placeholder="Desde" value={filters.yearFrom}
-                  onChange={e => setFilter('yearFrom', e.target.value)} />
-                <span>—</span>
-                <input type="number" placeholder="Hasta" value={filters.yearTo}
-                  onChange={e => setFilter('yearTo', e.target.value)} />
-              </div>
+              {filterTitle('year', 'Año')}
+              {isFilterOpen('year') && (
+                <div className="price-range">
+                  <input type="number" placeholder="Desde" value={filters.yearFrom}
+                    onChange={e => setFilter('yearFrom', e.target.value)} />
+                  <span>—</span>
+                  <input type="number" placeholder="Hasta" value={filters.yearTo}
+                    onChange={e => setFilter('yearTo', e.target.value)} />
+                </div>
+              )}
             </div>
 
             {/* Combustible */}
             <div className="filter-section">
-              <div className="filter-title">Combustible <i className="fa-solid fa-chevron-down" /></div>
-              <div className="filter-checks">
-                {FUELS.map(f => (
-                  <label key={f} className="filter-check">
-                    <input type="checkbox" checked={filters.fuel === f}
-                      onChange={() => setFilter('fuel', filters.fuel === f ? '' : f)} />
-                    <span>{f}</span>
-                  </label>
-                ))}
-              </div>
+              {filterTitle('fuel', 'Combustible')}
+              {isFilterOpen('fuel') && (
+                <div className="filter-checks">
+                  {FUELS.map(f => (
+                    <label key={f} className="filter-check">
+                      <input type="checkbox" checked={filters.fuel === f}
+                        onChange={() => setFilter('fuel', filters.fuel === f ? '' : f)} />
+                      <span>{f}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Transmisión */}
             <div className="filter-section">
-              <div className="filter-title">Transmisión <i className="fa-solid fa-chevron-down" /></div>
-              <div className="filter-checks">
-                {TRANSMISSIONS.map(t => (
-                  <label key={t} className="filter-check">
-                    <input type="checkbox" checked={filters.transmission === t}
-                      onChange={() => setFilter('transmission', filters.transmission === t ? '' : t)} />
-                    <span>{t}</span>
-                  </label>
-                ))}
-              </div>
+              {filterTitle('transmission', 'Transmisión')}
+              {isFilterOpen('transmission') && (
+                <div className="filter-checks">
+                  {TRANSMISSIONS.map(t => (
+                    <label key={t} className="filter-check">
+                      <input type="checkbox" checked={filters.transmission === t}
+                        onChange={() => setFilter('transmission', filters.transmission === t ? '' : t)} />
+                      <span>{t}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Km */}
             <div className="filter-section">
-              <div className="filter-title">Kilómetros <i className="fa-solid fa-chevron-down" /></div>
-              <select className="form-input" value={filters.kmMax} onChange={e => setFilter('kmMax', e.target.value)}>
-                <option value="">Sin límite</option>
-                <option value="20000">Hasta 20.000 km</option>
-                <option value="50000">Hasta 50.000 km</option>
-                <option value="100000">Hasta 100.000 km</option>
-                <option value="150000">Hasta 150.000 km</option>
-              </select>
+              {filterTitle('km', 'Kilómetros')}
+              {isFilterOpen('km') && (
+                <select className="form-input" value={filters.kmMax} onChange={e => setFilter('kmMax', e.target.value)}>
+                  <option value="">Sin límite</option>
+                  <option value="20000">Hasta 20.000 km</option>
+                  <option value="50000">Hasta 50.000 km</option>
+                  <option value="100000">Hasta 100.000 km</option>
+                  <option value="150000">Hasta 150.000 km</option>
+                </select>
+              )}
             </div>
           </aside>
 
